@@ -1,0 +1,1559 @@
+% graphs.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\part{Advanced Data Structures}
+\label{AdvancedDS}
+\mycleardoublepage
+
+\chapter{Graphs}
+\label{Graphs}
+\def\CHHEAD{Chap.\ \thechapter\ Graphs}    % Head title -- even pages
+\index{graph|(}
+\index{graph!modeling of problems}
+Graphs provide the ultimate in data structure flexibility.
+Graphs can model both real-world systems and abstract problems,
+so they are used in hundreds of applications.
+Here is a small sampling of the range of problems that graphs are
+routinely applied to.
+
+\begin{enumerate}
+
+\item
+Modeling connectivity in computer and communications networks.
+\index{networks}
+
+\item
+Representing a map as a set of locations with distances between
+locations; used to compute shortest routes between locations.
+\index{map}
+
+\item
+Modeling flow capacities in transportation networks.
+\index{transportation network}
+
+\item
+Finding a path from a starting condition to a goal condition;
+for example, in artificial intelligence problem solving.
+\index{artificial intelligence}
+
+\item
+Modeling computer algorithms, showing transitions from one program
+state to another.
+
+\item
+Finding an acceptable order for finishing subtasks in a complex
+activity, such as constructing large buildings.
+\index{prerequisite problem}
+
+\item
+Modeling relationships such as family trees, business or military
+organizations, and scientific taxonomies.
+\index{graph!modeling of problems}
+
+\end{enumerate}
+
+We begin in Section~\ref{GraphDefRep} with some basic graph
+terminology and then define two fundamental representations for
+graphs, the adjacency matrix and adjacency list.\index{graph!terminology} 
+Section~\ref{GrImplSec} presents a
+graph ADT\index{graph!ADT}\index{abstract data type (ADT)}
+and simple implementations\index{graph!implementation} based on the
+adjacency matrix\index{graph!adjacency matrix}
+and adjacency list.\index{graph!adjacency list}
+Section~\ref{GraphTrav} presents the two most commonly used graph
+traversal algorithms,\index{traversal!graph}
+called depth-first\index{depth-first search} and breadth-first
+search,\index{breadth-first search} with
+application to topological sorting.\index{topological sort}
+Section~\ref{ShortPath} presents algorithms for solving some problems
+related to finding shortest routes in a graph.\index{shortest paths}
+Finally, Section~\ref{MSTSec} presents algorithms for finding the
+minimum-cost spanning tree,\index{minimum-cost spanning tree} useful
+for determining lowest-cost connectivity in a network.\index{networks}
+Besides being useful and interesting in their own right, these
+algorithms illustrate the use of some data structures presented
+in earlier chapters.
+
+\section{Terminology and Representations}
+\label{GraphDefRep}
+
+\index{graph!terminology|(}
+A graph \(\cvar{G} = (\cvar{V}, \cvar{E})\) consists of a set of
+vertices~\cvar{V} and a set of edges~\cvar{E}, such
+that each edge in~\cvar{E} is a connection between a pair of vertices
+in~\cvar{V}.\index{graph!vertex}\index{graph!edge}\footnote{Some
+graph applications require that a given pair of vertices can have
+multiple or parallel edges connecting them\index{graph!parallel edge},
+or that a vertex can have an edge to itself.\index{graph!self loop}
+However, the applications discussed in this book do not require either
+of these special cases, so for simplicity we will assume that they
+cannot occur.}
+The number of vertices is written~\(|\cvar{V}|\), and the number of
+edges is written~\(|\cvar{E}|\).
+\(|\cvar{E}|\) can range from zero to a maximum of
+\(|\cvar{V}|^2 - |\cvar{V}|\).
+A graph with relatively few edges is called \defit{sparse}, while a
+graph with many edges is called \defit{dense}.
+A graph containing all possible edges is said to be \defit{complete}.
+
+A graph with edges directed from one vertex to another
+(as in Figure~\ref{GraphTerms}(b)) is
+called a \defit{directed graph} or \defit{digraph}.
+A graph whose edges are not directed is called an
+\defit{undirected graph}\index{graph!undirected}
+(as illustrated by Figure~\ref{GraphTerms}(a)).
+A graph with labels associated with its vertices
+(as in Figure~\ref{GraphTerms}(c)) is called a
+\defit{labeled graph}.
+Two vertices are \defit{adjacent} if they are joined by an edge.
+Such vertices are also called \defit{neighbors}.
+An edge connecting Vertices~\svar{U} and~\svar{V} is written
+(\svar{U},~\svar{V}).
+Such an edge is said to be \defit{incident} on Vertices~\svar{U}
+and~\svar{V}.
+Associated with each edge may be a cost or \defit{weight}.
+Graphs whose edges have weights (as in Figure~\ref{GraphTerms}(c))
+are said to be \defit{weighted}.
+
+\begin{figure}
+\pdffig{GraphDef}
+\vspace{1pt}
+
+\capt{4.5in}{Examples of graphs and graph terminology}
+{Examples of graphs and terminology.
+(a)~A~graph.
+(b)~A~directed graph (digraph).
+(c)~A~labeled (directed) graph with weights associated with the
+edges.
+In this example, there is a simple path from Vertex~0 to Vertex~3
+containing Vertices~0, 1, and~3.
+Vertices~0, 1, 3, 2, 4, and~1 also form a path, but not a simple path
+because Vertex~1 appears twice.
+Vertices~1, 3, 2, 4, and~1 form a simple cycle.}{GraphTerms}
+\bigskip
+\bigskip
+\bigskip
+\end{figure}
+
+A sequence of vertices \(\svar{v}_1$, $\svar{v}_2$, ..., $\svar{v}_n\)
+forms a \defit{path} of length \(n-1\) if there exist edges from
+\(\svar{v}_i\) to \(\svar{v}_{i+1}\) for 
+\(1 \leq i < n\).
+A path is \defit{simple} if all vertices on the path are distinct.
+The \defit{length} of a path is the number of edges it contains.
+A \defit{cycle} is a path of length three or more that connects
+some vertex \(\svar{v}_1\) to itself.
+A cycle is \defit{simple} if the path is simple, except for the first
+and last vertices being the same.
+
+A \defit{subgraph}~\cvar{S} is formed from graph~\cvar{G} by
+selecting a subset~\cvar{V}\(_s\) of \cvar{G}'s vertices and a subset
+\cvar{E}\(_s\) of \cvar{G}'s edges such that for every edge
+\svar{E} in \cvar{E}\(_s\),
+both of \svar{E}'s vertices are in~\cvar{V}\(_s\).
+
+An undirected graph is \defit{connected} if there is at least one path
+from any vertex to any other.
+The maximally connected subgraphs of an undirected graph are called
+\defit{connected components}.\index{graph!connected component}
+For example, Figure~\ref{ConCom} shows an undirected graph with three
+connected components.
+
+\begin{figure}
+\pdffig{ConCom}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Illustration of connected components}
+{An undirected graph with three connected components.
+Vertices~0, 1, 2, 3, and~4 form one connected component.
+Vertices~5 and~6 form a second connected component.
+Vertex~7 by itself forms a third connected component.}
+{ConCom}
+\bigskip
+\end{figure}
+
+A graph without cycles is called \defit{acyclic}.
+Thus, a directed graph without cycles is called a
+\defit{directed acyclic graph} or
+DAG.\index{directed acyclic graph (DAG)}
+
+A \defit{free tree} is a connected, undirected graph with no simple
+cycles.\index{free tree}
+An equivalent definition is that
+a free tree is connected and has \(|\cvar{V}| - 1\) edges.
+
+\begin{figure}
+\pdffig{GraphRep}
+\capt{4.5in}{Graph Representations}
+{Two graph representations.
+(a)~A~directed graph.
+(b)~The adjacency matrix for the graph of~(a).
+(c)~The adjacency list for the graph of~(a).}{GraphRep}
+\medskip
+\end{figure}
+
+\index{graph!terminology|)}
+
+\index{graph!representation|(}
+There are two commonly used methods for representing graphs.
+The \defit{adjacency matrix}\index{graph!adjacency matrix}
+is illustrated by Figure~\ref{GraphRep}(b).
+The adjacency matrix for a graph is a
+\mbox{\(|\cvar{V}| \times |\cvar{V}|\)} array.
+Assume that \(|\cvar{V}| = n\) and that
+the vertices are labeled from \(\svar{v}_0\) through \(\svar{v}_{n-1}\).
+Row~\(i\) of the adjacency matrix contains entries for
+Vertex~\(\svar{v}_i\).
+Column~\(j\) in row~\(i\) is marked if there is an edge
+from~\(\svar{v}_i\) to~\(\svar{v}_j\) and is not marked otherwise.
+Thus, the adjacency matrix requires one bit at each position.
+Alternatively, if we wish to associate a number with each edge,
+such as the weight or distance between two vertices,
+then each matrix position must store that number.
+In either case, the space requirements for the adjacency matrix are
+\(\Theta(|\cvar{V}|^2)\).
+
+\begin{figure}
+\pdffig{GraphUD}
+
+\vspace{1pt}
+\capt{4.5in}{Using the graph representations for undirected graphs}
+{Using the graph representations for undirected graphs.
+(a)~An undirected graph.
+(b)~The adjacency matrix for the graph of~(a).
+(c)~The adjacency list for the graph of~(a).}{Undirected}
+\bigskip
+\end{figure}
+
+The second common representation for graphs is the
+\defit{adjacency list},\index{graph!adjacency list}
+illustrated by Figure~\ref{GraphRep}(c).
+The adjacency list is an array of linked lists.
+The array is \(|\cvar{V}|\)~items long, with position \(i\) storing a
+pointer to the linked list of edges for Vertex~\(\svar{v}_i\).
+This linked list represents the edges by the vertices that are
+adjacent to Vertex~\(\svar{v}_i\).
+The adjacency list is therefore a generalization of the
+``list of children'' representation for trees described in
+Section~\ref{LOChild}.\index{general tree!list of children}
+
+\begin{example}
+The entry for Vertex~0 in Figure~\ref{GraphRep}(c) stores 1 and 4
+because there are two edges in the graph leaving Vertex~0, with one
+going to Vertex~1 and one going to Vertex~4.
+The list for Vertex~2 stores an entry for Vertex~4 because there is an
+edge from Vertex~2 to Vertex~4, but no entry for Vertex~3 because this
+edge comes into Vertex~2 rather than going out.
+\end{example}
+
+The storage requirements for the adjacency list depend on both the
+number of edges and the number of vertices in the graph.
+There must be an array entry for each vertex (even if the vertex is
+not adjacent to any other vertex and thus has no elements on its
+linked list), and each edge must appear on one of the lists.
+Thus, the cost is \(\Theta(|\cvar{V}| + |\cvar{E}|)\).
+
+Both the adjacency matrix and the adjacency list can be used to store
+directed or undirected
+graphs.\index{graph!adjacency matrix}\index{graph!adjacency list} 
+Each edge of an undirected graph connecting Vertices~\svar{U}
+and~\svar{V} is represented by two directed edges: one from
+\svar{U} to \svar{V} and one from \svar{V} to \svar{U}.
+Figure~\ref{Undirected} illustrates the use of the adjacency matrix
+and the adjacency list for undirected graphs.
+
+Which graph representation is more space efficient depends on the
+number of edges in the graph.
+The adjacency list stores information only for those edges that
+actually appear in the graph, while the adjacency matrix requires
+space for each potential edge, whether it exists or not.
+However, the adjacency matrix requires no overhead for pointers,
+which can be a substantial cost, especially if the only information
+stored for an edge is one bit to indicate its existence.
+As the graph becomes denser, the adjacency matrix becomes
+relatively more space efficient.
+Sparse graphs are likely to have their adjacency list representation
+be more space efficient.
+
+\begin{example}
+Assume that a vertex index requires two bytes, a pointer requires
+four bytes, and an edge weight requires two bytes.
+Then the adjacency matrix for the graph of Figure~\ref{GraphRep}
+requires \(2 |\cvar{V}^2| = 50\) bytes while the adjacency list requires
+\(4 |\cvar{V}| + 6 |\cvar{E}| = 56\) bytes.
+For the graph of Figure~\ref{Undirected}, the adjacency matrix
+requires the same space as before, while the adjacency list requires
+\(4 |\cvar{V}| + 6 |\cvar{E}| = 92\) bytes
+(because there are now 12 edges instead of 6).
+\end{example}
+
+The adjacency matrix often requires a higher asymptotic cost for an
+algorithm than would result if the adjacency list were used.
+The reason is that it is common for a graph algorithm
+to visit each neighbor of each vertex.
+Using the adjacency list, only the actual edges connecting a vertex to
+its neighbors are examined.
+However, the adjacency matrix must look at each of its \(|\cvar{V}|\)
+potential edges, yielding a total cost of \(\Theta(|\cvar{V}^2|)\)
+time when the algorithm might otherwise require only
+\(\Theta(|\cvar{V}| + |\cvar{E}|)\) time.
+This is a considerable disadvantage when the graph is sparse,
+but not when the graph is closer to full.
+\index{graph!representation|)}
+
+\section{Graph Implementations}
+\label{GrImplSec}
+
+\index{graph!implementation|(}
+\index{abstract data type (ADT)|(}
+\index{graph!ADT|(}
+We next turn to the problem of implementing a general-purpose graph
+class.
+Figure~\ref{GraphADT} shows an abstract class defining an ADT for
+graphs.
+Vertices are defined by an integer index value.
+In other words, there is a Vertex~0, Vertex~1, and so on.
+We can assume that a graph application stores any additional
+information of interest about a given vertex elsewhere, such as a name
+or application-dependent value.
+Note that this ADT is not implemented using a \Gen,
+because it is
+the \Cref{Graph} class users' responsibility to maintain information
+related to the vertices themselves.
+The \Cref{Graph} class need have no knowledge of the type or content
+of the information associated with a vertex, only the index number for
+that vertex.
+
+\begin{figure}
+\xprogfig{Graph.book}
+\vspace{-\smallskipamount}
+\capt{4.5in}{A graph ADT}
+{A graph ADT. This ADT assumes that the number of vertices is fixed
+when the graph is created, but that edges can be added and removed.
+It also supports a mark array to aid graph traversal algorithms.}{GraphADT}
+\vspace{\smallskipamount}
+\end{figure}
+
+Abstract class \Cref{Graph}
+has methods to return the number of vertices and edges
+(methods \Cref{n} and \Cref{e}, respectively).
+Function \Cref{weight} returns the weight of a given edge, with that
+edge identified by its two incident vertices.
+For example, calling \Cref{weight(0,~4)} on the graph of
+Figure~\ref{GraphTerms}~(c) would return~4.
+If no such edge exists, the weight is defined to be 0.
+So calling \Cref{weight(0,~2)} on the graph of
+Figure~\ref{GraphTerms}~(c) would return~0.
+
+Functions \Cref{setEdge} and \Cref{delEdge} set the weight of an edge
+and remove an edge from the graph, respectively.
+Again, an edge is identified by its two incident vertices.
+\Cref{setEdge} does not permit the user to set the weight to be 0,
+because this value is used to indicate a non-existent edge, nor are
+negative edge weights permitted.
+Functions \Cref{getMark} and \Cref{setMark} get and set, respectively,
+a requested value in the \Cref{Mark} array (described below) for
+Vertex~\svar{V}.
+\index{graph!ADT|)}
+\index{abstract data type (ADT)|)}
+
+Nearly every graph algorithm presented in this chapter will require
+visits to all neighbors of a given vertex.
+Two methods are provided to support this.
+They work in a manner similar to linked list access functions.
+Function \Cref{first} takes as input a vertex~\svar{V}, and returns
+the edge to the first neighbor for \svar{V} (we assume the neighbor
+list is sorted by vertex number).
+Function \Cref{next} takes as input Vertices~\svar{V1} and~\svar{V2}
+and returns the index for the vertex forming the next edge with
+\svar{V1} after \svar{V2} on \svar{V1}'s edge list.
+Function \Cref{next} will return a value of \(n = |\cvar{V}|\) once
+the end of the edge list for \svar{V1} has been reached.
+The following line appears in many graph algorithms:
+
+\begin{progenv}
+for (w = G=>first(v); w < G->n(); w = G->next(v,w))
+\end{progenv}
+
+\noindent This \Cfor\ loop gets the first neighbor of \Cref{v}, then
+works through the remaining neighbors of \Cref{v} until a value equal
+to \Cref{G->n()} is returned, signaling that all neighbors of \Cref{v}
+have been visited.
+For example, \Cref{first(1)} in Figure~\ref{Undirected} would return~0.
+\Cref{next(1, 0)} would return~3.
+\Cref{next(0, 3)} would return~4.
+\Cref{next(1, 4)} would return~5, which is not a vertex in the graph.
+
+It is reasonably straightforward to implement our graph and edge ADTs
+using either the adjacency list or adjacency matrix.
+The sample implementations presented here do not address the issue of
+how the graph is actually created.
+The user of these implementations must add functionality for
+this purpose, perhaps reading the graph description from a file.
+The graph can be built up by using the \Cref{setEdge} function
+provided by the ADT.\index{abstract data type (ADT)}
+\index{graph!ADT}
+
+\begin{figure}
+\index{graph!adjacency matrix}
+\xprogfig{Graphm1.book}
+
+\vspace{-\medskipamount}
+\vspace{-\bigskipamount}
+\capt{4.5in}{The adjacency matrix member functions}
+{An implementation for the adjacency matrix implementation.}{GrMatImpl}
+\end{figure}
+
+\begin{figure}
+\xprogfig{Graphm2.book}
+\vspace{-\bigskipamount}
+\captcont
+\bigskip
+\end{figure}
+
+\index{graph!adjacency matrix}
+Figure~\ref{GrMatImpl} shows an implementation for the adjacency
+matrix.
+Array \Cref{Mark} stores the information manipulated by the
+\Cref{setMark} and \Cref{getMark} functions.
+The edge matrix is implemented as an integer array of size
+\(n \times n\) for a graph of \(n\)~vertices.
+Position (\(i\), \(j\)) in the matrix stores the weight for edge
+(\(i\), \(j\)) if it exists.
+A weight of zero for edge (\(i\), \(j\)) is used to indicate that no edge
+connects Vertices~\(i\) and~\(j\).
+
+Given a vertex~\svar{V}, function \Cref{first} locates the position in
+\Cref{matrix} of the first edge (if any) of~\svar{V} by beginning with
+edge (\svar{V},~0) and scanning through row \svar{V} until an edge
+is found.
+If no edge is incident on \svar{V}, then \Cref{first} returns \(n\).
+
+Function \Cref{next} locates the edge following edge (\(i\), \(j\)) (if
+any) by continuing down the row of Vertex~\(i\) starting at position
+\(j+1\), looking for an edge.
+If no such edge exists, \Cref{next} returns \(n\).
+Functions \Cref{setEdge} and \Cref{delEdge} adjust the
+appropriate value in the array.
+Function \Cref{weight} returns the value stored in the
+appropriate position in the array.
+\index{graph!adjacency matrix}
+
+Figure~\ref{GrListImpl} presents an implementation of the adjacency
+list representation for graphs.
+Its main data structure is an array of linked lists, one linked list
+for each vertex.
+These linked lists store objects of type \Cref{Edge}, which merely
+stores the index for the vertex pointed to by the edge, along with the
+weight of the edge.
+\ifthenelse{\boolean{cpp}}
+{Because the \Cref{Edge} class is assumed to be private to the
+\Cref{Graphl} class, its data members have been made public for
+convenience.}{}
+
+\xproghere{Edge.book}
+
+\begin{figure}
+\index{graph!adjacency list}
+\xprogfig{Graphl1.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{The adjacency list member functions}
+{An implementation for the adjacency list.}{GrListImpl}
+\end{figure}
+
+\begin{figure}
+\xprogfig{Graphl2.book}
+\vspace{-\bigskipamount}
+\captcont
+\end{figure}
+
+Implementation for \Cref{Graphl} member functions is straightforward
+in principle, with the key functions being \Cref{setEdge},
+\Cref{delEdge}, and \Cref{weight}.
+They simply start at the beginning of the adjacency list and move
+along it until the desired vertex has been found.
+Note that \Cref{isEdge} checks to see if \svar{j} is already the
+current neighbor in \svar{i}'s adjacency list, since this will often
+be true when processing the neighbors of each vertex in turn.
+\index{graph!implementation|)}
+
+\section{Graph Traversals}
+\label{GraphTrav}
+
+\index{traversal!graph|(}
+Often it is useful to visit the vertices of a graph in some specific
+order based on the graph's topology.
+This is known as a \defit{graph traversal} and is similar in concept
+to a tree traversal.
+Recall that tree traversals visit every node exactly once, in some
+specified order such as preorder, inorder, or postorder.
+Multiple tree traversals exist because various applications require
+the nodes to be visited in a particular order.
+For example, to print a BST's nodes in ascending order requires an
+inorder traversal as opposed to some other
+traversal.\index{traversal!binary tree}
+Standard graph traversal orders also exist.
+Each is appropriate for solving certain problems.
+For example, many problems in artificial intelligence programming
+are modeled using graphs.\index{graph!modeling of problems}
+The problem domain may consist of a large collection of states,
+with connections between various pairs of states.
+Solving the problem may require getting from a specified start
+state to a specified goal state by moving between states only
+through the connections.
+Typically, the start and goal states are not directly connected.
+To solve this problem, the vertices of the graph must be searched in
+some organized manner.
+
+Graph traversal algorithms typically begin with a start vertex and
+attempt to visit the remaining vertices from there.
+Graph traversals must deal with a number of troublesome cases.
+First, it may not be possible to reach all vertices from the start
+vertex.
+This occurs when the graph is not connected.
+Second, the graph may contain cycles, and we must make sure that
+cycles do not cause the algorithm to go into an infinite loop.
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+Graph traversal algorithms can solve both of these problems
+by maintaining a \defit{mark bit} for each vertex on the graph.
+At the beginning of the algorithm, the mark bit for all vertices is
+cleared.
+The mark bit for a vertex is set when the vertex is first visited
+during the traversal.
+If a marked vertex is encountered during traversal, it is not visited
+a second time.
+This keeps the program from going into an infinite loop when it
+encounters a cycle.
+
+Once the traversal algorithm completes, we can check to see if all
+vertices have been processed by checking the mark bit array.
+If not all vertices are marked,
+we can continue the traversal from another unmarked vertex.
+Note that this process works regardless of whether the graph is
+directed or undirected.
+To ensure visiting all vertices, \Cref{graphTraverse} could be called
+as follows on a graph \cvar{G}:
+
+\xproghere{Grgentrav.book}
+
+\noindent Function ``\Cref{doTraverse}'' might be implemented by using
+one of the graph traversals described in this section.
+
+\subsection{Depth-First Search}
+
+\index{depth-first search|(}
+The first method of organized graph traversal is called
+\defit{depth-first search} (DFS).
+Whenever a vertex~\svar{V} is visited during the search,
+DFS will recursively visit all of \svar{V}'s unvisited neighbors.
+Equivalently, DFS will add all edges leading out of \(v\) to a
+stack.\index{stack}
+The next vertex to be visited is determined by popping the stack and
+following that edge.
+The effect is to follow one branch through the graph to its
+conclusion, then it will back up and follow another branch, and so on.
+The DFS process can be used to define a
+\defit{depth-first search tree}.
+This tree is composed of the edges that were followed to any new
+(unvisited) vertex during the traversal, and leaves out the edges that
+lead to already visited vertices.
+DFS can be applied to directed or undirected graphs.
+Here is an implementation for the DFS algorithm:
+
+\xproghere{Grdfs.book}
+
+This implementation contains calls to functions \Cref{PreVisit} and
+\Cref{PostVisit}.
+These functions specify what activity should take place during the
+search.
+Just as a preorder tree traversal requires action before the subtrees
+are visited, some graph traversals require that a vertex be processed
+before ones further along in the DFS.
+Alternatively, some applications require activity \emph{after} the
+remaining vertices are processed; hence the call to function
+\Cref{PostVisit}.
+This would be a natural opportunity to make use of the visitor design
+pattern\index{design pattern!visitor} described in
+Section~\ref{VisitorPatt}.
+
+Figure~\ref{DFSTree} shows a graph and its corresponding depth-first
+search tree.
+Figure~\ref{DFSExamp} illustrates the DFS process for the graph of
+Figure~\ref{DFSTree}(a).
+ 
+\begin{figure}
+\index{depth-first search}
+\pdffig{DFSTree}
+\capt{4.5in}{The depth-first search tree for a graph}
+{(a)~A graph.
+(b)~The depth-first search tree for the graph when starting at
+Vertex~\svar{A}.}{DFSTree}
+\medskip
+\end{figure}
+
+\begin{figure}
+\index{depth-first search}
+\pdffig{DFSExamp}
+\capt{4.5in}{An example of the DFS process}
+{A detailed illustration of the DFS process for the graph of
+Figure~\ref{DFSTree}(a) starting at Vertex~\svar{A}.
+The steps leading to each change in the recursion stack\index{stack}
+are described.}{DFSExamp}
+\end{figure}
+
+DFS processes each edge once in a directed graph.
+In an undirected graph, DFS processes each edge from both
+directions.
+Each vertex must be visited, but only once, so the total cost is
+\(\Theta(|\cvar{V}| + |\cvar{E}|)\).\index{depth-first search|)}
+
+\subsection{Breadth-First Search}
+
+\index{breadth-first search|(}
+Our second graph traversal algorithm is known as a
+\defit{breadth-first search} (BFS).
+BFS examines all vertices connected to the start vertex
+before visiting vertices further away.
+BFS is implemented similarly to DFS, except that a queue
+replaces the recursion stack.\index{queue}\index{stack}
+Note that if the graph is a tree and the start vertex is at the root,
+BFS is equivalent to visiting vertices level by level from top to
+bottom.
+Figure~\ref{BFSalg} provides an implementation for the BFS algorithm.
+Figure~\ref{BFSTree} shows a graph and the corresponding breadth-first
+search tree.
+Figure~\ref{BFSExamp} illustrates the BFS process for the graph of
+Figure~\ref{BFSTree}(a).
+
+\begin{figure}
+\xprogfig{Grbfs.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Breadth-first graph traversal algorithm}
+{Implementation for the breadth-first graph traversal algorithm}{BFSalg}
+\end{figure}
+
+\begin{figure}
+\ifthenelse{\boolean{cpp}}{\vspace{-\medskipamount}}{}
+\ifthenelse{\boolean{cpp}}{\vspace{-\medskipamount}}{}
+
+\index{breadth-first search}
+\pdffig{BFSTree}
+\vspace{-\bigskipamount}
+\ifthenelse{\boolean{cpp}}{\vspace{-\medskipamount}}{}
+
+\capt{4.5in}{The breadth-first search tree for a graph}
+{(a)~A graph.
+(b)~The breadth-first search tree for the graph when starting at
+Vertex~\svar{A}.}{BFSTree}
+\ifthenelse{\boolean{java}}{\medskip}{}
+\end{figure}
+
+\begin{figure}
+\index{breadth-first search}
+\pdffig{BFSExamp}
+\capt{4.5in}{An example of the BFS process}
+{A detailed illustration of the BFS process for the graph of
+Figure~\ref{BFSTree}(a) starting at Vertex~\svar{A}.\index{queue}
+The steps leading to each change in the queue are described.}{BFSExamp}
+\end{figure}
+\index{breadth-first search|)}
+ 
+\subsection{Topological Sort}
+
+\index{topological sort|(}
+Assume that we need to schedule a series of tasks, such as classes or
+construction jobs, where we cannot start one task until after its
+prerequisites are completed.
+We wish to organize the tasks into a linear order that allows us to
+complete them one at a time without violating any prerequisites.
+We can model the problem using a\index{graph!modeling of problems}
+DAG.\index{directed acyclic graph (DAG)}
+The graph is directed because one task is a prerequisite of
+another --- the vertices have a directed relationship.
+It is acyclic because a cycle would indicate a conflicting series of
+prerequisites that could not be completed without violating at least
+one prerequisite.
+The process of laying out the vertices of a DAG in a linear order to
+meet the prerequisite rules is called a \defit{topological sort}.
+Figure~\ref{TopSort} illustrates the problem.
+An acceptable topological sort for this example is \svar{J1},
+\svar{J2}, \svar{J3}, \svar{J4}, \svar{J5}, \svar{J6}, \svar{J7}.
+
+A topological sort may be found by performing a DFS on the graph.
+When a vertex is visited, no action is taken (i.e., function
+\Cref{PreVisit} does nothing).
+When the recursion pops back to that vertex, function
+\Cref{PostVisit} prints the vertex.
+This yields a topological sort in reverse order.
+It does not matter where the sort starts, as long as all vertices
+are visited in the end.
+Figure~\ref{TopSortDFS} shows an implementation for the DFS-based algorithm.
+
+\begin{figure}
+\xprogfig{Grtopd.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Recursive topological sort}
+{Implementation for the recursive topological sort.}{TopSortDFS}
+\end{figure}
+
+Using this algorithm starting at \svar{J1} and visiting adjacent
+neighbors in alphabetic order, vertices of the graph in
+Figure~\ref{TopSort} are printed out in the order \svar{J7},
+\svar{J5}, \svar{J4}, \svar{J6}, \svar{J2}, \svar{J3}, \svar{J1}.
+Reversing this yields the topological sort
+\svar{J1}, \svar{J3}, \svar{J2}, \svar{J6}, \svar{J4}, \svar{J5},
+\svar{J7}.
+
+\begin{figure}
+\pdffig{TopSort}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{Topological sort example}
+{An example graph for topological sort.
+Seven tasks have dependencies as shown by the directed
+graph.}{TopSort}
+\vspace{\medskipamount}
+\end{figure}
+
+We can implement topological sort using a queue\index{queue}
+instead of recursion, as follows.
+First visit all edges, counting the number of
+edges that lead to each vertex (i.e., count the number of
+prerequisites for each vertex).
+All vertices with no prerequisites are placed on the queue.
+We then begin processing the queue.
+When Vertex~\svar{V} is taken off of the queue, it is printed, and all
+neighbors of \svar{V} (that is, all vertices that have \svar{V} as a
+prerequisite) have their counts decremented by one.
+Place on the queue any neighbor whose count becomes zero.
+If the queue becomes empty without printing all of the vertices, then
+the graph contains a cycle (i.e., there is no possible ordering
+for the tasks that does not violate some prerequisite).
+The printed order for the vertices of the graph in
+Figure~\ref{TopSort} using the queue version of topological sort is
+\cvar{J1}, \cvar{J2}, \cvar{J3}, \cvar{J6}, \cvar{J4}, \cvar{J5}, \cvar{J7}.
+Figure~\ref{TSQueue} shows an implementation for the algorithm.\index{queue}
+
+\begin{figure}
+\xprogfig{Grtopb.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Queue-based topological sort algorithm}
+{A queue-based topological sort algorithm.}{TSQueue}
+\end{figure}
+\index{traversal!graph|)}
+\index{topological sort|)}
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\section{Shortest-Paths Problems}
+\label{ShortPath}
+
+\index{shortest paths|(}
+On a road map\index{map}, a road connecting two towns is typically
+labeled with its distance.
+We can model a road network\index{transportation network} as a
+directed graph whose edges are
+labeled with real numbers.\index{graph!modeling of problems}
+These numbers represent the distance (or other cost metric, such as
+travel time) between two vertices.
+These labels may be called \defit{weights}, \defit{costs}, or
+\defit{distances}, depending on the application.
+Given such a graph, a typical problem is to find the total
+length of the shortest path between two specified vertices.
+This is not a trivial problem, because the shortest path may not be
+along the edge (if any) connecting two vertices, but rather may be
+along a path involving one or more intermediate vertices.
+For example, in Figure~\ref{DistExamp}, the cost of the path from
+\svar{A} to \svar{B} to \svar{D} is~15.
+The cost of the edge directly from \svar{A} to \svar{D} is~20.
+The cost of the path from \svar{A} to \svar{C} to \svar{B} to \svar{D}
+is~10.
+Thus, the shortest path from \svar{A} to \svar{D} is~10 (not along
+the edge connecting \svar{A} to \svar{D}).
+We use the notation d(\svar{A}, \svar{D})~\(=\)~10 to indicate that the
+shortest distance from \svar{A} to \svar{D} is 10.
+In Figure~\ref{DistExamp}, there is no path from \svar{E} to \svar{B},
+so we set d(\svar{E}, \svar{B}) \(= \infty\).
+We define w(\svar{A},~\svar{D})~\(=\)~20 to be the weight of edge
+(\svar{A},~\svar{D}), that is, the weight of the direct connection
+from \svar{A} to \svar{D}. 
+Because there is no edge from \svar{E} to \svar{B},
+w(\svar{E},~\svar{B})~\(= \infty\).
+Note that w(\svar{D},~\svar{A})~\(= \infty\) because the graph of
+Figure~\ref{DistExamp} is directed.
+We assume that all weights are positive.
+
+\begin{figure}
+\pdffig{DisGraph}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\capt{4.5in}{Example graph for shortest-path definitions}
+{Example graph for shortest-path definitions.}{DistExamp}
+\smallskip
+\ifthenelse{\boolean{cpp}}{\medskip}{}
+\end{figure}
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\subsection{Single-Source Shortest Paths}
+\label{SSSP}
+
+This section presents an algorithm to solve the
+\defit{single-source} \defit{shortest-paths} problem.
+Given Vertex~\svar{S} in Graph~\cvar{G}, find a shortest path from
+\svar{S} to every other vertex in \cvar{G}.
+We might want only the shortest path between two vertices,
+\svar{S} and~\svar{T}.
+However in the worst case, while finding the shortest path from
+\svar{S} to \svar{T}, we might find the shortest paths from \svar{S}
+to every other vertex as well.
+So there is no better algorithm (in the worst case) for
+finding the shortest path to a single vertex than to find shortest
+paths to all vertices.
+The algorithm described here will only compute the distance to every
+such vertex, rather than recording the actual path.
+Recording the path requires modifications to the algorithm that
+are left as an exercise.
+
+Computer networks provide an application for the single-source
+shortest-paths problem.\index{graph!modeling of problems}
+The goal is to find the cheapest way for one computer to broadcast
+a message to all other computers on the network.\index{networks}
+The network can be modeled by a graph with edge weights indicating time or
+cost to send a message to a neighboring computer.
+
+For unweighted graphs (or whenever all edges have the same cost), the
+single-source shortest paths can be found using a simple breadth-first
+search.
+When weights are added, BFS will not give the correct answer.
+
+\index{dijkstra's algorithm@Dijkstra's algorithm|(}
+One approach to solving this problem when the edges have
+differing weights might be to process the
+vertices in a fixed order.
+Label the vertices \(\svar{v}_0\) to \(\svar{v}_{n-1}\), with
+\(\svar{S} = \svar{v}_0\).
+When processing Vertex~\(\svar{v}_1\), we take the edge connecting
+\(\svar{v}_0\) and \(\svar{v}_1\).
+When processing \(\svar{v}_2\), we consider the shortest distance from
+\(\svar{v}_0\) to \(\svar{v}_2\) and compare that to the shortest
+distance from \(\svar{v}_0\) to \(\svar{v}_1\) to \(\svar{v}_2\).
+When processing Vertex~\(\svar{v}_i\), we consider the shortest
+path for Vertices~\(\svar{v}_0\) through \(\svar{v}_{i-1}\) that have
+already been processed.
+Unfortunately, the true shortest path to \(\svar{v}_i\) might go
+through Vertex~\(\svar{v}_j\) for \(j > i\).
+Such a path will not be considered by this algorithm.
+However, the problem would not occur if we process the vertices in
+order of distance from \svar{S}.
+Assume that we have processed in order of distance from \svar{S} to
+the first \(i-1\) vertices that are closest to~\svar{S}; call this set
+of vertices~\cvar{S}.
+We are now about to process the \(i\)th closest vertex; call it~\svar{X}.
+A~shortest path from \svar{S} to \svar{X} must have its next-to-last
+vertex in~\cvar{S}. 
+Thus,
+\[{\rm d}(\svar{S}, \svar{X}) =
+\min_{\svar{U} \in \cvar{S}}({\rm d}(\svar{S}, \svar{U})
++ {\rm w}(\svar{U}, \svar{X})).\]
+In other words, the shortest path from \svar{S} to \svar{X} is the
+minimum over all paths that go from \svar{S} to \svar{U}, then have an
+edge from \svar{U} to \svar{X}, where \svar{U} is some vertex
+in~\cvar{S}.
+
+This solution is usually referred to as Dijkstra's algorithm.
+It works by maintaining a distance estimate
+\cvar{D}(\svar{X}) for all vertices \svar{X} in \cvar{V}.
+The elements of \cvar{D} are initialized to the value \Cref{INFINITE}.
+Vertices are processed in order of distance from \svar{S}.
+Whenever a vertex \svar{V} is processed, \cvar{D}(\svar{X}) is updated for
+every neighbor \svar{X} of \svar{V}.
+Figure~\ref{DijkImpl} shows an implementation for Dijkstra's algorithm.
+At the end, array~\svar{D} will contain the shortest distance values.
+
+\begin{figure}
+\xprogfig{Grdijk1.book}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\capt{4.5in}{Implementation for Dijkstra's algorithm}
+{An implementation for Dijkstra's algorithm.}{DijkImpl}\
+\vspace{-\bigskipamount}
+\end{figure}
+
+There are two reasonable solutions to the key issue of finding the
+unvisited vertex with minimum distance value during each pass through
+the main \Cfor\ loop.
+The first method is simply to scan through the list of \(|\cvar{V}|\)
+vertices searching for the minimum value, as follows:
+
+\xproghere{MinVert.book}
+
+% TODO: Why does the code look for an unvisited value first?
+% Is there an easier way?
+Because this scan is done \(|\cvar{V}|\) times, and because each edge
+requires a constant-time update to D, the total cost for this approach
+is \(\Theta(|\cvar{V}|^2 + |\cvar{E}|) = \Theta(|\cvar{V}|^2)\),
+because \(|\cvar{E}|\) is in O(\(|\cvar{V}|^2\)).
+
+The second method is to store unprocessed vertices in a
+min-heap\index{heap} ordered by distance values.
+The next-closest vertex can be found in the heap in
+\(\Theta(\log |\cvar{V}|)\) time.
+Every time we modify \cvar{D}(\svar{X}), we could reorder \svar{X} in
+the heap by deleting and reinserting it.
+This is an example of a priority queue\index{priority queue} with
+priority update, as described in Section~\ref{HeapSec}.
+To implement true priority updating, we would need to store with each
+vertex its array index within the heap.
+A simpler approach is to add the new (smaller) distance value
+for a given vertex as a new record in the heap.
+The smallest value for a given vertex currently in the heap will be
+found first, and greater distance values found later will be ignored
+because the vertex will already be marked as \Cref{VISITED}.
+The only disadvantage to repeatedly inserting distance values is that
+it will raise the number of elements in the heap from
+\(\Theta(|\cvar{V}|)\) to \(\Theta(|\cvar{E}|)\) in the worst case.
+The time complexity is
+\(\Theta((|\cvar{V}| + |\cvar{E}|) \log |\cvar{E}|)\),
+because for each edge we must reorder the heap.
+Because the objects stored on the heap need to know both their vertex
+number and their distance, we create a simple class for the purpose
+called \Cref{DijkElem}, as follows.
+\Cref{DijkElem} is quite similar to the \Cref{Edge} class used by the
+adjacency list representation.
+
+\xproghere{DijkElem.book}
+
+Figure~\ref{DijkQueue} shows an implementation for Dijkstra's
+algorithm using the priority queue.
+
+\begin{figure}
+\xprogfig{Grdijk2.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Dijkstra's algorithm using a priority queue}
+{An implementation for Dijkstra's algorithm using a priority
+queue.}{DijkQueue}
+\vspace{-\bigskipamount}
+\end{figure}
+
+Using \Cref{MinVertex} to scan the vertex list for the minimum value
+is more efficient when the graph is dense, that is, when \(|\cvar{E}|\)
+approaches \(|\cvar{V}|^2\).
+Using a priority queue is more efficient when the graph is sparse
+because its cost is
+\(\Theta((|\cvar{V}| + |\cvar{E}|) \log |\cvar{E}|)\).
+However, when the graph is dense, this cost can become as great as
+\(\Theta(|\cvar{V}|^2 \log |\cvar{E}|) = \Theta(|V|^2 \log |V|)\).
+
+Figure~\ref{Dijk} illustrates Dijkstra's algorithm.
+The start vertex is~\svar{A}.
+All vertices except \svar{A} have an initial value of \(\infty\).
+After processing Vertex~\svar{A}, its neighbors have their D~estimates
+updated to be the direct distance from~\svar{A}.
+After processing~\svar{C} (the closest vertex to~\svar{A}),
+Vertices~\svar{B} and~\svar{E} are updated to reflect the shortest
+path through~\svar{C}.
+The remaining vertices are processed in order~\svar{B}, \svar{D},
+and~\svar{E}.
+
+\begin{mytable}
+\[
+\begin{array}
+{l|c|c|c|c|c}
+& \textsf{\textbf{A}} & \textsf{\textbf{B}} & \textsf{\textbf{C}} &
+\textsf{\textbf{D}} & \textsf{\textbf{E}}\\
+\hline
+\textsf{Initial}   & \mathsf 0 & \mathsf \infty & \mathsf \infty & \mathsf \infty & \mathsf \infty\\
+\textsf{Process A} & \mathsf 0 & \mathsf 10 & \mathsf 3 & \mathsf 20 & \mathsf \infty\\
+\textsf{Process C} & \mathsf 0 &  \mathsf 5 & \mathsf 3 & \mathsf 20 & \mathsf 18\\
+\textsf{Process B} & \mathsf 0 &  \mathsf 5 & \mathsf 3 & \mathsf 10 & \mathsf 18\\
+\textsf{Process D} & \mathsf 0 &  \mathsf 5 & \mathsf 3 & \mathsf 10 & \mathsf 18\\
+\textsf{Process E} & \mathsf 0 &  \mathsf 5 & \mathsf 3 & \mathsf 10 & \mathsf 18\\
+\end{array}
+\]
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+\capt{4.5in}{Example of Dijkstra's algorithm}
+{A listing for the progress of Dijkstra's algorithm operating on the
+graph of Figure~\ref{DistExamp}.
+The start vertex is \svar{A}.}{Dijk}
+\smallskip
+\end{mytable}
+\index{dijkstra's algorithm@Dijkstra's algorithm|)}
+\index{shortest paths|)}
+
+
+\section{Minimum-Cost Spanning Trees}
+\label{MSTSec}
+
+\index{minimum-cost spanning tree|(}
+The \defit{minimum-cost} \defit{spanning tree} (MST)
+problem takes as input a connected, undirected graph~\cvar{G},
+where each edge has a distance or weight measure attached.
+The MST is the graph containing the vertices of \cvar{G} along with
+the subset of \cvar{G}'s edges that (1)~has minimum total cost as
+measured by summing the values for all of the edges in the subset,
+and (2)~keeps the vertices connected.\index{graph!modeling of problems}
+Applications where a solution to this problem is
+useful include soldering the shortest set of wires needed to connect a
+set of terminals on a circuit board, and connecting a set of cities by
+telephone lines in such a way as to require the least amount of cable.
+
+The MST contains no cycles.
+If a proposed MST did have a cycle, a cheaper MST could be
+had by removing any one of the edges in the cycle.
+Thus, the MST is a free tree\index{free tree} with \(|\cvar{V}| - 1\)
+edges.
+The name ``minimum-cost spanning tree'' comes from the fact that the
+required set of edges forms a tree, it spans the vertices (i.e., it
+connects them together), and it has minimum cost.
+Figure~\ref{MSTExamp} shows the MST for an example graph.
+
+\begin{figure}
+\pdffig{MST}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{The MST for a graph}
+{A graph and its MST.
+All edges appear in the original graph.
+Those edges drawn with heavy lines indicate
+the subset making up the MST.
+Note that edge (\svar{C},~\svar{F}) could be replaced with edge
+(\svar{D},~\svar{F}) to form a different MST with equal cost.}{MSTExamp}
+\bigskip
+\end{figure}
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\subsection{Prim's Algorithm}
+\label{PrimsSec}
+
+\index{prim's algorithm@Prim's algorithm|(}
+The first of our two algorithms for finding MSTs is commonly
+referred to as Prim's algorithm.
+Prim's algorithm is very simple.
+Start with any Vertex~\svar{N} in the graph, setting the MST
+to be~\svar{N} initially.
+Pick the least-cost edge connected to~\svar{N}.
+This edge connects \svar{N} to another vertex; call this~\svar{M}.
+Add Vertex~\svar{M} and Edge~(\svar{N},~\svar{M}) to the MST.
+Next, pick the least-cost edge coming from either \svar{N} or \svar{M}
+to any other vertex in the graph.
+Add this edge and the new vertex it reaches to the MST.
+This process continues, at each step expanding the MST by selecting
+the least-cost edge from a vertex currently in the MST to a vertex not
+currently in the MST. 
+
+Prim's algorithm is quite similar to Dijkstra's algorithm for finding
+the single-source shortest
+paths.\index{dijkstra's algorithm@Dijkstra's algorithm}
+The primary difference is that we are seeking not the next closest
+vertex to the start vertex, but rather the next closest vertex to any
+vertex currently in the MST.
+Thus we replace the lines
+
+\begin{progenv}
+if (D[w] > (D[v] + G->weight(v, w)))\\
+\hspace*{0.00in}\ \ D[w] = D[v] + G->weight(v, w);
+\end{progenv}
+
+\noindent in Djikstra's algorithm with the lines
+
+\begin{progenv}
+if (D[w] > G->weight(v, w))\\
+\hspace*{0.00in}\ \ D[w] = G->weight(v, w);
+\end{progenv}
+
+\noindent in Prim's algorithm.
+
+Figure~\ref{PrimImpl} shows an implementation for Prim's algorithm
+that searches the distance matrix for the next closest vertex.
+For each vertex \svar{I}, when \svar{I} is processed by Prim's
+algorithm, an edge going to \svar{I} is added to the MST that we are
+building.
+Array~\Cref{V[I]} stores the previously visited vertex that is
+closest to Vertex~\svar{I}.
+This information lets us know which edge goes into the MST when
+Vertex~\svar{I} is processed.
+The implementation of Figure~\ref{PrimImpl} also contains calls to
+\Cref{AddEdgetoMST} to indicate which edges are actually added to the
+MST.
+
+\begin{figure}
+\xprogfig{Grprim1.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{An implementation for Prim's algorithm}
+{An implementation for Prim's algorithm.}{PrimImpl}
+\end{figure}
+
+Alternatively, we can implement Prim's algorithm using a priority
+queue\index{priority queue} to find the next closest vertex, as
+shown in Figure~\ref{PrimQueue}.
+As with the priority queue version of Dijkstra's algorithm, the heap's
+\Cref{Elem} type stores a \Cref{DijkElem} object.
+
+\begin{figure}
+\xprogfig{Grprim2.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Prim's algorithm with priority queue}
+{An implementation of Prim's algorithm using a priority queue.}
+{PrimQueue}
+\end{figure}
+
+Prim's algorithm is an example of a greedy
+algorithm.\index{greedy algorithm}
+At each step in the \Cfor\ loop, we select the least-cost edge that
+connects some marked vertex to some unmarked vertex.
+The algorithm does not otherwise check that the MST really should
+include this least-cost edge.
+This leads to an important question:
+Does Prim's algorithm work correctly?
+Clearly it generates a spanning tree (because each pass through the
+\Cfor\ loop adds one edge and one unmarked vertex to the spanning tree
+until all vertices have been added), but does this tree have minimum
+cost?
+
+\begin{theorem}
+Prim's algorithm produces a minimum-cost spanning tree.
+\end{theorem}
+
+\vspace{-\medskipamount}
+\begin{proof}
+We will use a proof by contradiction.\index{proof!contradiction}
+Let \(\cvar{G} = (\cvar{V}, \cvar{E})\) be a graph for which Prim's
+algorithm does \emph{not} generate an MST.
+Define an ordering on the vertices according to the order in which they
+were added by Prim's algorithm to the MST: \(\svar{v}_0, \svar{v}_1,
+..., \svar{v}_{n-1}\). 
+Let edge \(\svar{e}_i\) connect (\(\svar{v}_x\), \(\svar{v}_i\)) for
+some \(x < i\) and \(i \geq 1\).
+Let \(\svar{e}_j\) be the lowest numbered (first) edge added
+by Prim's algorithm such that the set of edges selected so
+far \emph{cannot} be extended to form an MST for \cvar{G}.
+In other words, \(\svar{e}_j\) is the first edge where Prim's algorithm
+``went wrong.''
+Let \cvar{T} be the ``true'' MST.
+Call \(\svar{v}_p\) (\(p<j)\) the vertex connected by edge
+\(\svar{e}_j\), that is, \(\svar{e}_j = (\svar{v}_p, \svar{v}_j)\).
+
+Because \cvar{T} is a tree, there exists some path in \cvar{T}
+connecting \(\svar{v}_p\) and \(\svar{v}_j\).
+There must be some edge \(\svar{e}'\) in this path connecting vertices
+\(\svar{v}_u\) and \(\svar{v}_w\), with \(u < j\) and \(w \geq j\).
+Because \(\svar{e}_j\) is not part of \cvar{T}, adding edge
+\(\svar{e}_j\) to \cvar{T} forms a cycle.
+Edge \(\svar{e}'\) must be of lower cost than
+edge \(\svar{e}_j\), because Prim's algorithm did not generate an MST.
+This situation is illustrated in Figure~\ref{PrimProof}.
+However, Prim's algorithm would have selected the least-cost edge
+available.
+It would have selected \(\svar{e}'\), not \(\svar{e}_j\).
+Thus, it is a contradiction that Prim's algorithm would have selected
+the wrong edge, and thus, Prim's algorithm must be correct.
+\end{proof}
+
+\begin{figure}
+\pdffig{PrimMST}
+\vspace{-\medskipamount}
+\capt{4.5in}{Prim's MST algorithm proof}
+{Prim's MST algorithm proof.
+The left oval contains that portion of the graph where Prim's MST and
+the ``true'' MST \cvar{T} agree.
+The right oval contains the rest of the graph.
+The two portions of the graph are connected by (at least) edges
+\(\svar{e}_j\) (selected by Prim's algorithm to be in the MST) and
+\(\svar{e}'\) (the ``correct'' edge to be placed in
+the~MST).
+Note that the path from \(\svar{v}_w\) to \(\svar{v}_{j}\) cannot
+include any marked vertex \(\svar{v}_i\), \(i \leq j\), because to do so
+would form a cycle.}{PrimProof}
+\medskip
+\medskip
+\end{figure}
+
+\begin{example}
+For the graph of Figure~\ref{MSTExamp}, assume that we begin by
+marking Vertex~\svar{A}.
+From~\svar{A}, the least-cost edge leads to Vertex~\svar{C}.
+Vertex~\svar{C} and edge (\svar{A},~\svar{C}) are added to the MST.
+At this point, our candidate edges connecting the MST
+(Vertices~\svar{A} and~\svar{C}) with the rest of the graph are
+(\svar{A},~\svar{E}), (\svar{C},~\svar{B}), (\svar{C},~\svar{D}), and
+(\svar{C},~\svar{F}).
+From these choices, the least-cost edge from the MST is
+(\svar{C},~\svar{D}). 
+So we add Vertex~\svar{D} to the MST.
+For the next iteration, our edge choices are (\svar{A},~\svar{E}),
+(\svar{C},~\svar{B}), (\svar{C},~\svar{F}), and (\svar{D},~\svar{F}).
+Because edges (\svar{C},~\svar{F}) and (\svar{D},~\svar{F}) happen to
+have equal cost, it is an
+arbitrary decision as to which gets selected.
+Say we pick (\svar{C},~\svar{F}).
+The next step marks Vertex~\svar{E} and adds edge
+(\svar{F},~\svar{E}) to the MST.
+Following in this manner, Vertex~\svar{B}
+(through edge (\svar{C},~\svar{B})) is marked.
+At this point, the algorithm
+terminates.
+\end{example}
+\index{prim's algorithm@Prim's algorithm|)}
+
+\subsection{Kruskal's Algorithm}
+\label{Kruskal}
+
+\index{kruskal's algorithm@Kruskal's algorithm|(}
+Our next MST algorithm is commonly referred to as Kruskal's
+algorithm.
+Kruskal's algorithm is also a simple, greedy\index{greedy algorithm}
+algorithm.
+First partition the set of vertices into \(|\cvar{V}|\) equivalence
+classes (see Section~\ref{ParentPointer}), each consisting of one
+vertex.\index{equivalence!class}
+Then process the edges in order of weight.
+An edge is added to the MST, and two equivalence classes combined,
+if the edge connects two vertices in different equivalence classes.
+This process is repeated until only one equivalence class remains.
+
+\begin{example}
+Figure~\ref{KruskalFig} shows the first three steps of Kruskal's
+Algorithm for the graph of Figure~\ref{MSTExamp}.
+Edge (\svar{C},~\svar{D}) has the least cost, and because
+\svar{C} and \svar{D} are currently in separate MSTs, they are
+combined.
+We next select edge (\svar{E},~\svar{F}) to process, and combine these
+vertices into a single MST.
+The third edge we process is (\svar{C},~\svar{F}), which causes the
+MST containing Vertices~\svar{C} and~\svar{D} to merge with MST
+containing Vertices~\svar{E} and~\svar{F}.
+The next edge to process is (\svar{D},~\svar{F}).
+But because Vertices~\svar{D} and~\svar{F} are currently in the same
+MST, this edge is rejected.
+The algorithm will continue on to accept edges (\svar{B},~\svar{C})
+and (\svar{A},~\svar{C}) into the MST.
+\end{example}
+
+The edges can be processed in order of weight by using a
+min-heap.\index{heap}
+This is generally faster than sorting the edges first, because in
+practice we need only visit a small fraction of the edges before
+completing the MST.
+This is an example of finding only a few smallest elements in a list,
+as discussed in Section~\ref{Heapsort}.
+
+The only tricky part to this algorithm is determining if two vertices
+belong to the same equivalence class.\index{equivalence!class}
+Fortunately, the ideal algorithm is available for the purpose ---
+the UNION/FIND algorithm based on
+the parent pointer representation for trees described in
+Section~\ref{ParentPointer}.\index{union/find@UNION/FIND}
+Figure~\ref{KruskImpl} shows an implementation for the algorithm.
+Class \Cref{KruskalElem} is used to store the edges on the min-heap.
+
+\begin{figure}
+\pdffig{Kruskal}
+\capt{4.5in}{Illustration of Kruskal's MST algorithm}
+{Illustration of the first three steps of Kruskal's MST algorithm as
+applied to the graph of Figure~\ref{MSTExamp}.}{KruskalFig}
+\medskip
+\end{figure}
+
+\begin{figure}
+\xprogfig{KruskalElem.book}
+\bigskip
+
+\xprogfig{Grkruskal.book}
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+\capt{4.5in}{Kruskal's algorithm}
+{An implementation for Kruskal's algorithm.}{KruskImpl}
+\end{figure}
+
+Kruskal's algorithm is dominated by the time required to
+process the edges.
+The \Cref{differ} and \Cref{UNION} functions are nearly
+constant in time if path compression and weighted union is used.
+Thus, the total cost of the algorithm is
+\(\Theta(|\cvar{E}| \log |\cvar{E}|)\) in the worst case,
+when nearly all edges must be processed before all the edges of the
+spanning tree are found and the algorithm can stop.
+More often the edges of the spanning tree are the shorter ones,and
+only about \(|\cvar{V}|\) edges must be processed.
+If so, the cost is often close to \(\Theta(|\cvar{V}| \log |\cvar{E}|)\) 
+in the average case.\index{kruskal's algorithm@Kruskal's algorithm|)}
+\index{minimum-cost spanning tree|)}
+
+\newpage
+
+\section{Further Reading}
+
+Many interesting properties of graphs can be investigated by playing
+with the programs in the Stanford Graphbase.
+This is a collection of benchmark databases and graph processing
+programs.
+The Stanford Graphbase is documented in \cite{GraphBase}.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Prove by induction\index{proof!induction} that a graph with \(n\) vertices has
+at most \(n(n-1)/2\) edges.
+
+\item
+Prove the following implications regarding free trees.\index{free tree}
+
+\begin{enumerate}
+\item IF an undirected graph is connected and has no simple cycles,
+THEN the graph has \(|\cvar{V}| - 1\) edges.
+
+\item IF an undirected graph has \(|\cvar{V}| - 1\) edges and no
+cycles, THEN the graph is connected.
+\end{enumerate}
+
+\item
+\begin{enumerate}
+
+\item
+Draw the adjacency matrix representation for\index{graph!adjacency matrix}
+the graph of Figure~\ref{ExerGraph}.
+
+\item
+Draw the adjacency list representation for\index{graph!adjacency list}
+the same graph.
+
+\item
+If a pointer requires four bytes, a vertex label requires two bytes,
+and an edge weight requires two bytes, which representation requires
+more space for this graph?
+
+\item
+If a pointer requires four bytes, a vertex label requires one byte,
+and an edge weight requires two bytes, which representation requires
+more space for this graph?
+\end{enumerate}
+
+\item
+Show the DFS tree for\index{depth-first search}
+the graph of Figure~\ref{ExerGraph}, starting at Vertex~1.
+
+\item
+Write a pseudocode algorithm to create a DFS tree for an undirected,
+connected graph starting at a specified vertex~\svar{V}.
+
+\item
+Show the BFS tree for\index{breadth-first search}
+the graph of Figure~\ref{ExerGraph}, starting at Vertex~1.
+
+\item
+Write a pseudocode algorithm to create a BFS tree for an undirected,
+connected graph starting at a specified vertex~\svar{V}.
+
+\item
+% Bentley
+The BFS topological sort algorithm can report the existence of a cycle
+if one is encountered.\index{topological sort}
+Modify this algorithm to print the vertices possibly appearing in
+cycles (if there are any cycles).
+
+\item
+Explain why, in the worst case, Dijkstra's algorithm is
+(asymptotically) as efficient as any algorithm for finding the
+shortest path from some vertex~\svar{I} to another vertex~\svar{J}.
+
+\item
+Show the shortest paths generated by running Dijkstra's shortest-paths
+algorithm on the graph of Figure~\ref{ExerGraph}, beginning at
+Vertex~4.\index{shortest paths}
+Show the D values as each vertex is processed, as in
+Figure~\ref{Dijk}.\index{dijkstra's algorithm@Dijkstra's algorithm}
+
+\item
+Modify the algorithm for single-source shortest paths to actually
+store and return the shortest paths rather than just compute the
+distances.\index{shortest paths}
+
+\item
+The root of a DAG\index{directed acyclic graph (DAG)} is a vertex
+\svar{R} such that every vertex of the
+DAG can be reached by a directed path from \svar{R}.
+Write an algorithm that takes a directed graph as input and determines
+the root (if there is one) for the graph.
+The running time of your algorithm should be
+\(\Theta(|\cvar{V}| + |\cvar{E}|)\).
+
+\item
+Write an algorithm to find the longest path in a DAG, where the length
+of the path is measured by the number of edges that it contains.
+What is the asymptotic complexity of your
+algorithm?\index{directed acyclic graph (DAG)}
+
+\item
+Write an algorithm to determine whether a directed graph of
+\(|\cvar{V}|\) vertices contains a cycle.
+Your algorithm should run in \(\Theta(|\cvar{V}| + |\cvar{E}|)\) time.
+
+\item
+Write an algorithm to determine whether an undirected graph of
+\(|\cvar{V}|\) vertices contains a cycle.
+Your algorithm should run in \(\Theta(|\cvar{V}|)\) time.
+
+\begin{figure}
+\pdffig{ExerGrap}
+\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+
+\capt{4.5in}{Example graph for Chapter~\ref{Graphs} exercises}
+{Example graph for Chapter~\ref{Graphs} exercises.}{ExerGraph}
+\medskip
+\end{figure}
+
+\item
+The \defit{single-destination shortest-paths} problem for a directed
+graph is to find the shortest path \emph{from} every vertex to a
+specified vertex~\svar{V}.
+Write an algorithm to solve the single-destination shortest-paths
+problem.
+
+\item
+List the order in which the edges of the graph in
+Figure~\ref{ExerGraph} are visited when running Prim's MST algorithm
+starting at Vertex~3.\index{prim's algorithm@Prim's algorithm}
+Show the final MST.\index{minimum-cost spanning tree}
+
+\item
+List the order in which the edges of the graph in
+Figure~\ref{ExerGraph} are visited when running
+Kruskal's \index{kruskal's algorithm@Kruskal's algorithm}
+MST algorithm.\index{minimum-cost spanning tree}
+Each time an edge is added to the MST, show the result on the
+equivalence array,\index{equivalence!class} (e.g., show the array as in
+Figure~\ref{EquivExamp}).
+
+\item
+Write an algorithm to find a \defit{maximum} cost spanning tree, that
+is, the spanning tree with highest possible cost.
+
+\item
+When can Prim's and Kruskal's algorithms yield different MSTs?
+\index{prim's algorithm@Prim's algorithm}
+\index{kruskal's algorithm@Kruskal's algorithm}
+
+\item
+Prove that, if the costs for the edges of Graph~\cvar{G} are distinct,
+then only one MST exists for~\cvar{G}.
+\index{minimum-cost spanning tree}
+
+\item
+Does either Prim's or Kruskal's algorithm work if there are negative
+edge weights?
+\index{prim's algorithm@Prim's algorithm}
+\index{kruskal's algorithm@Kruskal's algorithm}
+
+\item
+Consider the collection of edges selected by
+Dijkstra's algorithm as the shortest paths to the graph's vertices
+from the start vertex.
+Do these edges form a spanning tree (not necessarily of minimum cost)?
+Do these edges form an MST?
+Explain why or why not.
+\index{minimum-cost spanning tree}
+\index{dijkstra's algorithm@Dijkstra's algorithm}
+
+\item
+Prove that a tree is a bipartite graph.
+
+\item
+Prove that any tree (i.e., a connected, undirected graph with no
+cycles) can be two-colored.
+(A graph can be two colored if every vertex can be assigned one of two
+colors such that no adjacent vertices have the same color.)
+
+\item
+Write an algorithm that determines if an arbitrary undirected graph
+is a bipartite graph.
+If the graph is bipartite, then your algorithm should also identify
+the vertices as to which of the two partitions each belongs to.
+
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+Design a format for storing graphs in files.
+Then implement two functions: one to read a graph
+from a file and the other to write a graph to a file.
+Test your functions by implementing a complete MST program that reads
+an undirected graph in from a file, constructs the MST, and then
+writes to a second file the graph representing the MST.
+
+\item
+\label{TriGraphRep}
+An undirected graph need not explicitly store two separate directed
+edges to represent a single undirected edge.
+An alternative would be to store only a single undirected edge
+(\svar{I},~\svar{J}) to connect Vertices~\svar{I} and~\svar{J}.
+However, what if the user asks for edge (\svar{J},~\svar{I})?
+We can solve this problem by consistently storing the edge such that
+the lesser of \svar{I} and \svar{J} always comes first.
+Thus, if we have an edge connecting Vertices~5 and~3, requests for
+edge (5,~3) and (3,~5) both map to (3,~5) because \(3<5\).
+
+Looking at the adjacency matrix, we notice that only the lower triangle
+of the array is used.
+Thus we could cut the space required by the adjacency matrix from
+\(|\cvar{V}|^2\) positions to \(|\cvar{V}|(|\cvar{V}|-1)/2\)
+positions.
+Read Section~\ref{SparseMatrix} on triangular matrices.
+The re-implement the adjacency matrix representation of
+Figure~\ref{GrMatImpl} to implement undirected graphs using a
+triangular array.
+
+\item
+While the underlying implementation (whether adjacency matrix or
+adjacency list) is hidden behind the graph ADT, these two
+implementations can have an impact on the efficiency of the resulting
+program.
+For Dijkstra's shortest paths algorithm, two different implementations
+were given in Section~\ref{SSSP} that provide different ways for
+determining the next closest vertex at each iteration of the
+algorithm.
+The relative costs of these two variants depend on who sparse or dense
+the graph is.
+They might also depend on whether the graph is implemented using an
+adjacency list or adjacency matrix.
+
+Design and implement a study to compare the effects on performance for
+three variables: (i) the two graph representations (adjacency list and
+adjacency matrix); (ii) the two implementations for Djikstra's
+shortest paths algorithm (searching the table of vertex distances or
+using a priority queue to track the distances), and (iii) sparse
+versus dense graphs.
+Be sure to test your implementations on a variety of graphs that are
+sufficiently large to generate meaningful times.
+
+\item
+The example implementations for DFS and BFS show calls to functions
+\Cref{PreVisit} and \Cref{PostVisit}.
+Re-implement the BFS and DFS functions to make use of the visitor
+design pattern\index{design pattern!visitor} to handle the pre/post
+visit functionality.
+
+\item
+Write a program to label the connected components for an undirected
+graph.\index{graph!connected component}
+In other words, all vertices of the first component are given the
+first component's label, all vertices of the second component are
+given the second component's label, and so on.
+Your algorithm should work by defining any two vertices connected by
+an edge to be members of the same equivalence
+class.\index{equivalence!class}
+Once all of the edges have been processed, all vertices in a given
+equivalence class will be connected.
+Use the UNION/FIND implementation from Section~\ref{ParentPointer} to
+implement equivalence classes.\index{union/find@UNION/FIND}
+\index{graph|)}
+
+\end{projects}

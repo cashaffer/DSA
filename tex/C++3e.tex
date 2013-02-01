@@ -1,0 +1,473 @@
+% book.tex
+% Data Structures and Algorithm Analysis
+% C++ 3rd Edition
+
+% Some convenient macros
+%\newcommand{\TODO} {}
+%\nonstopmode % Don't stop for errors
+\newcommand{\Nat}{\mbox{$\mathbb{N}$}}
+\newcommand{\NP}{\mbox{${\cal NP}$}}
+\newcommand{\Harmonic}{\mbox{${\cal H}_n$}}
+\newcommand{\Harmonicnp}{\mbox{${\cal H}_{n+1}$}}
+\newcommand{\Poly}{\mbox{${\cal P}$}}
+\newcommand{\fn}{\mbox{$f(n)$}}
+\newcommand{\gn}{\mbox{$g(n)$}}
+\newcommand{\Ogn}{\mbox{${\rm O}(g(n))$}}
+\newcommand{\Ohn}{\mbox{${\rm O}(h(n))$}}
+\newcommand{\Oone}{\mbox{${\rm O}(1)$}}
+\newcommand{\Oc}{\mbox{${\rm O}(c)$}}
+\newcommand{\On}{\mbox{${\rm O}(n)$}}
+\newcommand{\Oi}{\mbox{${\rm O}(i)$}}
+\newcommand{\Ofn}{\mbox{${\rm O}(f(n))$}}
+\newcommand{\Ologlogn}{\mbox{${\rm O}(\log \log n)$}}
+\newcommand{\Ologn}{\mbox{${\rm O}(\log n)$}}
+\newcommand{\Onlogn}{\mbox{${\rm O}(n \log n)$}}
+\newcommand{\Onsqrtn}{\mbox{${\rm O}(n^{1.5})$}}
+\newcommand{\Ontwo}{\mbox{${\rm O}(n^2)$}}
+\newcommand{\Onthree}{\mbox{${\rm O}(n^3)$}}
+\newcommand{\Onfour}{\mbox{${\rm O}(n^4)$}}
+\newcommand{\Onseven}{\mbox{${\rm O}(n^7)$}}
+\newcommand{\Otwon}{\mbox{${\rm O}(2^n)$}}
+\newcommand{\Ocn}{\mbox{${\rm O}(c^n)$}}
+\newcommand{\Onn}{\mbox{${\rm O}(n^n)$}}
+\newcommand{\Omegan}{\mbox{$\Omega(n)$}}
+\newcommand{\Omegacn}{\mbox{$\Omega(c^n)$}}
+\newcommand{\Omegafn}{\mbox{$\Omega(f(n))$}}
+\newcommand{\Omegagn}{\mbox{$\Omega(g(n))$}}
+\newcommand{\Omegahn}{\mbox{$\Omega(h(n))$}}
+\newcommand{\Omegalogn}{\mbox{$\Omega(\log n)$}}
+\newcommand{\Omeganlogn}{\mbox{$\Omega(n \log n)$}}
+\newcommand{\Omegantwo}{\mbox{$\Omega(n^2)$}}
+\newcommand{\Omegatwon}{\mbox{$\Omega(2^n)$}}
+\newcommand{\Omegann}{\mbox{$\Omega(n^n)$}}
+\newcommand{\Thetaone}{\mbox{$\Theta(1)$}}
+\newcommand{\Thetan}{\mbox{$\Theta(n)$}}
+\newcommand{\Thetansf}{\mbox{$\mathsf\Theta(n)$}}
+\newcommand{\Thetai}{\mbox{$\Theta(i)$}}
+\newcommand{\Thetafn}{\mbox{$\Theta(f(n))$}}
+\newcommand{\Thetagn}{\mbox{$\Theta(g(n))$}}
+\newcommand{\Thetahn}{\mbox{$\Theta(h(n))$}}
+\newcommand{\Thetantwo}{\mbox{$\Theta(n^2)$}}
+\newcommand{\Thetantwosf}{\mbox{$\mathsf\Theta(n^2)$}}
+\newcommand{\Thetanthree}{\mbox{$\Theta(n^3)$}}
+\newcommand{\Thetanfour}{\mbox{$\Theta(n^4)$}}
+\newcommand{\Thetanlogn}{\mbox{$\Theta(n \log n)$}}
+\newcommand{\Thetalogn}{\mbox{$\Theta(\log n)$}}
+\newcommand{\Thetaloglogn}{\mbox{$\Theta(\log \log n)$}}
+\newcommand{\Thetatwon}{\mbox{$\Theta(2^n)$}}
+\newcommand{\C} {\mbox{\textbf{C}}}
+\newcommand{\Csf} {\mbox{\sffamily\textbf{C}}}
+\newcommand{\ttlC} {\mbox{\boldmath $C$}}
+\newcommand{\Pascal} {\mbox{Pascal}}
+\newcommand{\JPP} {\mbox{\textbf{J\lower2pt\hbox{$^{++}$}}}}
+\newcommand{\lang} {\mbox{c}}
+\newcommand{\Lang} {\mbox{\textbf{C\lower2pt\hbox{$^{++}$}}}}
+\newcommand{\LangCPP} {\mbox{\textbf{C\lower2pt\hbox{$^{++}$}}}}
+\newcommand{\Bool} {\Cref{bool}}
+\newcommand{\Gen} {template}
+\newcommand{\Gens} {templates}
+\newcommand{\gpp} {\mbox{\textbf{g\lower2pt\hbox{$^{++}$}}}}
+\newcommand{\Langsf} {\mbox{\sffamily\textbf{C\lower2pt\hbox{$^{++}$}}}}
+\newcommand{\largeCPPsf} {\mbox{\sffamily\textbf{C\lower4pt\hbox{$^{++}$}}}}
+\newcommand{\smallCPPsf} {\small\mbox{\sffamily\textbf{C\lower2pt\hbox{$^{++}$}}}}
+\newcommand{\largeJAVAsf} {\mbox{\sffamily\textbf{Java}}}
+\newcommand{\smallJAVAsf} {\small\mbox{\sffamily\textbf{Java}}}
+\newcommand{\ttlCPP} {\mbox{{\boldmath $C$}\lower2pt\hbox{$^{++}$}}}
+\newcommand{\LangJava} {\mbox{Java}}
+\newcommand{\Javasf} {\mbox{\sffamily\textbf{Java}}}
+\newcommand{\ttlJava} {\mbox{Java}}
+\newcommand{\UNIX} {\mbox{UNIX}}
+\newcommand{\ttlUNIX} {\mbox{UNIX}}
+\newcommand{\MakeIndex} {\mbox{\tt{makeindex}}}
+\newcommand{\Xfig} {\mbox{\tt{Xfig}}}
+\newcommand{\Mathematica} {Mathematica}
+\newcommand{\Cref}[1]{{\tt{#1}}}  % A bit of program text, usually a variable
+\newcommand{\ttl}[1]{{\em{#1}}}   % Book title typeface
+\newcommand{\XYcoord}{{$xy$-coordinate}}
+\newcommand{\XYcoords}{{$xy$-coordinates}}
+\newcommand{\PRquad}{\mbox{PR~quadtree}}
+\newcommand{\KDtree}{\mbox{k-d~tree}}
+\newcommand{\KDtrees}{\mbox{k-d~trees}}
+\newcommand{\Kary}{\mbox{$K$-ary}}
+\newcommand{\sfbeta}{\mathsf\beta}
+\newcommand{\TM}{{$^{\mbox{\tiny TM}}$}}
+\newcommand{\pointref}{pointer}
+\newcommand{\pointrefs}{pointers}
+
+% Fonts used in old figures derived by Mathematica
+\newcommand{\tensf}{\fontsize{10}{12pt}\normalfont\sffamily}
+
+% Derived from Shultis, ``\LaTeX\ notes''
+%\newcommand{\cent}{\mbox{$\mbox{\small \sf c}\!\!\!\!\;\scriptstyle /$}}
+% Now using \textcent instead. Need to use package textcomp
+
+\newcommand{\defit}[1]{{\bfseries{#1}}} % Definition typeface
+
+% Type face for ``compound'' or ``complex'' variable names, such as
+% sets, trees, lists, etc.
+\newcommand{\cvar}[1]{{\textbf{#1}}}
+
+% Get rid of this!
+\newcommand{\svar}[1]{{\textit{#1}}}
+
+% Don't let a running head appear on the blank page.
+\newcommand{\mycleardoublepage}{\thispagestyle{empty}\cleardoublepage}
+
+
+\newcommand{\TRUE}{{\tt true}}
+\newcommand{\FALSE}{{\tt false}}
+\newcommand{\NULL}{{\tt NULL}}
+\newcommand{\Cfor} {{\tt for}}
+\newcommand{\Cwhile} {{\tt while}}
+\newcommand{\nth}{\mbox{$n$th}}
+\newcommand{\Sn}{\mbox{$\textbf{S}(n)$}}
+\newcommand{\Sone}{\mbox{$\textbf{S}(1)$}}
+\newcommand{\Snone}{\mbox{$\textbf{S}(n-1)$}}
+\newcommand{\Tn}{\mbox{$\textbf{T}(n)$}}
+\newcommand{\Ttwon}{\mbox{$\textbf{T}(2n)$}}
+\newcommand{\Tnone}{\mbox{$\textbf{T}(n-1)$}}
+\newcommand{\Tnhalf}{\mbox{$\textbf{T}(n/2)$}}
+\newcommand{\Tnsqrt}{\mbox{$\textbf{T}(\sqrt{n})$}}
+\newcommand{\Tone}{\mbox{$\textbf{T}(1)$}}
+\newcommand{\Ttwo}{\mbox{$\textbf{T}(2)$}}
+\newcommand{\cn}{\mbox{$c n$}}
+\newcommand{\cntwo}{\mbox{$c n^2$}}
+\newcommand{\TTtree}{\mbox{2-3 tree}}
+\newcommand{\TTPtree}{\mbox{2-3$^+$ tree}}
+\newcommand{\TTtrees}{\mbox{2-3 trees}}
+\newcommand{\Btree}{\mbox{B-tree}}
+\newcommand{\Btrees}{\mbox{B-trees}}
+\newcommand{\BPtree}{\mbox{B$^+$-tree}}
+\newcommand{\BPtrees}{\mbox{B$^+$-trees}}
+\newcommand{\BStree}{\mbox{B$^*$-tree}}
+\newcommand{\BStrees}{\mbox{B$^*$-trees}}
+\newcommand{\SWAN}{\mbox{SWAN}}
+
+\newlength{\inboxwid}
+\setlength{\inboxwid}{\textwidth}
+\addtolength{\inboxwid}{-2\fboxsep}
+\addtolength{\inboxwid}{1pt}
+
+\newlength{\rulewidth}
+
+\newcommand{\pdffig}[1]{{\begin{center} \includegraphics{../figs/#1.pdf}
+\end{center}}}
+
+%\newcommand{\xfig}[1]{{\begin{center} \input{../figs/#1.pstex_t}
+%\end{center}}}
+
+\newcommand{\xprogfig}[1]{{\small\verbinput{../progs/#1}}}
+
+% Put in line numbers
+\newcommand{\xprogline}[1]{{\small\verbinputnum{../progs/#1}}}
+
+\newcommand{\xproghere}[1]{{\bigskip\setlength{\parindent}{0in}
+                            \begin{minipage}{5in}\small
+                            \verbinput{../progs/#1}\end{minipage}\bigskip}}
+
+% For putting programs inside examples or exercises
+\newcommand{\xprogexamp}[1]{{\bigskip\setlength{\parindent}{0in}
+                            \begin{minipage}{4.5in}\small
+                            \verbinput{../progs/#1}\end{minipage}\bigskip}}
+
+% For putting programs inside enumerated items of exercises
+\newcommand{\xprogexer}[1]{{\bigskip\setlength{\parindent}{0in}
+                           \small\verbinput{../progs/#1}\bigskip}}
+
+\newenvironment{progenv}%
+{\medskip\setlength{\parindent}{0in}\begin{minipage}{5.0in}\small\tt}%
+{\end{minipage}\medskip}
+
+% for use inside of examples
+\newenvironment{progenvnarrow}%
+{\medskip\setlength{\parindent}{0in}\begin{minipage}{4.5in}\small\tt}%
+{\end{minipage}\medskip}
+
+% for use inside of exercises
+\newenvironment{progenvexer}%
+{\medskip\setlength{\parindent}{0in}\begin{minipage}{4.5in}\small\tt}%
+{\end{minipage}\medskip}
+
+% for use inside an item of an exercise
+\newenvironment{progenvexeritem}%
+{\medskip\setlength{\parindent}{0in}\begin{minipage}{4.1in}\small\tt}%
+{\end{minipage}\medskip}
+
+\newenvironment{mytable}%
+{\begin{figure}}%
+{\end{figure}}
+
+\newenvironment{sidebar}%
+{\setlength{\inboxwid}{\textwidth}
+\addtolength{\fboxsep}{3pt}
+\addtolength{\inboxwid}{-2\fboxsep}
+\addtolength{\inboxwid}{-2\fboxrule}
+\begin{figure}\begin{Sbox}\begin{minipage}{\inboxwid}\setlength{\parindent}{1.5em}}%
+{\end{minipage}\end{Sbox}\fbox{\TheSbox}\end{figure}\addtolength{\fboxsep}{-3pt}}
+
+%Exercises environment.  Minor modification to enumerated lists.
+\newenvironment{exercises}%
+{\begin{enumerate}\def\labelenumi{\thechapter.\theenumi}}%
+{\end{enumerate}}
+
+%Projects environment.  Minor modification to enumerated lists.
+\newenvironment{projects}%
+{\begin{enumerate}\def\labelenumi{\thechapter.\theenumi}}%
+{\end{enumerate}}
+
+% Example environment.  Just doing a \newtheorem example yields
+% italic type.  However, this uses a \newtheorem, both to set the
+% example number, and also to make examples \label'able.
+\newenvironment{example}%
+{\begin{myquotation}  % Get indentation
+\setlength{\rulewidth}{\textwidth}
+\addtolength{\rulewidth}{-2\parindent}
+\noindent\rule{\rulewidth}{2\fboxrule}\begin{exampthm}\rm}%
+{\end{exampthm}\vspace{-\medskipamount}\rule{\rulewidth}{2\fboxrule}
+\end{myquotation}\vspace{\medskipamount}}
+
+\newenvironment{inbox}%
+{\setlength{\fboxsep}{6pt}
+\setlength{\inboxwid}{\textwidth}
+\addtolength{\inboxwid}{-2\fboxsep}
+\addtolength{\inboxwid}{-2\fboxrule}
+\vspace{1 pc}
+\noindent\begin{Sbox}\begin{minipage}{\inboxwid}
+\setlength{\parindent}{1.5em}}%
+{\end{minipage}\end{Sbox}\fbox{\TheSbox}\vspace{1 pc}}
+
+\newenvironment{inboxex}%
+{\setlength{\fboxsep}{6pt}
+\setlength{\inboxwid}{4.6in}
+\addtolength{\inboxwid}{-2\fboxsep}
+\addtolength{\inboxwid}{-2\fboxrule}
+\vspace{1 pc}
+\noindent\begin{Sbox}\begin{minipage}{\inboxwid}
+\setlength{\parindent}{1.5em}}%
+{\end{minipage}\end{Sbox}\fbox{\TheSbox}\vspace{1 pc}}
+
+% Boxed definitions
+% Using a \newtheorem environment not only gives the numbers, but also
+% makes definitions \label'able.
+
+%\newenvironment{definition}%
+%{\begin{inbox}\vspace{-\topsep}\vspace{-\parsep}\vspace{3 pt}
+%\noindent\begin{defthm}\rm}%
+%{\end{defthm}\end{inbox}}
+
+\newenvironment{proof}{\noindent{\textsf{\textbf{Proof:}}}}{\hfill$\Box$}
+
+\newenvironment{numproof}[1]{\noindent{\textsf{\textbf{Proof {#1}:}}}}{\hfill$\Box$}
+
+
+\hyphenation{quad-tree port-a-bil-i-ty alg-orithm as-ymp-tot-ic}
+
+% Eliminate widows and orphans
+\clubpenalty=10000
+\widowpenalty=10000
+
+\title{\Huge Data Structures and Algorithm Analysis\\
+\smallskip
+\Large Edition 3.2 (C++ Version)}
+
+\author{\Large Clifford A. Shaffer\smallskip\\
+Department of Computer Science\\
+Virginia Tech\\
+Blacksburg, VA 24061}
+
+\date{\today\\
+Update 3.2.0.7\\
+For a list of changes, see
+\url{http://people.cs.vt.edu/~shaffer/Book/errata.html}\\
+\ \\
+Copyright \copyright\ 2009-2012 by Clifford A. Shaffer.\\
+\smallskip
+This document is made freely available in PDF form for educational and
+other non-commercial use.
+You may make copies of this file and redistribute in electronic form
+without charge.
+You may extract portions of this document provided that the front page,
+including the title, author, and this notice are included.
+Any commercial use of this document requires the written consent of the author.
+The author can be reached at \texttt{shaffer@cs.vt.edu}.\\
+If you wish to have a printed version of this document, print copies are
+published by Dover Publications\\
+(see {\small\url{http://store.doverpublications.com/048648582x.html}}).\\
+Further information about this text is available at
+\url{http://people.cs.vt.edu/~shaffer/Book/}.\\
+}
+
+%\includeonly{bintree}
+
+%\includeonly{preface,intro,mathpre,alganal,list,bintree,gentree,insort,fileproc,search,indexing,graphs,relist,advtree,analtech,bounds,algorithms,limcomp}
+
+\documentclass[twoside,11pt]{report}
+
+\usepackage{times}
+\usepackage{c++3e}
+\usepackage{verbatim}
+\usepackage{makeidx}
+\usepackage{latexsym} % for /Box
+\usepackage{url}
+%\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{ifthen}
+\usepackage{textcomp}
+
+% To support shared files between the C++ and Java versions,
+% set up some boolean switches to conditionally compile
+\newboolean{cpp}
+\setboolean{cpp}{true}
+\newboolean{java}
+\setboolean{java}{false}
+
+% Set the \tt font family to be bold
+% We do this so that the code example text won't be too light.
+\DeclareOldFontCommand{\tt}{\normalfont\ttfamily\bfseries}{\mathtt}
+
+\makeindex
+\begin{document}
+
+\makeatletter
+
+\newtheorem{exampthm}{\sffamily Example}[chapter]
+\newtheorem{theorem}{\sffamily Theorem}[chapter]
+\newtheorem{lemma}{\sffamily Lemma}[chapter]
+\newtheorem{defthm}{\sffamily Definition}[chapter]
+
+\bibliographystyle{alpha}
+
+\pagenumbering{roman}
+\maketitle
+
+\setcounter{page}{3}              % Starting page number (specified by PH)
+
+%\addcontentsline{toc}{chapter}{Table of Contents}
+\parskip .5ex                     % Add space between Contents items
+\markboth{Contents}{Contents}     % Head title -- odd pages
+\def\CHHEAD{Contents}             % Head title -- even pages
+\tableofcontents
+\newpage			  % HACK -- clear this page to get
+				  % the header right
+
+% PH doesn't like list of figures
+%\addcontentsline{toc}{chapter}{List of Figures}
+%\markboth{Figures}{Figures}     % Head title -- odd pages
+%\def\CHHEAD{Figures}             % Head title -- even pages
+%\listoffigures
+%\mycleardoublepage
+
+% PH doesn't like list of tables
+%\addcontentsline{toc}{chapter}{List of Tables}
+%\markboth{Tables}{Tables}     % Head title -- odd pages
+%\def\CHHEAD{Tables}             % Head title -- even pages
+%\listoftables
+\mycleardoublepage
+\parskip 0in plus 2pt
+
+\markboth{Preface}{Preface}     % Head title -- odd pages
+\def\CHHEAD{Preface}             % Head title -- even pages
+\include{preface}\mycleardoublepage
+
+\pagenumbering{arabic}
+\include{intro}\mycleardoublepage     % Quote
+\include{mathpre}\mycleardoublepage   % Quote
+\include{alganal}\mycleardoublepage   % Quote
+\include{list}\mycleardoublepage      % Note about Polya quote
+\include{bintree}\mycleardoublepage   % No quote
+\include{gentree}\mycleardoublepage   % No quote
+\include{insort}\mycleardoublepage    % No quote
+\include{fileproc}\mycleardoublepage  % No quote
+\include{search}\mycleardoublepage    % Quote
+\include{indexing}\mycleardoublepage  % No quote
+\include{graphs}\mycleardoublepage    % No quote
+\include{relist}\mycleardoublepage    % No quote
+\include{advtree}\mycleardoublepage   % No quote
+\include{analtech}\mycleardoublepage  % Quote
+\include{bounds}\mycleardoublepage    % No quote
+\include{algorithms}\mycleardoublepage % No quote
+\include{limcomp}\mycleardoublepage   % No quote
+
+\include{utils}\mycleardoublepage
+
+\addcontentsline{toc}{chapter}{Bibliography}
+\def\CHHEAD{BIBLIOGRAPHY}    % Head title -- even pages
+\bibliography{bookbib}\newpage
+
+\mycleardoublepage
+
+\index{activation record|see{compiler, activation record}}
+\index{algorithm analysis!amortized|see{amortized analysis}}
+\index{asymptotic analysis|see{algorithm analysis, asymptotic}}
+\index{back of the envelope, napkin|see{estimating}}
+\index{best fit|see{memory management, best fit}}
+\index{big-Oh notation|see{O notation}}
+\index{binary search|see{search, binary}}
+\index{binary search tree|see{BST}}
+\index{binary tree!BST|see{BST}}
+\index{binary tree!traversal|see {traversal, binary tree}}
+\index{bst@BST!traversal|see {traversal}}
+\index{class|see{object-oriented programming, class}}
+\index{composite|see{design pattern, composite}}
+\index{connected component|see{graph, connected component}}
+\index{contradiction, proof by|see{proof, contradiction}}
+\index{cylinder|see{disk drive, cylinder}}
+\index{data structure!spatial|see{spatial data structure}}
+\index{dequeue|see{queue, dequeue}}
+\index{diminishing increment sort@Diminishing$\;$Increment$\;$Sort|see{Shellsort}}
+\index{disjoint set|see{equivalence class}}
+\index{disk processing|see{file processing}}
+\index{dynamic array|see{array, dynamic}}
+\index{enqueue|see{queue, enqueue}}
+\index{enumeration|see{traversal}}
+\index{exact-match query|see{search, exact-match query}}
+\index{exponential growth rate|see{growth rate, exponential}}
+\index{external sorting|see{sorting, external}}
+\index{first fit|see{memory management, first fit}}
+\index{flyweight|see{design pattern, flyweight}}
+\index{general tree!traversal|see{traversal}}
+\index{graph!traversal|see{traversal, graph}}
+\index{greatest common divisor|see{largest common factor}}
+\index{hidden obligations|see{obligations, hidden}}
+\index{induction, proof by|see{proof, induction}}
+\index{inorder traversal|see{traversal, inorder}}
+\index{inverted list|see{index, inverted list}}
+\index{linear growth|see{growth rate, linear}}
+\index{linear index|see{index, linear}}
+\index{linear search|see{search, sequential}}
+\index{link|see{list, link class}}
+\index{linked list|see{list, linked}}
+\index{logical representation|see{data structure, physical vs. logical form}}
+\index{master theorem@Master Theorem|see{recurrence relation, Master Theorem}}
+\index{member|see{object-oriented programming, member}}
+\index{member function|see{object-oriented programming, member function}}
+\index{multiway merging|see{Mergesort, multiway merging}}
+\index{np@\NP|see{problem, \NP}}
+\index{physical representation|see{data structure, physical vs. logical form}}
+\index{pop|see{stack, pop}}
+\index{postorder traversal|see{traversal, postorder}}
+\index{powerset|see{set, powerset}}
+\index{preorder traversal|see{traversal, preorder}}
+\index{push|see{stack, push}}
+\index{quadratic growth|see{growth rate, quadratic}}
+\index{queue!priority|see{priority queue}}
+\index{range query|see{search, range query}}
+\index{self-organizing lists|see{list, self-organizing}}
+\index{sequential search|see{search, sequential}}
+\index{stable sorting alorithms|see{sorting, stable algorithms}}
+\index{subclass|see{object-oriented programming, class hierarchy}}
+\index{subset|see{set, subset}}
+\index{strategy|see{design pattern, strategy}}
+\index{visitor|see{design pattern, visitor}}
+\index{worst fit|see{memory management, worst fit}}
+
+\addcontentsline{toc}{chapter}{Index}
+\def\CHHEAD{INDEX}    % Head title -- even pages
+
+\hyphenpenalty=10000
+\raggedright
+
+\printindex
+
+\end{document}

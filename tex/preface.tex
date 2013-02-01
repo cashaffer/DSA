@@ -1,0 +1,418 @@
+% preface.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+% This next line gets the preface into the TOC without
+% incrementing the chapter numbering.
+\addcontentsline{toc}{chapter}{Preface}
+\chapter*{Preface}
+\label{Preface}
+
+We study data structures so that we can learn to write more efficient
+programs.\index{efficiency}
+But why must programs be efficient when new computers are faster every
+year?
+The reason is that our ambitions grow with our capabilities.
+Instead of rendering efficiency needs obsolete, the modern revolution
+in computing power and storage capability merely raises the efficiency
+stakes as we attempt more complex tasks.
+
+The quest for program efficiency need not and should not conflict with
+sound design and clear coding.
+Creating efficient programs has little to do with ``programming
+tricks'' but rather is based on good organization of information and
+good algorithms.
+A programmer who has not mastered the basic principles of clear design
+is not likely to write efficient programs.
+Conversely, concerns related to development costs and maintainability
+should not be used as an excuse to justify inefficient performance.
+Generality in design can and should be achieved without sacrificing
+performance, but this can only be done if the designer understands how
+to measure performance and does so as an integral part of the design
+and implementation process.
+Most computer science curricula recognize that good programming
+skills begin with a strong emphasis on fundamental software
+engineering principles.\index{software engineering}
+Then, once a programmer has learned the principles of clear
+program design and implementation, the next step is to study
+the effects of data organization and algorithms on program efficiency.
+
+\paragraph{Approach:}
+This book describes many techniques for representing data.
+These techniques are presented within the context of
+the following principles:
+
+\begin{enumerate}
+
+\item
+Each data structure and each algorithm has costs and
+benefits.\index{data structure!costs and benefits}
+Practitioners need a thorough understanding of how to assess costs and
+benefits to be able to adapt to new design challenges.
+This requires an understanding of the principles of
+algorithm analysis,\index{algorithm analysis}
+and also an appreciation for the significant effects of the physical
+medium employed (e.g., data stored on disk versus main memory).
+
+\item
+Related to costs and benefits is the notion of
+tradeoffs.\index{tradeoff}
+For example, it is quite common to reduce time requirements at the
+expense of an increase in space requirements, or vice versa.
+Programmers face tradeoff issues regularly in all phases of software
+design and implementation, so the concept must become deeply ingrained.
+
+\item
+Programmers should know enough about common practice to avoid
+reinventing the wheel.
+Thus, programmers need to learn the commonly used data
+structures, their related algorithms, and the most frequently
+encountered design patterns\index{design pattern} found in programming.
+
+\item
+Data structures follow needs.
+Programmers must learn to assess application needs first,
+then find a data structure with matching capabilities.
+To~do this requires competence in Principles~1, 2,
+and~3.
+
+\end{enumerate}
+
+As I have taught data structures through the years, I have found that
+design issues have played an ever greater role in my courses.
+This can be traced through the various editions of this textbook by
+the increasing coverage for design patterns and generic interfaces.
+The first edition had no mention of design patterns.\index{design pattern}
+The second edition had limited coverage of a few example patterns, and
+introduced the
+dictionary\index{dictionary}\index{abstract data type (ADT)}
+\ifthenelse{\boolean{cpp}}{ADT and comparator classes.\index{comparator}}{}
+\ifthenelse{\boolean{java}}{ADT.}{}
+With the third edition, there is explicit coverage of some design
+patterns that are encountered when programming the basic data
+structures and algorithms covered in the book.
+
+\paragraph{Using the Book in Class:}
+Data structures and algorithms textbooks tend to fall into one of two
+categories: teaching texts or encyclopedias.
+Books that attempt to do both usually fail at both.
+This book is intended as a teaching text.
+I~believe it is more important for a practitioner to understand
+the principles required to select or design the data structure that
+will best solve some problem than it is to memorize a lot of textbook
+implementations.
+Hence, I~have designed this as a teaching text that covers most
+standard data structures, but not all.
+A few data structures that are not widely adopted are included
+to illustrate important principles.
+Some relatively new data structures that should
+become widely used in the future are included.
+
+Within an undergraduate program, this textbook is designed for use in
+either an advanced lower division (sophomore or junior level) data
+structures course, or for a senior level algorithms course.
+New material has been added in the third edition to support its use in
+an algorithms course.
+Normally, this text would be used in a course beyond the standard
+freshman level ``CS2'' course that often serves as the initial
+introduction to data structures.
+Readers of this book should typically have two semesters of the
+equivalent of programming experience,
+including at least some exposure to \Lang. %\index{\lang@\Lang}
+Readers who are already familiar with recursion\index{recursion} will
+have an advantage.
+Students of data structures will also benefit from having first
+completed a good course in Discrete
+Mathematics.\index{discrete mathematics}
+Nonetheless, Chapter~\ref{MathPre} attempts to give a reasonably
+complete survey of the prerequisite mathematical topics at the level
+necessary to understand their use in this book.
+Readers may wish to refer back to the appropriate sections as
+needed when encountering unfamiliar mathematical material.
+
+A sophomore-level class where students have only a little background
+in basic data structures or analysis (that is, background equivalent
+to what would be had from a traditional CS2 course)
+might cover Chapters 1-11 in detail,
+as well as selected topics from Chapter~\ref{AdvTree}.
+That is how I~use the book for my own sophomore-level class.
+Students with greater background might cover Chapter~\ref{Intro},
+skip most of Chapter~\ref{MathPre} except for reference, briefly cover
+Chapters~\ref{AlgAnal} and~\ref{LSQ},
+and then cover chapters 5-12 in detail.
+Again, only certain topics from Chapter~\ref{AdvTree} might be covered,
+depending on the programming assignments selected by the instructor.
+A senior-level algorithms course would focus on Chapters 11 and 14-17.
+
+Chapter~\ref{AdvTree} is intended in part as a source for
+larger programming exercises.
+I~recommend that all students taking a data structures course be
+required to implement some advanced tree structure, or another dynamic
+structure of comparable difficulty such as the
+skip list\index{skip list@Skip List} or
+sparse matrix\index{matrix!sparse} representations of
+Chapter~\ref{ReList}.
+None of these data structures are significantly more difficult to
+implement than the binary search tree,\index{bst@BST} and any of them
+should be within a student's ability after completing
+Chapter~\ref{BinaryTree}.
+
+While I have attempted to arrange the presentation in an order that
+makes sense, instructors should feel free to rearrange the
+topics as they see fit.
+The book has been written so that once the reader has mastered
+Chapters~1-6, the remaining material has relatively few dependencies.
+Clearly, external sorting\index{sorting!external} depends on
+understanding internal sorting\index{sorting!internal} and disk files.
+Section~\ref{ParentPointer} on the UNION/FIND
+algorithm\index{union/find@UNION/FIND}
+is used in Kruskal's Minimum-Cost Spanning Tree
+algorithm.\index{kruskal's algorithm@Kruskal's algorithm}
+Section~\ref{SelfOrg} on
+self-organizing lists\index{list!self-organizing} mentions the
+buffer replacement schemes covered in
+Section~\ref{BuffPool}.\index{buffer pool}
+Chapter~\ref{AnalTech} draws on examples from throughout the book.
+Section~\ref{SecHardProb} relies on knowledge of graphs.\index{graph}
+Otherwise, most topics depend only on material presented earlier
+within the same chapter.
+
+Most chapters end with a section entitled ``Further Reading.''
+These sections are not comprehensive lists of
+references on the topics presented.
+Rather, I~include books and articles that, in my opinion,
+may prove exceptionally informative or entertaining to the reader.
+In~some cases I~include references to works that should become
+familiar to any well-rounded computer scientist.
+
+\paragraph{Use of \Langsf:}
+%\index{\lang@\Lang|(}
+The programming examples are written in \Lang, but
+I~do not wish to discourage those unfamiliar with \Lang\ from reading
+this book.
+I~have attempted to make the examples as clear as possible while
+maintaining the advantages of \Lang.
+\Lang\ is used here strictly as a tool to illustrate data structures
+concepts.
+In~particular, I~make use of \Lang's support for
+hiding implementation details, including features such as classes,
+private class members,
+\ifthenelse{\boolean{java}}{and interfaces.}{}
+\ifthenelse{\boolean{cpp}}{constructors, and destructors.}{}
+These features of the language support the crucial concept of
+separating logical design, as embodied in the abstract data type, from
+physical implementation as embodied in the
+data structure.\index{data structure!physical vs. logical form}
+
+\ifthenelse{\boolean{cpp}}
+{To keep the presentation as clear as possible, some
+important features of \Lang\ are avoided here.
+I~deliberately minimize use of certain features commonly
+used by experienced \Lang\ programmers such as
+class hierarchy,\index{object-oriented programming!class}
+inheritance,\index{object-oriented programming!inheritance} and
+virtual functions.\index{virtual function}
+Operator\index{operator overloading} and function overloading
+is used sparingly.
+\C-like initialization syntax is preferred to some of the
+alternatives offered by \Lang.}{}
+
+\ifthenelse{\boolean{java}}
+{As with any programming language, \Lang\ has both
+advantages and disadvantages.
+\Lang\ is a small language.
+There usually is only one language feature to do something,
+and this has the happy tendency of encouraging a programmer toward
+clarity when used correctly.
+In this respect, it is superior to \C\ or \LangCPP.
+\LangJava\ serves nicely for defining and using most traditional data
+structures such as lists and trees.
+On the other hand, \Lang\ is quite poor when used to do file
+processing, being both cumbersome and inefficient.
+It is also a poor language when fine control of memory is required.
+As an example, applications requiring memory
+management, such as those discussed in Section~\ref{MemMan}, are
+difficult to write in \Lang.
+Since I wish to stick to a single language throughout the text, like
+any programmer I must take the bad along with the good.
+The most important issue is to get the ideas across, whether or not
+those ideas are natural to a particular language of discourse.
+Most programmers will use a variety of programming languages
+throughout their career, and the concepts described in this book
+should prove useful in a variety of circumstances.}{}
+
+\ifthenelse{\boolean{java}}
+{Inheritance, a key feature of object-oriented programming, is used
+sparingly in the code examples.
+Inheritance}{}
+\ifthenelse{\boolean{cpp}}
+{While the \Lang\ features mentioned above have valid design rationale
+in real programs, they tend to obscure rather than enlighten the
+principles espoused in this book.
+For example, inheritance}{}
+is an important tool that helps programmers avoid
+duplication, and thus minimize bugs.\index{inheritance}
+From a pedagogical standpoint, however, inheritance often makes
+code examples harder to understand since it tends to spread the
+description for one logical unit among several classes.
+Thus, my class definitions only use inheritance where inheritance is
+explicitly relevant to the point illustrated
+(e.g., Section~\ref{PointerBin}).
+This does not mean that a programmer should do likewise.
+Avoiding code duplication and minimizing errors are important goals.
+Treat the programming examples as illustrations of data structure
+principles, but do not copy them directly into your own programs.
+
+One painful decision I~had to make was whether to use \Gens\
+in the code examples.
+\ifthenelse{\boolean{java}}
+{\GGens\ were not used in the first edition of this book.\index{generics}
+But in the years since then, \Lang\ has matured and its use}{}
+\ifthenelse{\boolean{cpp}}
+{In the first edition of this book, the decision was to leave \Gens\
+out as it was felt that their syntax
+obscures the meaning of the code for those not familiar with
+\Lang.\index{templates}
+In the years following, the use of \Lang}{}
+in computer science curricula has greatly expanded.
+I now assume that readers of the text will be
+familiar with \Gen\ syntax.
+Thus, \Gens\ are now used extensively in the code examples.
+
+My implementations are meant to provide concrete illustrations of data
+structure principles, as an aid to the textual exposition.
+Code examples should not be read or used in isolation from the
+associated text because the bulk of each example's documentation is
+contained in the text, not the code.
+The code complements the text, not the other way around.
+They are not meant to be a series of commercial-quality class
+implementations.
+If you are looking for a complete implementation of a standard data
+structure for use in your own code, you would do well to do an
+Internet search.
+
+For instance, the code examples provide less parameter checking than is
+sound programming practice, since including such checking would
+obscure rather than illuminate the text.
+Some parameter checking and testing for other constraints
+(e.g., whether a value is being removed from an empty container)
+is included in the form
+of\ifthenelse{\boolean{java}}
+{calls to methods in class \Cref{Assert}.}{}
+\ifthenelse{\boolean{cpp}}
+{a call to \Cref{Assert}.}{}
+\index{assert@\Cref{assert}}
+\ifthenelse{\boolean{cpp}}
+{The inputs to \Cref{Assert} are a Boolean expression and a character
+string.}{}
+\ifthenelse{\boolean{java}}
+{Method \Cref{Assert.notFalse} takes a Boolean expression.}{}
+If~this expression evaluates to \FALSE, then a message is printed and
+the program terminates immediately.
+\ifthenelse{\boolean{java}}
+{Method \Cref{Assert.notNull} takes a reference to class \Cref{Object},
+and terminates the program if the value of the reference is \NULL.
+(To be precise, they throw an
+\Cref{IllegalArgument\-Exception}, which will
+terminate the program unless the programmer takes action to handle
+the exception.)}{}
+Terminating a program when a function receives a bad parameter is
+generally considered undesirable in real programs,
+but is quite adequate for understanding how a data structure is
+meant to operate.
+In real programming applications, \Lang's exception handling features
+should be used to deal with input data errors.
+However, assertions provide a simpler mechanism for indicating
+required conditions in a way that is both adequate for clarifying how
+a data structure is meant to operate, and is easily modified into true
+exception handling.
+\ifthenelse{\boolean{cpp}}
+{See the Appendix for the implementation of \Cref{Assert}.}{}
+
+I~make a distinction in the text between ``\Lang\
+implementations'' and ``pseudocode.''\index{pseudocode}
+Code labeled as a \Lang\ implementation has actually been
+compiled and tested on one or more \Lang\ compilers.
+Pseudocode examples often conform closely to \Lang\ syntax, but
+typically contain one or more lines of higher-level description.
+Pseudocode is used where I~perceived a greater pedagogical
+advantage to a simpler, but less precise, description.
+%\index{\lang@\Lang|)}
+
+\paragraph{Exercises and Projects:}
+Proper implementation and analysis of data structures cannot be learned
+simply by reading a book.
+You must practice by implementing real programs,
+constantly comparing different techniques to see what really works
+best in a given situation.
+
+One of the most important aspects of a course in data structures is
+that it is where students really learn to program using pointers and
+dynamic memory allocation, by implementing data structures such as
+linked lists and trees.
+It is often where students truly learn recursion.
+In our curriculum, this is the first course where students do
+significant design, because it often requires real data structures to
+motivate significant design exercises.
+Finally, the fundamental differences between memory-based and
+disk-based data access cannot be appreciated without practical
+programming experience.
+For all of these reasons, a data structures course cannot succeed
+without a significant programming component.
+In our department, the data structures course is one of the most
+difficult programming course in the curriculum.
+
+Students should also work problems to develop their
+analytical abilities.
+I~provide over 450 exercises and suggestions for programming
+projects.
+I~urge readers to take advantage of them.
+
+\paragraph{Contacting the Author and Supplementary Materials:}
+A book such as this is sure to contain errors and have room for
+improvement.
+I~welcome bug reports and constructive criticism.
+I~can be reached by electronic mail via the Internet at
+{\tt shaffer@vt.edu}.
+Alternatively, comments can be mailed to
+
+\medskip
+
+{\obeylines\parskip=-1pt
+\qquad Cliff Shaffer
+\qquad Department of Computer Science
+\qquad Virginia Tech
+\qquad Blacksburg, VA 24061
+}
+
+\medskip
+
+The electronic posting of this book, along with a
+set of lecture notes for use in class can be obtained
+at
+\begin{center}
+\bfseries\url{http://www.cs.vt.edu/~shaffer/book.html}.
+\end{center}
+The code examples used in the book are available at the same site.
+Online Web pages for Virginia Tech's sophomore-level data
+structures class can be found at
+\begin{center}
+\bfseries\url{http://courses.cs.vt.edu/~cs3114}.
+\end{center}
+
+Readers of this textbook will be interested in our open-source, online
+eTextbook project, OpenDSA ({\bfseries\url{http://algoviz.org/OpenDSA}}).
+The OpenDSA project's goal is to ceate a complete collection of
+tutorials that combine textbook-quality content with algorithm
+visualizations for every algorithm and data structure, and a rich
+collection of interactive exercises.
+When complete, OpenDSA will replace this book.
+
+This book was typeset by the author using \LaTeX.
+The bibliography was prepared using \BibTeX.
+The index was prepared using \MakeIndex.
+The figures were mostly drawn with \Xfig.
+Figures~\ref{RunTimeGraph} and \ref{HashLoad}
+were partially created using \Mathematica.
+
+\input{acknow}

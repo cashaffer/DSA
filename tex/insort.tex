@@ -1,0 +1,2501 @@
+% insort.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\part{Sorting and Searching}
+\label{SortSearch}
+\mycleardoublepage
+
+\chapter{Internal Sorting}
+\label{InSort}
+\def\CHHEAD{Chap.\ \thechapter\ Internal Sorting}    % Head title -- even pages
+
+\index{sorting|(}
+We sort many things in our everyday lives:
+A handful of cards when playing Bridge;
+bills and other piles of paper; jars of spices; and so on.
+And we have many intuitive strategies that we can use to do the
+sorting, depending on how many objects we have to sort and how hard
+they are to move around.
+Sorting is also one of the most frequently performed computing tasks.
+We might sort the records in a database so that we can search the
+collection efficiently.
+We might sort the records by zip code so that we can print and mail
+them more cheaply.
+We might use sorting as an intrinsic part of an algorithm to solve
+some other problem, such as when computing the minimum-cost spanning
+tree (see Section~\ref{MSTSec}).\index{minimum-cost spanning tree}
+
+Because sorting is so important, naturally it has been studied
+intensively and many algorithms have been devised.
+Some of these algorithms are straightforward adaptations of schemes we
+use in everyday life.
+Others are totally alien to how humans do things, having been invented
+to sort thousands or even millions of records stored on the computer.
+After years of study, there are still unsolved problems related to
+sorting.
+New algorithms are still being developed and refined for
+special-purpose applications.
+
+While introducing this central problem in computer science,
+this chapter has a secondary purpose of illustrating
+issues in algorithm design and analysis.
+For example, this collection of sorting algorithms shows multiple
+approaches to using divide-and-conquer.
+In particular, there are multiple ways to do the dividing:
+Mergesort divides a list in half;
+Quicksort divides a list into big values and small values;
+and Radix Sort divides the problem by working on one digit of the key
+at a time.
+Sorting algorithms can also illustrate a wide variety of
+analysis techniques.\index{algorithm analysis}  
+We'll find that it is possible for an algorithm to have an average
+case whose growth rate is significantly smaller than its worse case
+(Quicksort).
+We'll see how it is possible to speed up sorting algorithms
+(both Shellsort and Quicksort) by taking advantage of the best case
+behavior of another algorithm (Insertion sort).
+We'll see several examples of how we can tune an algorithm for better
+performance. 
+We'll see that special case behavior by some algorithms makes them a
+good solution for special niche applications (Heapsort).
+Sorting provides an example of a significant technique for
+analyzing the lower bound for a problem.
+Sorting will also be used to motivate the introduction to file
+processing presented in
+Chapter~\ref{FileProc}.\index{file processing}\index{sorting!external} 
+
+The present chapter covers several standard algorithms appropriate
+for sorting a collection of records that fit in the computer's
+main memory.
+It begins with a discussion of three simple, but relatively slow,
+algorithms requiring \Thetantwo\ time in the average and worst cases.
+Several algorithms with considerably better performance are then
+presented, some with \Thetanlogn\ worst-case running time.
+The final sorting method presented requires only \Thetan\ worst-case
+time under special conditions.
+The chapter concludes with a proof that sorting in general
+requires \Omeganlogn\ time in the worst case.\index{sorting!lower bound}
+\index{problem!analysis of}
+
+\section{Sorting Terminology and Notation}
+
+\index{sorting!terminology|(}
+Except where noted otherwise, input to the sorting algorithms
+presented in this chapter is a collection of records stored in an
+array.
+\ifthenelse{\boolean{cpp}}
+{Records are compared to one another by means of a comparator class,
+as introduced in Section~\ref{Dictionary}.
+To simplify the discussion we will assume that each record has a
+key field whose value is extracted from the record by the comparator.
+The key method of the comparator class is \Cref{prior}, which returns
+true when its first argument should appear prior to its second
+argument in the sorted list.}{}
+\ifthenelse{\boolean{java}}
+{Records are compared to one another by requiring that their type
+extend the \Cref{Comparable} class.
+This will ensure that the class implements the \Cref{compareTo}
+method, which returns a value less than zero, equal to zero, or
+greater than zero depending on its relationship to the record being
+compared to.
+The \Cref{compareTo} method is defined to extract the appropriate key
+field from the record.}{}
+We also assume that for every record type there is a \Cref{swap}
+function that can interchange the contents of two records in the
+array\ifthenelse{\boolean{cpp}}{(see the Appendix)}{}.
+
+Given a set of records \(r_1\), \(r_2\), ..., \(r_n\)
+with key values \(k_1\), \(k_2\), ..., \(k_n\),
+the \defit{Sorting Problem} is to
+arrange the records into any order \(s\) such that records
+\(r_{s_1}\), \(r_{s_2}\), ..., \(r_{s_n}\) have keys obeying the
+property \(k_{s_1} \leq k_{s_2} \leq ... \leq k_{s_n}\). 
+In other words, the sorting problem is to arrange a set of records so
+that the values of their key fields are in non-decreasing order.
+
+As defined, the Sorting Problem allows input with two or more
+records that have the same key value.
+Certain applications require that input not contain
+duplicate key values.
+The sorting algorithms presented in this chapter and in
+Chapter~\ref{FileProc} can handle duplicate key values unless
+noted otherwise.
+
+When duplicate key values are allowed, there might be an implicit
+ordering to the duplicates, typically based on their order of
+occurrence within the input.
+It might be desirable to maintain this initial ordering among
+duplicates.\index{sorting!stable algorithms}
+A sorting algorithm is said to be \defit{stable} if it does not change
+the relative ordering of records with identical key values.
+Many, but not all, of the sorting algorithms presented in this chapter
+are stable, or can be made stable with minor changes.
+
+\index{sorting!comparing algorithms|(}
+When comparing two sorting algorithms, the most straightforward
+approach would seem to be simply program both and measure their
+running times.\index{algorithm analysis!empirical comparison}
+An example of such timings is presented in Figure~\ref{SortComp}.
+However, such a comparison can be misleading because the running time
+for many sorting algorithms depends on specifics of the input values.
+In particular, the number of records, the size of the keys
+and the records, the allowable range of the key values, and the amount
+by which the input records are ``out of order'' can all greatly affect
+the relative running times for sorting algorithms.
+
+When analyzing sorting algorithms, it is traditional to measure
+the number of comparisons made between keys.
+This measure is usually closely related to the running time for
+the algorithm and has the advantage of being machine and data-type
+independent.
+However, in some cases records might be so large that their physical
+movement might take a significant fraction of the total running time.
+If so, it might be appropriate to measure the number of
+swap operations performed by the algorithm.
+In most applications we can assume that all records and keys are of
+fixed length, and that a single comparison or a single swap operation
+requires a constant amount of time regardless of which keys are
+involved.
+Some special situations ``change the rules'' for comparing sorting
+algorithms.
+For example, an application with records or keys having widely
+varying length (such as sorting a sequence of variable length strings)
+will benefit from a special-purpose sorting
+technique.\index{variable-length record!sorting}
+Some applications require that a small number of records be
+sorted, but that the sort be performed frequently.
+An example would be an application that repeatedly sorts groups of
+five numbers.\index{sorting!small data sets}
+In such cases, the constants in the runtime equations that are usually
+ignored in an asymptotic analysis now become crucial.
+Finally, some situations require that a sorting algorithm use as
+little memory as possible.
+We will note which sorting algorithms require significant extra memory
+beyond the input array.
+\index{sorting!terminology|)}
+\index{sorting!comparing algorithms|)}
+
+\section{Three \boldmath\Thetantwo\ Sorting Algorithms}
+\label{SlowSortSec}
+
+This section presents three simple sorting algorithms.
+While easy to understand and implement, we will soon see that they are
+unacceptably slow when there are many records to sort.
+Nonetheless, there are situations where one of these simple algorithms
+is the best tool for the job.
+
+\subsection{Insertion Sort}
+\label{InsSort}
+
+\index{insertion sort@Insertion Sort|(}
+Imagine that you have a stack of phone bills from the past two years
+and that you wish to organize them by date.
+A fairly natural way to do this might be to look at the first two
+bills and put them in order.
+Then take the third bill and put it into the right order with respect
+to the first two, and so on.
+As you take each bill, you would add it to the sorted pile that you
+have already made.
+This naturally intuitive process is the inspiration for
+our first sorting algorithm, called \defit{Insertion Sort}.
+Insertion Sort iterates through a list of records.
+Each record is inserted in turn at the correct position
+within a sorted list composed of those records already processed.
+The following is a \Lang\ implementation.
+The input is an array of \(n\) records stored in array \Cref{A}.
+
+\xproghere{Inssort.book}
+
+Consider the case where \Cref{inssort} is processing the \(i\)th
+record, which has key value~\svar{X}.
+The record is moved upward in the array as long as \svar{X} is less
+than the key value immediately above it.
+As soon as a key value less than or equal to \svar{X} is encountered,
+\Cref{inssort} is done with that record because all records above it
+in the array must have smaller keys.
+Figure~\ref{Insertion} illustrates how Insertion Sort works.
+
+\begin{figure}
+\pdffig{InsSort}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{An illustration of Insertion Sort}
+{An illustration of Insertion Sort.\index{insertion sort@Insertion Sort}
+Each column shows the array after the iteration with the indicated
+value of \Cref{i} in the outer \Cfor\ loop.
+Values above the line in each column have been sorted.
+Arrows indicate the upward motions of records through the array.}
+{Insertion}
+\medskip
+\end{figure}
+
+The body of \Cref{inssort} is made up of two nested \Cfor\ loops.
+The outer \Cfor\ loop is executed \(n-1\) times.
+The inner \Cfor\ loop is harder to analyze because the
+number of times it executes depends on how many keys in positions~1 to
+\(i-1\) have a value less than that of the key in position~\(i\).
+In the worst case, each record must make its way to the top of the
+array.
+This would occur if the keys are initially arranged from highest to
+lowest, in the reverse of sorted order.
+In this case, the number of comparisons will be one the first time
+through the \Cfor\ loop, two the second time, and so on.
+Thus, the total number of comparisons will be
+
+\[ \sum_{i=2}^n i \approx n^2/2 = \Thetantwo. \]
+
+\vspace{-\medskipamount}
+In contrast, consider the best-case cost.
+This occurs when the keys begin in sorted order from lowest to
+highest.
+In this case, every pass through the inner \Cfor\ loop will fail
+immediately, and no values will be moved.
+The total number of comparisons will be \(n-1\), which is the
+number of times the outer \Cfor\ loop executes.
+Thus, the cost for Insertion Sort in the best case is \Thetan.
+
+While the best case is significantly faster than the worst case,
+the worst case is usually a more reliable indication of the ``typical''
+running time.
+However, there are situations where we can expect the input to be in
+sorted or nearly sorted order.
+One example is when an already sorted list is slightly disordered by a
+small number of additions to the list;
+restoring sorted order using Insertion Sort might be a good idea if we
+know that the disordering is slight.
+Examples of algorithms that take advantage of Insertion Sort's
+near-best-case running time are the Shellsort algorithm
+of Section~\ref{ShellSort} and\index{shellsort@Shellsort}
+the Quicksort algorithm of
+Section~\ref{QuickSort}.\index{quicksort@Quicksort}
+
+What is the average-case cost of Insertion Sort?
+When record \(i\) is processed, the number
+of times through the inner \Cfor\ loop depends on how far ``out of
+order'' the record is.
+In particular, the inner \Cfor\ loop is executed once for each key
+greater than the key of record \(i\) that appears in array positions~0
+through~\(i-1\).
+For example, in the leftmost column of Figure~\ref{Insertion} the
+value~15 is preceded by five values greater than~15.
+Each such occurrence is called an \defit{inversion}.\index{inversion}
+The number of inversions (i.e., the number of values greater than a
+given value that occur prior to it in the array) will determine the
+number of comparisons and swaps that must take place.
+We need to determine what the average number of inversions will
+be for the record in position \(i\).
+We expect on average that half of the keys in the first \(i-1\) array
+positions will have a value greater than that of the key at
+position~\(i\).
+Thus, the average case should be about half the cost of the worst
+case, or around \(n^2/4\), which is still \Thetantwo.
+So, the average case is no better than the worst case in
+asymptotic complexity.
+
+Counting comparisons or swaps yields similar results.
+Each time through the inner \Cfor\ loop yields both a comparison and a
+swap, except the last (i.e., the comparison that fails the inner
+\Cfor\ loop's test), which has no swap.
+Thus, the number of swaps for the entire sort operation is
+\(n-1\)~less than the number of comparisons.
+This is 0 in the best case, and \Thetantwo\ in the average and
+worst cases.
+\index{insertion sort@Insertion Sort|)}
+
+\subsection{Bubble Sort}
+
+\index{bubble sort@Bubble Sort|(}
+Our next sorting algorithm is called \defit{Bubble Sort}.
+Bubble Sort is often taught to novice programmers in
+introductory computer science courses.
+This is unfortunate, because Bubble Sort has no redeeming features
+whatsoever.
+It is a relatively slow sort, it is no easier to understand than
+Insertion Sort, it does not correspond to any intuitive counterpart in
+``everyday'' use, and it has a poor best-case running time.
+However, Bubble Sort can serve as the inspiration for a better sorting
+algorithm that will be presented in Section~\ref{SelSortSec}.
+
+Bubble Sort consists of a simple double \Cfor\ loop.
+The first iteration of the inner \Cfor\ loop moves
+through the record array from bottom to top, comparing adjacent keys.
+If the lower-indexed key's value is greater than its higher-indexed
+neighbor, then the two values are swapped.
+Once the smallest value is encountered, this process will cause it
+to ``bubble'' up to the top of the array.
+The second pass through the array repeats this process.
+However, because we know that the smallest value reached the top
+of the array on the first pass, there is no need to compare the top
+two elements on the second pass.
+Likewise, each succeeding pass through the array compares adjacent
+elements, looking at one less value than the preceding pass.
+Figure~\ref{BubbSort} illustrates Bubble Sort.
+A \Lang\ implementation is as follows:
+
+\xproghere{Bubsort.book}
+
+\begin{figure}
+\pdffig{BubSort}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{An illustration of Bubble Sort}
+{An illustration of Bubble Sort.\index{bubble sort@Bubble Sort}
+Each column shows the array after the iteration with the indicated
+value of \Cref{i} in the outer \Cfor\ loop.
+Values above the line in each column have been sorted.
+Arrows indicate the swaps that take place during a given iteration.}
+{BubbSort}
+\bigskip
+\end{figure}
+
+Determining Bubble Sort's number of comparisons is easy.
+Regardless of the arrangement of the values in the array, the number
+of comparisons made by the inner \Cfor\ loop is always \(i\),
+leading to a total cost of
+
+\[\sum_{i=1}^n i \approx n^2/2 = \Thetantwo. \]
+
+\noindent Bubble Sort's running time is roughly the same
+in the best, average, and worst cases.
+
+The number of swaps required depends on how often a
+value is less than the one immediately preceding it in the array.
+We can expect this to occur for about half the comparisons in the
+average case, leading to \Thetantwo\ for the expected number
+of swaps.
+The actual number of swaps performed by Bubble Sort will be identical
+to that performed by
+Insertion Sort.\index{insertion sort@Insertion Sort}
+\index{bubble sort@Bubble Sort|)}
+
+\subsection{Selection Sort}
+\label{SelSortSec}
+
+\index{selection sort@Selection Sort|(}
+Consider again the problem of sorting a pile of phone bills for the
+past year.
+Another intuitive approach might be to look through the pile until you
+find the bill for January, and pull that out.
+Then look through the remaining pile until you find the bill for
+February, and add that behind January.
+Proceed through the ever-shrinking pile of bills to select the next
+one in order until you are done.
+This is the inspiration for
+our last \Thetantwo\ sort, called \defit{Selection Sort}.
+The \(i\)th pass of Selection Sort ``selects'' the \(i\)th smallest
+key in the array, placing that record into position \(i\).
+In other words, Selection Sort first finds the smallest key in an
+unsorted list, then the second smallest, and so on.
+Its unique feature is that there are few record swaps.
+To find the next smallest key value requires searching through
+the entire unsorted portion of the array, but only one swap is
+required to put the record in place.
+Thus, the total number of swaps required will be~\(n-1\)
+(we get the last record in place ``for free'').
+
+Figure~\ref{SelSort} illustrates Selection Sort.
+Below is a \Lang\ implementation.
+
+\begin{figure}
+\pdffig{SelSort}
+\vspace{-\bigskipamount}
+\capt{4.5in}{An example of Selection Sort}
+{An example of Selection Sort.\index{selection sort@Selection Sort}
+Each column shows the array after the iteration with the indicated
+value of~\Cref{i} in the outer \Cfor\ loop.
+Numbers above the line in each column have been sorted and are in
+their final positions.}{SelSort}
+\medskip
+\end{figure}
+
+\xproghere{Selsort.book}
+
+Selection Sort (as written here) is essentially a Bubble Sort,
+except that rather than repeatedly swapping adjacent values to get
+the next smallest record into place, we instead remember the position
+of the element to be selected and do one swap at the end.
+Thus, the number of comparisons is still \Thetantwo, but the number of
+swaps is much less than that required by bubble sort.
+Selection Sort is particularly advantageous when the cost to do a swap
+is high, for example, when the elements are long strings or other
+large records.
+Selection Sort is more efficient than Bubble Sort (by a constant
+factor) in most other situations as well.\index{bubble sort@Bubble Sort}
+
+\begin{figure}
+\pdffig{PtrSwap}
+\vspace{-\medskipamount}
+\vspace{-\smallskipamount}
+\capt{4.5in}{Swapping pointers to records}
+{An example of swapping pointers to records.
+(a)~A~series of four records.
+The record with key value~42 comes before the record with key value~5.
+(b)~The four records after the top two pointers have been swapped.
+Now the record with key value~5 comes before the record with key
+value~42.}{PtrSwap}
+\bigskip
+\end{figure}
+
+There is another approach to keeping the cost of swapping records low
+that can be used by any sorting algorithm even when the records are
+large.
+This is to have each element of the array store a pointer to a record
+rather than store the record itself.
+In this implementation, a swap operation need only exchange the
+pointer values; the records themselves do not move.
+This technique is illustrated by Figure~\ref{PtrSwap}.
+Additional space is needed to store the pointers, but the
+return is a faster swap operation.
+
+\subsection{The Cost of Exchange Sorting}
+
+\index{sorting!exchange sorting|(}
+\index{bubble sort@Bubble Sort|(}
+\index{insertion sort@Insertion Sort|(}
+Figure~\ref{SlowSort} summarizes the cost of Insertion, Bubble, and
+Selection Sort in terms of their required number of comparisons and
+swaps\footnote{There is a slight anomaly with Selection Sort.
+The supposed advantage for Selection Sort is its low number of swaps
+required, yet Selection Sort's best-case number of swaps is worse than
+that for Insertion Sort or Bubble Sort.
+This is because the implementation given for Selection Sort does not
+avoid a swap in the case where record~\(i\) is already in
+position~\(i\).
+One could put in a test to avoid swapping in this situation.
+But it usually takes more time to do the tests
+than would be saved by avoiding such swaps.}
+in the best, average, and worst cases.
+The running time for each of these sorts is \Thetantwo\ in
+the average and worst cases.
+
+\begin{mytable}
+\begin{center}
+
+\sffamily
+\begin{tabular}{rccc}
+&\textbf{Insertion}&\textbf{Bubble}&\textbf{Selection}\\
+
+\textbf{Comparisons:}\\
+Best Case&\Thetansf&\Thetantwosf&\Thetantwosf\\
+Average Case&\Thetantwosf&\Thetantwosf&\Thetantwosf\\
+\medskip
+Worst Case&\Thetantwosf&\Thetantwosf&\Thetantwosf\\
+
+\textbf{Swaps:}\\
+Best Case&0&0&\Thetansf\\
+Average Case&\Thetantwosf&\Thetantwosf&\Thetansf\\
+Worst Case&\Thetantwosf&\Thetantwosf&\Thetansf\\
+\end{tabular}
+
+\end{center}
+\vspace{-\medskipamount}\vspace{-\smallskipamount}
+
+\capt{4.5in}{A comparison of three simple sorts}
+{A comparison of the asymptotic complexities for three simple sorting
+algorithms.}
+{SlowSort}
+\smallskip
+\end{mytable}
+
+The remaining sorting algorithms presented in this chapter are
+significantly better than these three under typical conditions.
+But before continuing on, it is instructive to investigate what makes
+these three sorts so slow.
+The crucial bottleneck is that only \emph{adjacent}
+records are compared.
+Thus, comparisons and moves (in all but Selection Sort) are by single
+steps.
+Swapping adjacent records is called an \defit{exchange}.
+Thus, these sorts are sometimes referred to as \defit{exchange sorts}.
+The cost of any exchange sort can be at best the total number of
+steps that the records in the array must move to reach their
+``correct'' location
+(i.e., the number of inversions for each record).\index{inversion}
+
+What is the average number of inversions?
+Consider a list~\cvar{L} containing \(n\)~values.
+Define \(\cvar{L}_R\) to be \cvar{L} in reverse.
+\cvar{L} has \(n(n-1)/2\) distinct pairs of values, each of which
+could potentially be an inversion.
+Each such pair must either be an inversion in~\cvar{L} or in
+\(\cvar{L}_R\).
+Thus, the total number of inversions in \cvar{L} and 
+\(\cvar{L}_R\) together is exactly \(n(n-1)/2\) for an average of
+\(n(n-1)/4\) per list.
+We therefore know with certainty that any sorting algorithm which
+limits comparisons to adjacent items will cost at least
+\(n (n-1)/4 = \Omegantwo\) in the average case.
+\index{insertion sort@Insertion Sort|)}
+\index{bubble sort@Bubble Sort|)}
+\index{sorting!exchange sorting|)}
+\index{selection sort@Selection Sort|)}
+
+\section{Shellsort}
+\label{ShellSort}
+
+\index{shellsort@Shellsort|(}
+The next sorting algorithm that we consider is called
+\defit{Shellsort}, named after its inventor, D.L.~Shell.
+It is also sometimes called the \defit{diminishing increment}
+sort.
+Unlike Insertion and Selection Sort, there is no real life intuitive
+equivalent to Shellsort.
+Unlike the exchange sorts, Shellsort makes comparisons and swaps
+between non-adjacent elements.
+Shellsort also exploits the best-case performance
+of Insertion Sort.
+Shellsort's strategy is to make the list ``mostly sorted'' so that a
+final Insertion Sort can finish the job. 
+When properly implemented, Shellsort will give substantially better
+performance than \Thetantwo\ in the worst case.
+
+Shellsort uses a process that forms the basis for many of the sorts
+presented in the following sections:
+Break the list into sublists, sort them, then recombine the sublists.
+Shellsort breaks the array of elements into ``virtual'' sublists.
+Each sublist is sorted using an Insertion Sort.
+Another group of sublists is then chosen and sorted, and so on.
+
+During each iteration, Shellsort breaks the list into disjoint
+sublists so that each element in a sublist is a fixed number of
+positions apart.
+For example, let us assume for convenience that \(n\), the number of
+values to be sorted, is a power of two.
+One possible implementation of Shellsort will begin by breaking
+the list into \(n/2\) sublists of 2~elements each, where the array
+index of the 2~elements in each sublist differs by~\(n/2\).
+If there are 16 elements in the array indexed from~0 to~15,
+there would initially be 8~sublists of 2~elements each.
+The first sublist would be the elements in positions~0 and~8,
+the second in positions~1 and~9, and so on.
+Each list of two elements is sorted using Insertion Sort.
+
+The second pass of Shellsort looks at fewer, bigger lists.
+For our example the second pass would have \(n/4\) lists of size~4,
+with the elements in the list being \(n/4\) positions apart.
+Thus, the second pass would have as its first sublist the 4~elements
+in positions~0, 4, 8, and~12;
+the second sublist would have elements in positions~1, 5, 9, and~13;
+and so on.
+Each sublist of four elements would also be sorted using an Insertion
+Sort.
+
+The third pass would be made on two lists, one consisting of the odd
+positions and the other consisting of the even positions.
+
+The culminating pass in this example would be a ``normal'' Insertion
+Sort of all elements.\index{insertion sort@Insertion Sort}
+Figure~\ref{ShellSortEx} illustrates the process for an array of
+16~values where the sizes of the increments (the distances between
+elements on the successive passes) are~8, 4, 2, and~1.
+Figure~\ref{ShellImpl} presents a \Lang\ implementation for Shellsort.
+
+\begin{figure}
+\pdffig{ShelSort}
+\vspace{-1pt}
+
+\capt{4.5in}{An example of Shellsort}
+{An example of Shellsort.\index{shellsort@Shellsort}
+Sixteen items are sorted in four passes.
+The first pass sorts 8~sublists of size~2 and
+increment~8.\index{shellsort@Shellsort}
+The second pass sorts 4~sublists of size~4 and increment~4.
+The third pass sorts 2~sublists of size~8 and increment~2.
+The fourth pass sorts 1~list of size~16 and increment~1 (a regular
+Insertion Sort).\index{insertion sort@Insertion Sort}}{ShellSortEx}
+\bigskip
+\end{figure}
+
+\begin{figure}
+\xprogfig{Shsort.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Shell Sort implementation}
+{An implementation for Shell Sort.}{ShellImpl}
+\end{figure}
+
+Shellsort will work correctly regardless of the size of the
+increments, \emph{provided that the final pass has increment 1}
+(i.e., provided the final pass is a regular
+Insertion Sort).\index{insertion sort@Insertion Sort}
+If Shellsort will always conclude with a regular Insertion Sort,
+then how can it be any improvement on Insertion Sort?
+The expectation is that each of the (relatively cheap) sublist sorts
+will make the list ``more sorted'' than it was before.
+It is not necessarily the case that this will be true, but it is
+almost always true in practice.
+When the final Insertion Sort is conducted, the list
+should be ``almost sorted,'' yielding a relatively cheap final
+Insertion Sort pass.\index{insertion sort@Insertion Sort}
+
+Some choices for increments will make Shellsort run more efficiently
+than others.
+In particular, the choice of increments described above (\(2^k\),
+\(2^{k-1}\), ..., 2, 1) turns out to be relatively inefficient.
+A better choice is the following series based on division by three:
+(..., 121, 40, 13, 4, 1).
+
+The analysis of Shellsort is difficult, so we must
+accept without proof that the average-case performance
+of Shellsort (for ``divisions by three'' increments) is \Onsqrtn.
+Other choices for the increment series can reduce this upper bound
+somewhat.
+Thus, Shellsort is substantially better than Insertion Sort, or any
+of the \Thetantwo\ sorts presented in Section~\ref{SlowSortSec}.
+In fact, Shellsort is not terrible when compared with the
+asymptotically better sorts to be presented whenever \(n\)~is of
+medium size (thought is tends to be a little slower than these other
+algorithms when they are well implemented). 
+Shellsort illustrates how we can sometimes exploit the special
+properties of an algorithm (in this case Insertion Sort) even if in
+general that algorithm is unacceptably
+slow.\index{insertion sort@Insertion Sort}
+\index{shellsort@Shellsort|)}
+
+\section{Mergesort}
+\label{MergeSort}
+
+\index{mergesort@Mergesort|(}
+A natural approach to problem solving is divide and conquer.
+In terms of sorting, we might consider breaking the list to be sorted
+into pieces, process the pieces, and then put them back together
+somehow.
+A simple way to do this would be to split the list in half, sort
+the halves, and then merge the sorted halves together.
+This is the idea behind \defit{Mergesort}.
+
+Mergesort is one of the simplest sorting algorithms conceptually,
+and has good performance both in the asymptotic 
+sense and in empirical running time.
+Surprisingly, even though it is based on a simple concept,
+it is relatively difficult to implement in practice.
+Figure~\ref{MergeFig} illustrates Mergesort.
+A pseudocode sketch of Mergesort is as follows:
+
+\xproghere{MergePseudo.book}
+
+\begin{figure}
+\pdffig{MrgSort}
+\vspace{-1pt}
+
+\capt{4.5in}{An illustration of Mergesort}
+{An illustration of Mergesort.\index{mergesort@Mergesort}
+The first row shows eight numbers that are to be sorted.
+Mergesort will recursively\index{recursion} subdivide the list into
+sublists of one element each, then recombine the sublists.
+The second row shows the four sublists of size~2 created by the
+first merging pass.
+The third row shows the two sublists of size~4 created by the next
+merging pass on the sublists of row~2.
+The last row shows the final sorted list created by merging the two
+sublists of row~3.}{MergeFig}
+\bigskip
+\end{figure}
+
+Before discussing how to implement Mergesort, we will first examine
+the merge function.
+Merging two sorted sublists is quite simple.
+Function \Cref{merge} examines the first element of each
+sublist and picks the smaller value as the smallest element overall.
+This smaller value is removed from its sublist and placed into the
+output list.
+Merging continues in this way, comparing the front
+elements of the sublists and continually appending the smaller to the
+output list until no more input elements remain.
+
+Implementing Mergesort presents a number of technical difficulties.
+The first decision is how to represent the lists.
+Mergesort lends itself well to sorting a singly linked list because
+merging does not require random access to the list elements.
+Thus, Mergesort is the method of choice when the input is in the form
+of a linked list.
+Implementing \Cref{merge} for linked lists is straightforward, because
+we need only remove items from the front of the input lists and append
+items to the output list.
+Breaking the input list into two equal halves presents some
+difficulty.
+Ideally we would just break the lists into front and back halves.
+However, even if we know the length of the list in advance, it would
+still be necessary to traverse halfway down the linked list to reach
+the beginning of the second half.
+A simpler method, which does not rely on knowing the length of the
+list in advance, assigns elements of the input list alternating
+between the two sublists.
+The first element is assigned to the first sublist, the
+second element to the second sublist, the third to first sublist, the
+fourth to the second sublist, and so on.
+This requires one complete pass through the input list to build the
+sublists.
+
+When the input to Mergesort is an array, splitting input into two
+subarrays is easy if we know the array bounds.
+Merging is also easy if we merge the subarrays into a second array.
+Note that this approach requires twice the amount of space as any of
+the sorting methods presented so far, which is a serious disadvantage
+for Mergesort.
+It is possible to merge the subarrays without using a second array,
+but this is extremely difficult to do efficiently and is
+not really practical.
+Merging the two subarrays into a second array, while
+simple to implement, presents another difficulty.
+The merge process ends with the sorted list in the auxiliary array.
+Consider how the recursive\index{recursion} nature of Mergesort breaks
+the original array into subarrays, as shown in Figure~\ref{MergeFig}.
+Mergesort is recursively called until subarrays of size~1 have been
+created, requiring \(\log n\) levels of recursion.
+These subarrays are merged into subarrays of size~2, which are in
+turn merged into subarrays of size~4, and so on.
+We need to avoid having each merge operation
+require a new array.
+With some difficulty, an algorithm can be
+devised that alternates between two arrays.  A much simpler approach
+is to copy the sorted sublists to the auxiliary array first, and then
+merge them back to the original array.
+Figure~\ref{MergesortBasic} shows a complete implementation for
+mergesort following this approach.
+
+\begin{figure}
+\xprogfig{Mrgsort1.book}
+
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Mergsort}
+{Standard implementation for Mergesort.}
+{MergesortBasic}
+\end{figure}
+
+An optimized Mergesort implementation is shown in
+Figure~\ref{MergsortOpt}.
+It reverses the order of the second subarray during the initial copy.
+Now the current positions of the two subarrays work inwards from the
+ends, allowing the end of each subarray to act as a sentinel for the
+other.
+Unlike the previous implementation, no test is needed to check for
+when one of the two subarrays becomes empty.
+This version also uses Insertion Sort to sort small subarrays.
+
+\begin{figure}
+\xprogfig{Mrgsort3.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}{Optimized Mergsort}
+{Optimized implementation for Mergesort.}
+{MergsortOpt}
+\end{figure}
+
+Analysis of Mergesort is straightforward, despite the fact that it is
+a recursive\index{recursion} algorithm.
+The merging part takes time \Thetai\ where \(i\)
+is the total length of the two subarrays being merged.
+The array to be sorted is repeatedly split in half until subarrays of
+size~1 are reached, at which time they are merged to be of size~2,
+these merged to subarrays of size~4, and so on as shown in
+Figure~\ref{MergeFig}.
+Thus, the depth of the recursion is \(\log n\) for \(n\)~elements
+(assume for simplicity that \(n\) is a power of two).
+The first level of recursion can be thought of as working on one array
+of size~\(n\), the next level working on two arrays of size~\(n/2\), the
+next on four arrays of size~\(n/4\), and so~on.
+The bottom of the recursion has \(n\)~arrays of size~1.
+Thus, \(n\)~arrays of size~1 are merged (requiring
+\Thetan\ total steps), \(n/2\)~arrays of size~2 (again requiring
+\Thetan\ total steps), \(n/4\)~arrays of size~4, and so on.
+At each of the \(\log n\) levels of recursion, \Thetan\ work is done,
+for a total cost of~\Thetanlogn.
+This cost is unaffected by the relative order of the
+values being sorted, thus this analysis holds for the best, average,
+and worst cases.
+\index{mergesort@Mergesort|)}
+
+\section{Quicksort}
+\label{QuickSort}
+
+\index{quicksort@Quicksort|(}
+While Mergesort uses the most obvious form of divide and conquer
+(split the list in half then sort the halves), it is not the only way
+that we can break down the sorting problem.
+And we saw that doing the merge step for Mergesort when using an array
+implementation is not so easy.
+So perhaps a different divide and conquer strategy might turn out to
+be more efficient?
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\defit{Quicksort} is aptly named because, when properly implemented, it
+is the fastest known general-purpose in-memory sorting algorithm in
+the average case.
+It does not require the extra array needed by Mergesort, so it is
+space efficient as well.
+Quicksort is widely used, and is typically the algorithm implemented
+in a library sort routine such as the \UNIX\ \Cref{qsort}
+function.\index{unix@\UNIX}
+Interestingly, Quicksort is hampered by exceedingly poor worst-case
+performance, thus making it inappropriate for certain applications.
+
+\index{bst@BST}
+Before we get to Quicksort, consider for a moment the practicality
+of using a Binary Search Tree for sorting.
+You could insert all of the values to be sorted into the BST
+one by one, then traverse the completed tree using an inorder traversal.
+The output would form a sorted list.
+This approach has a number of drawbacks, including the extra space
+required by BST pointers and the amount of time required to insert
+nodes into the tree.
+However, this method introduces some interesting ideas.
+First, the root of the BST (i.e., the first node inserted) splits the
+list into two sublists:
+The left subtree contains those values in the
+list less than the root value while the right subtree contains those
+values in the list greater than or equal to the root value.
+Thus, the BST implicitly implements a ``divide and conquer'' approach
+to sorting the left and right subtrees.\index{divide and conquer}
+Quicksort implements this concept in a much more efficient
+way.\index{bst@BST}
+
+Quicksort first selects a value called the \defit{pivot}.
+(This is conceptually like the root node's value in the BST.)
+Assume that the input array contains \(k\)~values less than the pivot.
+The records are then rearranged in such a way that the \(k\)~values less
+than the pivot are placed in the first, or leftmost, \(k\)~positions
+in the array, and the values greater than or equal to
+the pivot are placed in the last, or rightmost, \(n-k\)~positions.
+This is called a \defit{partition} of the array.
+The values placed in a given partition need not (and typically will
+not) be sorted with respect to each other.
+All that is required is that all values end up in the correct
+partition.
+The pivot value itself is placed in position~\(k\).
+Quicksort then proceeds to sort the resulting subarrays now on either
+side of the pivot, one of size~\(k\) and the other of size \(n-k-1\).
+How are these values sorted?
+Because Quicksort is such a good algorithm, using Quicksort on
+the subarrays would be appropriate.
+
+Unlike some of the sorts that we have seen earlier in this chapter,
+Quicksort might not seem very ``natural'' in that it is not an
+approach that a person is likely to use to sort real objects.
+But it should not be too surprising that a really efficient sort for
+huge numbers of abstract objects on a computer would be rather
+different from our experiences with sorting a relatively few physical
+objects.
+
+The \Lang\ code for Quicksort is shown in Figure~\ref{QuicksortFig}.
+Parameters~\Cref{i} and~\Cref{j} define the left and right indices,
+respectively, for the subarray being sorted.
+The initial call to Quicksort would be \Cref{qsort(array, 0, n-1)}.
+
+\begin{figure}
+\xprogfig{Qsort1.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}{Quicksort}
+{Implementation for Quicksort.}
+{QuicksortFig}
+\end{figure}
+
+Function \Cref{partition} will move records to the appropriate
+partition and then return~\Cref{k}, the first position in the
+right partition.
+Note that the pivot value is initially placed at the end of the array
+(position~\Cref{j}).
+Thus, \Cref{partition} must not affect the value of array
+position~\Cref{j}.
+After partitioning, the pivot value is placed in position~\Cref{k},
+which is its correct position in the final, sorted array.
+By doing so, we guarantee that at least one value (the pivot) will not
+be processed in the recursive calls to \Cref{qsort}.
+Even if a bad pivot is selected, yielding a completely empty
+partition to one side of the pivot, the larger partition will contain
+at most \(n-1\) elements.
+
+Selecting a pivot can be done in many ways.
+The simplest is to use the first key.
+However, if the input is sorted or reverse sorted, this will produce a
+poor partitioning with all values to one side of the pivot.
+It is better to pick a value at random, thereby reducing the chance of
+a bad input order affecting the sort.
+Unfortunately, using a random number generator is relatively
+expensive, and we can do nearly as well by selecting the middle
+position in the array.
+Here is a simple \Cref{findpivot} function:
+
+\xproghere{Findpiv.book}
+
+We now turn to function \Cref{partition}.
+If we knew in advance how many keys are less than the pivot,
+\Cref{partition} could simply copy elements with key values less than
+the pivot to the low end of the array, and elements with larger keys
+to the high end.
+Because we do not know in advance how many keys are less than
+the pivot,
+we use a clever algorithm that moves indices inwards from the
+ends of the subarray, swapping values as necessary until the two
+indices meet.
+Figure~\ref{PartitionCode} shows a \Lang\ implementation for the
+partition step.
+
+\begin{figure}
+\xprogfig{Partit.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}{Partition}
+{The Quicksort partition implementation.}
+{PartitionCode}
+\ifthenelse{\boolean{cpp}}{\medskip}{}
+\end{figure}
+
+Figure~\ref{Partition} illustrates \Cref{partition}.
+Initially, variables \Cref{l} and \Cref{r} are immediately outside the
+actual bounds of the subarray being partitioned.
+Each pass through the outer \Cref{do} loop moves the counters \Cref{l}
+and \Cref{r} inwards, until eventually they meet.
+Note that at each iteration of the inner \Cwhile\ loops, the bounds
+are moved prior to checking against the pivot value.
+This ensures that progress is made by each \Cwhile\ loop, even when
+the two values swapped on the last iteration of the \Cref{do} loop
+were equal to the pivot.
+Also note the check that \Cref{r > l} in the second \Cwhile\ loop.
+This ensures that \Cref{r} does not run off the low end of the
+partition in the case where the pivot is the least value in that
+partition.
+Function \Cref{partition} returns the first index of the right
+partition so that the subarray bound for the recursive calls to
+\Cref{qsort} can be determined.
+Figure~\ref{QuickSortPic} illustrates the complete Quicksort
+algorithm.
+
+\begin{figure}
+\pdffig{Partit}
+\vspace{-1pt}
+
+\capt{4.5in}{The Quicksort partition step}
+{The Quicksort partition step.
+The first row shows the initial positions for a collection of ten key
+values.
+The pivot value is~60, which has been swapped to the end of the array.
+The \Cref{do} loop makes three iterations, each time moving counters
+\Cref{l} and \Cref{r} inwards until they meet in the third pass.
+In the end, the left partition contains four values and the right
+partition contains six values.
+Function \Cref{qsort} will place the pivot value into
+position~4.}{Partition}
+\bigskip\medskip
+\end{figure}
+
+\begin{figure}
+\pdffig{Qsort}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\capt{4.5in}{An illustration of Quicksort}
+{An illustration of Quicksort.}{QuickSortPic}
+\end{figure}
+
+To analyze Quicksort, we first analyze the \Cref{findpivot} and
+\Cref{partition} functions operating on a subarray of length~\(k\).
+Clearly, \Cref{findpivot} takes constant time.
+Function \Cref{partition} contains a \Cref{do} loop with two
+nested \Cwhile\ loops.
+The total cost of the partition operation is constrained by
+how far \Cref{l}~and \Cref{r} can move inwards.
+In particular, these two bounds variables together can move a total of
+\(s\)~steps for a subarray of length~\(s\).
+However, this does not directly tell us how much work is done by the
+nested \Cref{while} loops.
+The \Cref{do} loop as a whole is guaranteed to move both \Cref{l} and
+\Cref{r} inward at least one position on each first pass.
+Each \Cwhile\ loop moves its variable at least once (except in the
+special case where \Cref{r} is at the left edge of the
+array, but this can happen only once).
+Thus, we see that the \Cref{do} loop can be executed at most
+\(s\)~times, the total amount of work done moving \Cref{l} and
+\Cref{r} is~\(s\), and
+each \Cwhile\ loop can fail its test at most \(s\)~times.
+The total work for the entire \Cref{partition} function is
+therefore~\(\Theta(s)\).
+
+Knowing the cost of \Cref{findpivot} and \Cref{partition}, we
+can determine the cost of Quicksort.
+We begin with a worst-case analysis.
+The worst case will occur when the pivot does a poor job of breaking
+the array, that is, when there are no elements in one partition, and
+\(n-1\)~elements in the other.
+In this case, the divide and conquer\index{divide and conquer}
+strategy has done a poor job of
+dividing, so the conquer phase will work on a subproblem only one
+less than the size of the original problem.
+If this happens at each partition step, then the total cost of the
+algorithm will be
+\[\sum_{k=1}^n k = \Thetantwo. \]\index{summation}
+
+In the worst case, Quicksort is \Thetantwo.
+This is terrible, no better than Bubble Sort.\footnote{The worst
+insult that I can think of for a sorting algorithm.}
+When will this worst case occur?
+Only when each pivot yields a bad partitioning of the array.
+If the pivot values are selected at random, then this is extremely
+unlikely to happen.
+When selecting the middle position of the current subarray, it is
+still unlikely to happen.
+It does not take many good partitionings for Quicksort to
+work fairly well.
+
+Quicksort's best case occurs when \Cref{findpivot} always breaks the
+array into two equal halves.
+Quicksort repeatedly splits the array into
+smaller partitions, as shown in Figure~\ref{QuickSortPic}.
+In the best case, the result will be \(\log n\) levels of partitions,
+with the top level having one array of size~\(n\), the second level
+two arrays of size~\(n/2\), the next with four arrays of size~\(n/4\),
+and so~on.
+Thus, at each level, all partition steps for that level do a total of
+\(n\)~work, for an overall cost of $n \log n$ work when Quicksort
+finds perfect pivots.
+
+Quicksort's average-case behavior falls somewhere
+between the extremes of worst and best case.
+Average-case analysis considers the cost for all possible arrangements
+of input, summing the costs and dividing by the number of cases.
+We make one reasonable simplifying assumption:
+At each partition step, the pivot is
+equally likely to end in any position in the (sorted) array.
+In other words, the pivot is equally likely to break an array into
+partitions of sizes~0 and~\(n-1\), or~1 and~\(n-2\), and so on.
+
+Given this assumption, the average-case cost is computed from the
+following equation:
+
+\[{\bf T}(n) = cn + \frac{1}{n}\sum_{k=0}^{n-1}[{\bf T}(k) +
+{\bf T}(n - 1 - k)],\index{summation}
+\quad {\bf T}(0) = {\bf T}(1) = c.\]
+
+\noindent This equation is in the form of a
+recurrence relation.\index{recurrence relation}
+Recurrence relations are discussed in Chapters~\ref{MathPre}
+and~\ref{AnalTech},
+and this one is solved in Section~\ref{QuickAnal}.
+This equation says that there is one chance in \(n\) that the pivot
+breaks the array into subarrays of size~0 and~\(n-1\),
+one chance in \(n\) that the pivot breaks the array into
+subarrays of size~1 and~\(n-2\), and so on.
+The expression ``\( {\bf T}(k) + {\bf T}(n - 1 - k)\)'' is the cost
+for the two recursive calls to Quicksort on two arrays of size~\(k\)
+and \(n-1-k\).
+The initial \(cn\)~term is the cost of doing the
+\Cref{findpivot} and \Cref{partition} steps, for some constant~\(c\).
+The closed-form solution to this recurrence relation is
+\Thetanlogn.
+Thus, Quicksort has average-case cost \Thetanlogn.
+
+This is an unusual situation that the average case cost and the worst
+case cost have asymptotically different growth rates.
+Consider what ``average case'' actually means.
+We compute an average cost for inputs of size \(n\) by summing up for
+every possible input of size \(n\) the product of the running time
+cost of that input times the probability that that input will occur.
+To simplify things, we assumed that every permutation is equally
+likely to occur.
+Thus, finding the average means summing up the cost for every
+permutation and dividing by the number of inputs (\(n!\)).
+We know that some of these \(n!\) inputs cost \Ontwo.
+But the sum of all the permutation costs has to be \((n!)(\Onlogn)\).
+Given the extremely high cost of the worst inputs, there must be
+very few of them.
+In fact, there cannot be a constant fraction of the inputs with cost
+\Ontwo.
+Even, say, 1\% of the inputs with cost \Ontwo\ would lead to an
+average cost of \Ontwo.
+Thus, as \(n\) grows, the fraction of inputs with high cost must be
+going toward a limit of zero.
+We can conclude that Quicksort will have good behavior if
+we can avoid those very few bad input permutations.
+
+\index{code tuning|(}
+The running time for Quicksort can be improved (by a constant factor),
+and much study has gone into optimizing this algorithm.
+The most obvious place for improvement is the \Cref{findpivot}
+function.
+Quicksort's worst case arises when the pivot does a poor job of
+splitting the array into equal size subarrays.
+If we are willing to do more work searching for a better pivot, the
+effects of a bad pivot can be decreased or even eliminated.
+One good choice is to use the ``median of three'' algorithm, which
+uses as a pivot the middle of three randomly selected values.
+Using a random number generator to choose the positions is relatively
+expensive, so a common compromise is to look at the first, middle, and
+last positions of the current subarray.
+However, our simple \Cref{findpivot} function that takes the middle
+value as its pivot has the virtue of making it highly unlikely to get
+a bad input by chance, and it is quite cheap to implement.
+This is in sharp contrast to selecting the first or last element as
+the pivot, which would yield bad performance for many permutations
+that are nearly sorted or nearly reverse sorted.
+
+A significant improvement can be gained by recognizing that
+Quicksort is relatively slow when \(n\) is
+small.\index{sorting!small data sets}
+This might not seem to be relevant if most of the time we sort
+large arrays, nor should it matter how long Quicksort takes in the
+rare instance when a small array is sorted because it will be fast
+anyway.
+But you should notice that Quicksort itself sorts many, many small
+arrays!
+This happens as a natural by-product of the divide and conquer
+approach.\index{divide and conquer}
+
+A simple improvement might then be to replace Quicksort with a faster
+sort for small numbers, say
+Insertion Sort\index{insertion sort@Insertion Sort}
+or Selection Sort.\index{selection sort@Selection Sort}
+However, there is an even better --- and still simpler --- optimization.
+When Quicksort partitions are below a certain size, do nothing!
+The values within that partition will be out of order.
+However, we do know that all values in the array to the left of the
+partition are smaller than all values in the partition.
+All values in the array to the right of the partition are greater than
+all values in the partition.
+Thus, even if Quicksort only gets the values to
+``nearly'' the right locations, the array will be close to sorted.
+This is an ideal situation in which to take advantage of the best-case
+performance of Insertion Sort.\index{insertion sort@Insertion Sort}
+The final step is a single call to Insertion Sort to process the
+entire array, putting the elements into final sorted order.
+Empirical testing shows that the subarrays should be left unordered
+whenever they get down to nine or fewer elements.
+
+\index{recursion!implemented by stack}
+The last speedup to be considered reduces the cost of making
+recursive calls.
+Quicksort is inherently recursive, because each Quicksort operation
+must sort two sublists.
+Thus, there is no simple way to turn Quicksort into an iterative
+algorithm.
+However, Quicksort can be implemented using a stack\index{stack}
+to imitate recursion, as the amount of information that must
+be stored is small.
+We need not store copies of a subarray, only the subarray bounds.
+Furthermore, the stack depth can be kept small if care is taken on
+the order in which Quicksort's recursive calls are executed.
+We can also place the code for \Cref{findpivot} and \Cref{partition}
+inline to eliminate the remaining function calls.
+Note however that by not processing sublists of size nine or
+less as suggested above, about three quarters of the function calls
+will already have been eliminated.
+Thus, eliminating the remaining function calls will yield only a
+modest speedup.
+\index{code tuning|)}
+\index{quicksort@Quicksort|)}
+
+\section{Heapsort}
+\label{Heapsort}
+
+\index{heapsort@Heapsort|(}
+\index{heap|(}
+Our discussion of Quicksort\index{quicksort@Quicksort}
+began by considering the practicality of
+using a binary search tree for sorting.\index{bst@BST}
+The BST requires more space than the other sorting methods and will
+be slower than Quicksort or Mergesort due to the relative expense of
+inserting values into the tree.
+There is also the possibility that the BST might be unbalanced,
+leading to a \Thetantwo\ worst-case running time.
+Subtree balance in the BST is closely related to Quicksort's partition
+step.
+Quicksort's pivot serves roughly the same purpose as the BST root
+value in that the left partition (subtree) stores values less than
+the pivot (root) value, while the right partition (subtree) stores
+values greater than or equal to the pivot (root).
+
+A good sorting algorithm can be devised based on a tree structure more
+suited to the purpose.
+In particular, we would like the tree to be balanced, space efficient,
+and fast.
+The algorithm should take advantage of the fact that sorting is a
+special-purpose application in that all of the values to be stored are
+available at the start.
+This means that we do not necessarily need to insert one value at a
+time into the tree structure.
+
+Heapsort is based on the heap data structure presented in
+Section~\ref{HeapSec}.
+Heapsort has all of the advantages just listed.
+The complete binary tree\index{binary tree!complete}
+is balanced, its array representation is space efficient, and we can
+load all values into the tree at once, taking advantage of the
+efficient \Cref{buildheap} function.
+The asymptotic performance of Heapsort is \Thetanlogn\ in
+the best, average, and worst cases.
+It is not as fast as Quicksort in the average case (by a constant
+factor), but Heapsort has special properties that will make it
+particularly useful when sorting data sets too large to fit in main
+memory, as discussed in
+Chapter~\ref{FileProc}.\index{sorting!external}
+
+A sorting algorithm based on max-heaps is quite straightforward.
+First we use the heap building algorithm of Section~\ref{HeapSec} to
+convert the array into max-heap order.
+Then we repeatedly remove the
+maximum value from the heap, restoring the heap property each time
+that we do so, until the heap is empty.
+Note that each time we remove the maximum element from the heap, it is
+placed at the end of the array.
+Assume the \(n\)~elements are stored in array positions~0
+through \(n-1\).
+After removing the maximum value from the heap and
+readjusting, the maximum value will now be placed in position \(n-1\)
+of the array.
+The heap is now considered to be of size \(n-1\).
+Removing the new maximum (root) value places the second largest value
+in position \(n-2\) of the array.
+After removing each of the remaining values in turn, the array will be
+properly sorted from least to greatest.
+This is why Heapsort uses a max-heap rather than a min-heap as might
+have been expected.
+Figure~\ref{HeapSortFig} illustrates Heapsort.
+The complete \Lang\ implementation is as follows:
+
+\begin{figure}
+\pdffig{Heapsort}
+\smallskip
+\capt{4.5in}{An illustration of Heapsort}
+{An illustration of Heapsort.\index{heapsort@Heapsort}
+The top row shows the values in their
+original order.  The second row shows the values after building the
+heap.  The third row shows the result of the first \Cref{removefirst}
+operation on key value~88.  Note that 88 is now at the end of the
+array.  The fourth row shows the result of the second \Cref{removefirst}
+operation on key value~85.  The fifth row shows the result of the
+third \Cref{removefirst} operation on key value~83.  At this point, the
+last three positions of the array hold the three greatest values in
+sorted order.  Heapsort continues in this manner until the entire
+array is sorted.}{HeapSortFig}
+\end{figure}
+
+\xproghere{Heapsort.book}
+
+Because building the heap takes \Thetan\ time
+(see Section~\ref{HeapSec}), and because \(n\)~deletions
+of the maximum element each take \Thetalogn\ time, we see that the
+entire Heapsort operation takes \Thetanlogn\ time in the worst,
+average, and best cases.
+While typically slower than Quicksort\index{quicksort@Quicksort} by a
+constant factor, Heapsort has one special advantage over the other
+sorts studied so far.
+Building the heap is relatively cheap, requiring \Thetan\ time.
+Removing the maximum element from the heap requires \Thetalogn\ time.
+Thus, if we wish to find the \(k\)~largest
+elements in an array, we can do so in time \(\Theta(n + k\log n)\).
+If~\(k\) is small, this is a substantial improvement over the time
+required to find the \(k\) largest elements using one of the other
+sorting methods described earlier (many of which would require sorting
+all of the array first).
+One situation where we are able to take advantage of this concept is
+in the implementation of Kruskal's minimum-cost spanning tree (MST)
+algorithm of
+Section~\ref{Kruskal}.\index{kruskal's algorithm@Kruskal's algorithm}
+That algorithm requires that edges be visited in ascending
+order (so, use a min-heap), but this process stops as soon as the MST
+is complete.
+Thus, only a relatively small fraction of the edges need be sorted.
+\index{minimum-cost spanning tree}
+\index{heap|)}
+\index{heapsort@Heapsort|)}
+
+\section{Binsort and Radix Sort}
+\label{BinRadix}
+
+\index{binsort@Binsort|(}
+Imagine that for the past year, as you paid your various bills, you
+then simply piled all the paperwork onto the top of a table somewhere.
+Now the year has ended and its time to sort all of these papers by
+what the bill was for (phone, electricity, rent, etc.) and date.
+A pretty natural approach is to make some space on the floor, and as
+you go through the pile of papers, put the phone bills into one pile,
+the electric bills into another pile, and so on.
+Once this initial assignment of bills to piles is done (in one pass),
+you can sort each pile by date relatively quickly because they are each
+fairly small.
+This is the basic idea behind a Binsort.
+
+Section~\ref{SpaceBounds} presented the following code fragment to
+sort a permutation\index{permutation} of the numbers~0
+through~\(n-1\):
+
+\xproghere{binsimp1.book}
+
+\noindent Here the key value is used to determine the
+position for a record in the final sorted array.
+This is the most basic example of a \defit{Binsort}, where key values
+are used to assign records to \defit{bins}.
+This algorithm is extremely efficient, taking \Thetan\ time regardless
+of the initial ordering of the keys.
+This is far better than the performance of any sorting
+algorithm that we have seen so far.
+The only problem is that this algorithm has limited use because it
+works only for a permutation of the numbers from~0 to~\(n-1\).
+
+We can extend this simple Binsort algorithm to be more useful.
+Because Binsort must perform direct computation on the key value (as
+opposed to just asking which of two records comes first as our
+previous sorting algorithms did),
+we will assume that the records use an integer key type.
+\ifthenelse{\boolean{cpp}}
+{We further assume that it can be extracted from a record using the
+\Cref{key} method supplied by a template parameter class named
+\Cref{getKey}.}{}
+
+The simplest extension is to allow for duplicate values among the
+keys.
+This can be done by turning array slots into arbitrary-length bins by
+turning \Cref{B} into an array of linked lists.
+In this way, all records with key value~\(i\) can be placed in bin
+\Cref{B[i]}.
+A second extension allows for a key range greater than~\(n\).
+For example, a set of \(n\)~records might have keys in the range~1
+to~\(2n\).
+The only requirement is that each possible key value have a
+corresponding bin in~\Cref{B}.
+The extended Binsort algorithm is shown in Figure~\ref{BinSort}.
+
+\begin{figure}
+\xprogfig{binsort.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}{Extended Binsort}
+{The extended Binsort algorithm.}
+{BinSort}
+\ifthenelse{\boolean{cpp}}{\medskip}{}
+\end{figure}
+
+This version of Binsort can sort any collection of records whose key
+values fall in the range from~0 to \Cref{MaxKeyValue}\(-1\).
+The total work required is simply that needed to place each record
+into the appropriate bin and then take all of the records out of the
+bins.
+Thus, we need to process each record twice, for \Thetan\ work.
+
+Unfortunately, there is a crucial oversight in this analysis.
+Binsort must also look at each of the bins to see if it
+contains a record.
+The algorithm must process \Cref{MaxKeyValue}
+bins, regardless of how many actually hold records.
+If \Cref{MaxKey}\-\Cref{Value}   % HACK to get the line to break right
+ is small compared to \(n\), then this is not a great expense.
+Suppose that \Cref{MaxKeyValue} \( = n^2\).
+In this case, the total amount of work done will be
+\(\Theta(n + n^2) = \Theta(n^2) \).
+This results in a poor sorting algorithm, and the algorithm becomes
+even worse as the disparity between \(n\) and \Cref{MaxKeyValue}
+increases.
+In addition, a large key range requires an unacceptably large array
+\Cref{B}.
+Thus, even the extended Binsort is useful only for a limited key
+range.
+
+A further generalization to Binsort yields a \defit{bucket sort}.
+Each bin is associated with not just one key, but rather a range of
+key values.
+A bucket sort assigns records to bins and then relies on some
+other sorting technique to sort the records within each bin.  The hope
+is that the relatively inexpensive bucketing process will put only a
+small number of records in each bin, and that a
+``cleanup sort'' within the bins will then be relatively cheap.
+
+\index{radix sort@Radix Sort|(}
+There is a way to keep the number of bins and the related processing
+small while allowing the cleanup sort to be based on Binsort.
+Consider a sequence of records with keys in the range~0 to~99.
+If we have ten bins available, we can first assign records to bins by
+taking their key value modulo~10.
+Thus, every key will be assigned to the
+bin matching its rightmost decimal digit.
+We can then take these
+records from the bins \emph{in order} and reassign them to the bins
+on the basis of their leftmost (10's place) digit (define values in
+the range~0 to~9 to have a leftmost digit of~0).
+In other words, assign the \(i\)th record from array \Cref{A} to a bin
+using the formula \Cref{A[i]/10}.
+If we now gather the values from
+the bins in order, the result is a sorted list.
+Figure~\ref{RadixSort} illustrates this process.
+
+\begin{figure}
+\pdffig{RadSort}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{An example of Radix Sort}
+{An example of Radix Sort\index{radix sort@Radix Sort}
+for twelve two-digit numbers in base ten.
+Two passes are required to sort the list.}{RadixSort}
+\vspace{-1pt}
+\end{figure}
+
+\newpage
+
+In this example, we have \(r=10\) bins and \(n=12\) keys in the range
+0 to \(r^2-1\).
+The total computation is \Thetan, because we look at each
+record and each bin a constant number of times.
+This is a great improvement over the simple Binsort where the number
+of bins must be as large as the key range.
+Note that the example uses \(r = 10\) so as
+to make the bin computations easy to visualize:
+Records were placed
+into bins based on the value of first the rightmost and then the
+leftmost decimal digits.
+Any number of bins would have worked.
+This is an example of a \defit{Radix Sort}, so called because the bin
+computations are based on the \defit{radix} or the \defit{base} of the
+key values.
+This sorting algorithm can be extended to any number of
+keys in any key range.
+We simply assign records to bins based on the
+keys' digit values working from the rightmost digit to the leftmost.
+If there are \(k\)~digits, then this requires that we assign keys to
+bins \(k\)~times.
+
+As with Mergesort,\index{mergesort@Mergesort}
+an efficient implementation of Radix Sort is
+somewhat difficult to achieve.
+In particular, we would prefer to sort
+an array of values and avoid processing linked lists.  If we know how
+many values will be in each bin, then an auxiliary array of size~\(r\)
+can be used to hold the bins.
+For example, if during the first pass the 0~bin will receive three
+records and the 1~bin will receive five records, then we could simply
+reserve the first three array positions for the 0~bin and the next
+five array positions for the 1~bin.
+Exactly this approach is taken by the \Lang\ implementation of
+Figure~\ref{RadixSortCode}.
+At the end of each pass, the records are copied back to the original
+array.
+
+\begin{figure}
+\xprogfig{Radix.book}
+
+\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{Radix Sort}
+{The Radix Sort algorithm.}
+{RadixSortCode}
+\vspace{-\smallskipamount}
+\end{figure}
+
+\newpage
+
+The first inner \Cfor\ loop initializes array \Cref{cnt}.  The
+second loop counts the number of records to be assigned to each bin.
+The third loop sets the values in \Cref{cnt} to their proper indices
+within array~\Cref{B}.
+Note that the index stored in \Cref{cnt[j]}
+is the \emph{last} index for bin \Cref{j}; bins are filled from high
+index to low index.
+The fourth loop assigns the records to the bins (within
+array~\Cref{B}).
+The final loop simply copies the records back to
+array~\Cref{A} to be ready for the next pass.
+Variable \Cref{rtoi} stores \(r^i\) for use in bin computation on the
+\(i\)'th iteration.
+Figure~\ref{RadExamp} shows how this algorithm processes the input
+shown in Figure~\ref{RadixSort}.
+
+\begin{figure}
+\pdffig{RadExamp}
+\bigskip
+\capt{4.5in}{An example of function \Cref{radix}}
+{An example showing function \Cref{radix} applied to the input of
+Figure~\ref{RadixSort}.
+Row~1 shows the initial values within the input array.
+Row~2 shows the values for array \Cref{cnt} after
+counting the number of records for each bin.
+Row~3 shows the index values stored in array \Cref{cnt}.
+For example, \Cref{cnt[0]} is~0, indicating no input values are in
+bin~0.
+\Cref{Cnt[1]} is~2, indicating that array~\Cref{B} positions 0 and 1
+will hold the values for bin~1.
+\Cref{Cnt[2]} is~3, indicating that array~\Cref{B} position 2 will
+hold the (single) value for bin~2.
+\Cref{Cnt[7]} is~11, indicating that array~\Cref{B} positions~7
+through~10 will hold the four values for bin~7.
+Row~4 shows the results of the first pass of the Radix Sort.
+Rows~5 through~7 show the equivalent steps for the second
+pass.}{RadExamp}
+\bigskip
+\end{figure}
+
+This algorithm requires \(k\)~passes over the list of \(n\)~numbers in
+base~\(r\), with \(\Theta(n + r)\) work done at each pass.  Thus the
+total work is \(\Theta(nk + rk)\).  What is this in terms of~\(n\)?
+Because \(r\) is the size of the base, it might be rather small.
+One could use base~2 or~10.
+Base~26 would be appropriate for sorting character strings.
+For now, we will treat \(r\) as a constant value and ignore it
+for the purpose of determining asymptotic complexity.
+Variable~\(k\) is related to the key range:
+It is the maximum number of digits that a
+key may have in base~\(r\).
+In some applications we can determine \(k\)
+to be of limited size and so might wish to consider it a constant.
+In this case, Radix Sort is \Thetan\ in the best, average, and worst
+cases, making it the sort with best asymptotic complexity that we have
+studied.
+
+Is it a reasonable assumption to treat \(k\) as a constant?
+Or is there some relationship between \(k\) and~\(n\)?
+If the key range is limited and duplicate key values are common,
+there might be no relationship between \(k\) and~\(n\).
+To make this distinction clear, use \(N\) to denote the number of
+distinct key values used by the \(n\) records.
+Thus, \(N \leq n\).
+Because it takes a minimum of \(\log_r N\) base~\(r\) digits to
+represent \(N\) distinct key values, we know that
+\(k \geq \log_r N\).
+
+Now, consider the situation in which no keys are duplicated.
+If there are \(n\) unique keys (\(n = N\)), then it requires
+\(n\)~distinct code values to represent them.
+Thus, \(k \geq \log_r n\).
+Because it requires \emph{at least} \Omegalogn\ digits
+(within a constant factor) to distinguish between the $n$~distinct keys,
+\(k\)~is in \Omegalogn.
+This yields an asymptotic complexity of \Omeganlogn\ for 
+Radix Sort to process \(n\)~distinct key values.
+
+It is possible that the key range is much larger;
+\(\log_r n\) bits is merely the best case possible for \(n\)~distinct
+values.
+Thus, the \(\log_r n\) estimate for \(k\) could be overly optimistic.
+The moral of this analysis is that, for the general case of \(n\)
+distinct key values, Radix Sort is at best a \Omeganlogn\ sorting
+algorithm.
+
+Radix Sort can be much improved by making base~\(r\) be as large as
+possible.
+Consider the case of an integer key value.
+Set \(r = 2^i\) for some~\(i\).
+In other words, the value of \(r\) is related to the
+number of bits of the key processed on each pass.
+Each time the number of bits is doubled, the number of passes is cut
+in half.
+When processing an integer key value, setting \(r = 256\) allows the
+key to be processed one byte at a time.
+Processing a 32-bit key requires only four passes.
+It is not unreasonable on most computers to use
+\(r = 2^{16} = 64\mbox{K}\), resulting in only two passes for a 32-bit
+key.
+Of course, this requires a \Cref{cnt} array of size~64K.
+Performance will be good
+only if the number of records is close to 64K or greater.
+In other words, the number of records must be large compared to the
+key size for Radix Sort to be efficient.
+In many sorting applications, Radix Sort can be tuned in this way to
+give good performance.
+
+Radix Sort depends on the ability to make a fixed number of multiway
+choices based on a digit value, as well as random access to the bins.
+Thus, Radix Sort might be difficult to implement for certain key types.
+For example, if the keys are real numbers or arbitrary length strings,
+then some care will be necessary in implementation.
+In particular, Radix Sort will need to be careful about deciding when
+the ``last digit'' has been found to distinguish among real numbers,
+or the last character in variable length strings.
+Implementing the concept of Radix Sort with the trie\index{trie} data
+structure (Section~\ref{Trie}) is most appropriate for these
+situations.
+
+At this point, the perceptive reader might begin to question our
+earlier assumption that key comparison takes constant time.
+If the keys are ``normal integer'' values stored in, say, an integer
+variable, what is the size of this variable compared to \(n\)?
+In fact, it is almost certain that~32 (the number of bits in a
+standard \Cref{int} variable) is
+greater than \(\log n\) for any practical computation.
+In this sense, comparison of two long integers requires \Omegalogn\
+work.
+
+Computers normally do arithmetic in units of a particular size, such
+as a 32-bit word.
+Regardless of the size of the variables, comparisons use this
+native word size and require a constant amount of time since the
+comparison is implemented in hardware.
+In practice, comparisons of two 32-bit values take constant time, even
+though 32 is much greater than \(\log n\).
+To some extent the truth of the proposition that there are constant
+time operations (such as integer comparison) is in the eye of the
+beholder.
+At the gate level of computer architecture, individual bits are
+compared.
+However, constant time comparison for integers is true in practice on
+most computers (they require a fixed number of machine instructions),
+and we rely on such assumptions as the basis for our analyses.
+In contrast, Radix Sort must do several arithmetic
+calculations on key values (each requiring constant time), where the
+number of such calculations is proportional to the key length.
+Thus, Radix Sort truly does \Omeganlogn\ work to process \(n\)
+distinct key values.
+\index{radix sort@Radix Sort|)}
+\index{binsort@Binsort|)}
+
+\section{An Empirical Comparison of Sorting Algorithms}
+
+\index{sorting!comparing algorithms|(}
+Which sorting algorithm is fastest?  Asymptotic complexity analysis
+lets us distinguish between \Thetantwo\ and \Thetanlogn\ algorithms,
+but it does not help distinguish between algorithms with the same
+asymptotic complexity.
+Nor does asymptotic analysis say anything about which algorithm is
+best for sorting small lists.
+For answers to these questions, we can turn to empirical testing.
+
+\begin{figure}
+\index{insertion sort@Insertion Sort}
+\index{bubble sort@Bubble Sort}
+\index{selection sort@Selection Sort}
+\index{shellsort@Shellsort}
+\index{quicksort@Quicksort}
+\index{mergesort@Mergesort}
+\index{heapsort@Heapsort}
+\index{radix sort@Radix Sort}
+{\footnotesize
+\begin{center}
+\sffamily
+\begin{tabular}{l|rrrrrrrr}
+\hline
+\multicolumn{1}{c|}{\textbf{Sort}} & \multicolumn{1}{c}{\textbf{10}}&
+\multicolumn{1}{c}{\textbf{100}} & \multicolumn{1}{c}{\textbf{1K}}&
+\multicolumn{1}{c}{\textbf{10K}} & \multicolumn{1}{c}{\textbf{100K}}&
+\multicolumn{1}{c}{\textbf{1M}}&
+\multicolumn{1}{c}{\textbf{Up}} & \multicolumn{1}{c}{\textbf{Down}}\\
+\hline
+Insertion & .00023 & .007 & 0.66 &  64.98 &  7381.0 &  674420 &   0.04 & 129.05\\
+Bubble    & .00035 & .020 & 2.25 & 277.94 & 27691.0 & 2820680 &  70.64 & 108.69\\
+Selection & .00039 & .012 & 0.69 &  72.47 &  7356.0 &  780000 &  69.76 &  69.58\\
+Shell     & .00034 & .008 & 0.14 &   1.99 &    30.2 &     554 &   0.44 &   0.79\\
+Shell/O   & .00034 & .008 & 0.12 &   1.91 &    29.0 &     530 &   0.36 &   0.64\\
+Merge     & .00050 & .010 & 0.12 &   1.61 &    19.3 &     219 &   0.83 &   0.79\\
+Merge/O   & .00024 & .007 & 0.10 &   1.31 &    17.2 &     197 &   0.47 &   0.66\\
+Quick     & .00048 & .008 & 0.11 &   1.37 &    15.7 &     162 &   0.37 &   0.40\\
+Quick/O   & .00031 & .006 & 0.09 &   1.14 &    13.6 &     143 &   0.32 &   0.36\\
+Heap      & .00050 & .011 & 0.16 &   2.08 &    26.7 &     391 &   1.57 &   1.56\\
+Heap/O    & .00033 & .007 & 0.11 &   1.61 &    20.8 &     334 &   1.01 &   1.04\\
+Radix/4   & .00838 & .081 & 0.79 &   7.99 &    79.9 &     808 &   7.97 &   7.97\\
+Radix/8   & .00799 & .044 & 0.40 &   3.99 &    40.0 &     404 &   4.00 &   3.99\\
+\hline
+\end{tabular}
+\end{center}
+}
+
+\smallskip
+\capt{4.5in}{Empirical comparison of sorting algorithms}
+{Empirical comparison of sorting algorithms run on a 3.4-GHz Intel
+Pentium 4 CPU running Linux.
+Shellsort, Quicksort, Mergesort, and Heapsort each are shown with
+regular and optimized versions.
+Radix Sort is shown for 4- and 8-bit-per-pass versions.
+All times shown are milliseconds.
+}
+{SortComp}
+\bigskip
+\ifthenelse{\boolean{cpp}}{\medskip}{}
+\end{figure}
+
+Figure~\ref{SortComp} shows timing results for
+actual implementations of the sorting algorithms presented in this
+chapter.
+The algorithms compared include Insertion Sort, Bubble Sort,
+Selection Sort, Shellsort, Quicksort, Mergesort, Heapsort and
+Radix Sort.
+Shellsort shows both the basic version from Section~\ref{ShellSort}
+and another with increments based on division by three.
+Mergesort shows both the basic implementation from
+Section~\ref{MergeSort} and the optimized version
+(including calls to Insertion Sort for lists of length below nine).
+For Quicksort, two versions are compared: the basic implementation
+from Section~\ref{QuickSort} and an optimized version
+that does not partition sublists below length nine (with Insertion
+Sort performed at the end).
+The first Heapsort version uses the class definitions from
+Section~\ref{HeapSec}.
+The second version removes all the class definitions and operates
+directly on the array using inlined code for all access functions.
+
+Except for the rightmost columns,
+the input to each algorithm is a random array of integers.
+This affects the timing for some of the sorting algorithms.
+For example, Selection Sort is not being used to best advantage
+because the record size is small, so it does not get the best possible
+showing.
+The Radix Sort implementation certainly takes advantage of this
+key range in that it does not look at more digits than necessary.
+On the other hand, it was not optimized to use bit shifting instead of 
+division, even though the bases used would permit this.
+
+The various sorting algorithms are shown for lists of sizes
+10, 100, 1000, 10,000, 100,000, and 1,000,000.
+The final two columns of each table show the performance for the
+algorithms on inputs of size 10,000 where the numbers are in
+ascending (sorted) and descending (reverse sorted) order,
+respectively.
+These columns demonstrate best-case performance for some
+algorithms and worst-case performance for others.
+They also show that for some algorithms, the order of input
+has little effect.
+
+These figures show a number of interesting results.
+As expected, the \Ontwo\ sorts are quite poor performers for large
+arrays.
+Insertion Sort is by far the best of this group, unless the array is
+already reverse sorted.
+Shellsort is clearly superior to any of these \Ontwo\ sorts for lists
+of even 100 elements.
+Optimized Quicksort is clearly the best overall algorithm for all but
+lists of 10 elements.
+Even for small arrays, optimized Quicksort performs well because
+it does one partition step before calling Insertion Sort.
+Compared to the other \Onlogn\ sorts, unoptimized Heapsort is quite
+slow due to the overhead of the class structure.
+When all of this is stripped away and the algorithm is implemented to
+manipulate an array directly, it is still somewhat slower than
+mergesort.
+In general, optimizing the various algorithms makes a
+noticeable improvement for larger array sizes.
+
+Overall, Radix Sort is a surprisingly poor performer.
+If the code had been tuned to use bit shifting of the key value, it
+would likely improve substantially;
+but this would seriously limit the range of element types that the
+sort could support.
+\index{sorting!comparing algorithms|)}
+
+\section{Lower Bounds for Sorting}
+\label{LBSort}
+
+\index{problem!analysis of|(}
+\index{sorting!lower bound|(}
+\index{lower bound!sorting|(}
+This book contains many analyses for algorithms.
+These analyses generally define the upper and lower bounds for
+algorithms in their worst and average cases.
+For many of the algorithms presented so far, analysis has been easy.
+This section considers a more difficult task --- an analysis for the
+cost of a \emph{problem} as opposed to an \emph{algorithm}.
+The upper bound for a problem can be defined as the asymptotic cost of
+the fastest known algorithm.
+The lower bound defines the best possible efficiency for \emph{any}
+algorithm that solves the problem, including algorithms not yet
+invented.
+Once the upper and lower bounds for the problem meet, we know that no
+future algorithm can possibly be (asymptotically) more efficient.
+
+A simple estimate for a problem's lower bound can be obtained by
+measuring the size of the input that must be read and the output
+that must be written.
+Certainly no algorithm can be more efficient than the problem's
+I/O time.
+From this we see that the sorting problem cannot be solved by
+\emph{any} algorithm in less than \Omegan\ time because it takes at
+least \(n\) steps to read and write the \(n\) values to be sorted.
+Alternatively, any sorting algorithm must at least look at every input
+vale to recognize whether the input values are in sort order.
+So, based on our current knowledge of sorting algorithms and the
+size of the input, we know that the \emph{problem} of sorting is
+bounded by \Omegan\ and \Onlogn.
+
+Computer scientists have spent much time devising efficient
+general-purpose sorting algorithms, but no one has ever found one
+that is faster than \Onlogn\ in the worst or average cases.
+Should we keep searching for a faster sorting algorithm?
+Or can we prove that there is no faster sorting algorithm by finding
+a tighter lower bound?
+
+This section presents one of the most important and most useful
+proofs in computer science:
+No sorting algorithm based on key comparisons can possibly be
+faster than \Omeganlogn\ in the worst case.
+This proof is important for three reasons.
+First, knowing that widely used sorting algorithms are asymptotically
+optimal is reassuring.
+In particular, it means that you need not bang your head against
+the wall searching for an \On\ sorting algorithm (or at least
+not one in any way based on key comparisons).
+Second, this proof is one of the few non-trivial lower-bounds proofs
+that we have for any problem; that is, this proof provides one of the
+relatively few instances where our lower bound is tighter than simply
+measuring the size of the input and output.
+As such, it provides a useful model for proving lower bounds on other
+problems.
+Finally, knowing a lower bound for sorting gives us a lower
+bound in turn for other problems whose solution could be used as the
+basis for a sorting algorithm.
+The process of deriving asymptotic bounds for one problem from the
+asymptotic bounds of another is called a
+\defit{reduction},\index{reduction}
+a concept further explored in Chapter~\ref{LimComp}.
+
+Except for the Radix Sort\index{radix sort@Radix Sort} and
+Binsort,\index{binsort@Binsort} all of the sorting algorithms
+presented in this chapter make decisions based on the direct
+comparison of two key values.
+For example, Insertion Sort\index{insertion sort@Insertion Sort}
+sequentially compares the value to be inserted into the sorted list
+until a comparison against the next value in the list fails.
+In contrast, Radix Sort has no direct comparison of key values.
+All decisions are based on the value of specific digits in the key
+value,
+so it is possible to take approaches to sorting that do not involve
+key comparisons.
+Of course, Radix Sort in the end does not provide a more efficient
+sorting algorithm than comparison-based sorting.
+Thus, empirical evidence suggests that comparison-based sorting is a
+good approach.\footnote{The truth is stronger than this statement
+implies.
+In reality, Radix Sort relies on comparisons as well and so can be
+modeled by the technique used in this section.
+The result is an \Omeganlogn\ bound in the general case even for
+algorithms that look like Radix Sort.}
+
+The proof that any comparison sort requires \Omeganlogn\
+comparisons in the worst case is structured as follows.
+First, comparison-based decisions can be modeled as the
+branches in a tree.
+This means that any sorting algorithm based on comparisons between
+records can be viewed as a binary tree whose nodes correspond to the
+comparisons, and whose branches correspond to the possible outcomes.
+Next, the minimum number of leaves in the resulting tree is
+shown to be the factorial of \(n\).\index{factorial function}
+Finally, the minimum depth of a tree with \(n!\) leaves is shown
+to be in \Omeganlogn.
+
+\index{decision tree|(}
+Before presenting the proof of an \Omeganlogn\ lower bound for
+sorting, we first must define the concept of a
+\defit{decision tree}.
+A decision tree is a binary tree that can model the processing for any
+algorithm that makes binary decisions.
+Each (binary) decision is represented by a branch in the tree.
+For the purpose of modeling sorting algorithms, we count all
+comparisons of key values as decisions.
+If two keys are compared and the first is less than the second, then
+this is modeled as a left branch in the decision tree.
+In the case where the first value is greater than the second, the
+algorithm takes the right branch.
+
+\index{permutation|(}
+\index{insertion sort@Insertion Sort|(}
+Figure~\ref{Decision} shows the decision tree that models
+Insertion Sort on three input values.
+The first input value is labeled~X, the second~Y, and the third~Z.
+They are initially stored in positions~0, 1, and~2, respectively,
+of input array \Cref{A}.
+Consider the possible outputs.
+Initially, we know nothing about the final positions of the three
+values in the sorted output array.
+The correct output could be any permutation of the input values.
+For three values, there are \(n! = 6\) permutations.
+Thus, the root node of the decision tree lists all six permutations
+that might be the eventual result of the algorithm.
+
+\begin{figure}
+\pdffig{DecTree}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{A decision tree for Insertion Sort}
+{Decision tree for Insertion Sort when processing three values
+labeled~X, Y, and~Z, initially stored at positions~0, 1, and~2,
+respectively, in input array A.}{Decision}
+\vspace{1pt}
+\end{figure}
+
+When \(n = 3\), the first comparison made by Insertion Sort
+is between the second item in the input array~(Y) and the first
+item in the array~(X).
+There are two possibilities:
+Either the value of Y is less than that
+of~X, or the value of Y is \emph{not} less than that of~X.
+This decision is modeled by the first branch in the tree.
+If~Y is less than~X, then the left branch should be taken and
+Y must appear before X in the final output.
+Only three of the original six permutations have this property,
+so the left child of the root lists the three
+permutations where Y appears before~X: YXZ, YZX, and ZYX.
+Likewise, if Y were not less than~X, then the right branch would be
+taken, and only the three permutations in which Y appears after X are
+possible outcomes: XYZ, XZY, and ZXY.
+These are listed in the right child of the root.
+
+Let us assume for the moment that Y is less than~X and so the
+left branch is taken.
+In this case, Insertion Sort swaps the two values.
+At this point the array stores~YXZ.
+Thus, in Figure~\ref{Decision} the left child of the root shows YXZ
+above the line.
+Next, the third value in the array is compared against the second
+(i.e., Z~is compared with~X).
+Again, there are two possibilities.
+If~Z is less than~X, then these items should be swapped (the left
+branch).
+If~Z is not less than~X, then Insertion Sort is complete (the right
+branch).
+
+Note that the right branch reaches a leaf node, and that this leaf node
+contains only one permutation:~YXZ.
+This means that only permutation~YXZ can be the outcome based
+on the results of the decisions taken to reach this node.
+In other words, Insertion Sort has ``found'' the single permutation
+of the original input that yields a sorted list.
+Likewise, if the second decision resulted in taking the left branch,
+a~third comparison, regardless of the outcome, yields nodes in the
+decision tree with only single permutations.
+Again, Insertion Sort has ``found'' the correct
+permutation that yields a sorted list.
+\index{insertion sort@Insertion Sort|)}
+
+Any sorting algorithm based on comparisons can be modeled by a
+decision tree in this way, regardless of the size of the input.
+Thus, all sorting algorithms can be viewed as algorithms to ``find''
+the correct permutation of the input that yields a sorted list.
+Each algorithm based on comparisons can be viewed as proceeding by
+making branches in the tree based on the results of key comparisons,
+and each algorithm can terminate once a node with a single permutation
+has been reached.
+
+How is the worst-case cost of an algorithm expressed by the
+decision tree?
+The decision tree shows the decisions made by an algorithm for all
+possible inputs of a given size.
+Each path through the tree from the root to a leaf is one possible
+series of decisions taken by the algorithm.
+The depth of the deepest node represents the longest series of
+decisions required by the algorithm to reach an answer.
+
+There are many comparison-based sorting algorithms, and each will be
+modeled by a different decision tree.
+Some decision trees might be well-balanced, others might be unbalanced.
+Some trees will have more nodes than others (those with more nodes
+might be making ``unnecessary'' comparisons).
+In fact, a poor sorting algorithm might have an arbitrarily large
+number of nodes in its decision tree, with leaves of arbitrary depth.
+There is no limit to how slow the ``worst'' possible sorting
+algorithm could be.
+However, we are interested here in knowing what the \emph{best}
+sorting algorithm could have as its minimum cost in the worst
+case.
+In other words, we would like to know what is the \emph{smallest}
+depth possible for the \emph{deepest} node in the tree for any sorting
+algorithm.
+
+The smallest depth of the deepest node will depend on the number of
+nodes in the tree.
+Clearly we would like to ``push up'' the nodes in the tree, but there
+is limited room at the top.
+A tree of height~1 can only store one node (the root);
+the tree of height~2 can store three nodes; the tree of height~3 can
+store seven nodes, and so on.
+
+Here are some important facts worth remembering:
+\begin{itemize}
+\item A binary tree of height~\(n\) can store at most \(2^n-1\)
+nodes.
+\item Equivalently, a tree with \(n\)~nodes requires at least
+\(\lceil \log (n+1) \rceil\) levels.
+\end{itemize}
+
+What is the minimum number of nodes that must be in the decision tree
+for any comparison-based sorting algorithm for \(n\)~values?
+Because sorting algorithms are in the business of determining which
+unique permutation of the input corresponds to the sorted list,
+the decision tree for any sorting algorithm must contain at least one
+leaf node for each possible permutation.
+There are \(n!\)~permutations for a set of \(n\)~numbers
+(see Section~\ref{MiscNote}). 
+\index{permutation|)}
+
+Because there are at least \(n!\)~nodes in the tree, we know that the
+tree must have \(\Omega(\log n!)\) levels.\index{factorial function}
+From Stirling's\index{factorial function!Stirling's approximation}
+approximation (Section~\ref{MiscNote}), we know \(\log n!\) is
+in \Omeganlogn.
+The decision tree for any comparison-based sorting algorithm must
+have nodes \Omeganlogn\ levels deep.
+Thus, in the worst case, any such sorting algorithm must require
+\Omeganlogn\ comparisons.
+
+Any sorting algorithm requiring \Omeganlogn\ comparisons in the
+worst case requires \Omeganlogn\ running time in the worst case.
+Because any sorting algorithm requires \Omeganlogn\ running time,
+the problem of sorting also requires \Omeganlogn\ time.
+We already know of sorting algorithms with \Onlogn\ running
+time, so we can conclude that the problem of sorting requires
+\Thetanlogn\ time.
+As a corollary, we know that no comparison-based sorting algorithm can
+improve on existing \Thetanlogn\ time sorting algorithms by more than 
+a constant factor.
+\index{decision tree|)}
+\index{lower bound!sorting|)}
+\index{sorting!lower bound|)}
+\index{problem!analysis of|)}
+
+\section{Further Reading}
+
+The definitive reference on sorting is Donald~E. Knuth's
+\ttl{Sorting and Searching} \cite{KnuthV3}.
+A wealth of details is covered there, including
+optimal sorts for small size \(n\)\index{sorting!small data sets}
+and special purpose sorting networks.
+It is a thorough (although somewhat dated) treatment on sorting.
+For an analysis of Quicksort and a thorough survey on its
+optimizations, see Robert Sedgewick's \ttl{Quicksort} \cite{SedgeSort}.
+Sedgewick's \ttl{Algorithms} \cite{Sedgewick} discusses most of the
+sorting algorithms described here and pays special attention to
+efficient implementation.
+The optimized Mergesort version of Section~\ref{MergeSort} comes from
+Sedgewick.
+
+While \Omeganlogn\ is the theoretical lower bound in the worst case for
+sorting,\index{sorting!lower bound}
+many times the input is sufficiently well ordered that
+certain algorithms can take advantage of this fact to speed the
+sorting process.
+A simple example is Insertion Sort's best-case running time.
+Sorting algorithms whose running time is based on the amount of
+disorder in the input are called
+\defit{adaptive}.\index{sorting!adaptive}
+For more information on adaptive sorting algorithms, see
+``A Survey of Adaptive Sorting Algorithms'' by Estivill-Castro and
+Wood \cite{AdSort}.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Using induction,\index{proof!induction} prove that Insertion Sort will
+always produce a sorted array.\index{insertion sort@Insertion Sort}
+
+\item
+Write an Insertion Sort\index{insertion sort@Insertion Sort}
+algorithm for integer key values.
+However, here's the catch:
+The input is a stack\index{stack} (\emph{not} an array), and the only
+variables that your algorithm may use are a fixed number of integers
+and a fixed number of stacks.
+The algorithm should return a stack containing the records in sorted
+order (with the least value being at the top of the stack).
+Your algorithm should be \Thetantwo\ in the worst case.
+
+\item
+The Bubble Sort\index{bubble sort@Bubble Sort}
+implementation has the following inner \Cfor\ loop:
+
+\begin{progenvexer}
+for (int j=n-1; j>i; j--)
+\end{progenvexer}
+
+\noindent
+Consider the effect of replacing this with the following statement:
+
+\begin{progenvexer}
+for (int j=n-1; j>0; j--)
+\end{progenvexer}
+
+\noindent Would the new implementation work correctly?
+Would the change affect the asymptotic complexity of the algorithm?
+How would the change affect the running time of the algorithm?
+
+\item
+When implementing Insertion Sort,\index{insertion sort@Insertion Sort}
+a binary search\index{search!binary} could be used to
+locate the position within the first \(i-1\) elements of the array
+into which element \(i\) should be inserted.
+How would this affect the number of comparisons required?
+How would using such a binary search affect the asymptotic
+running time for Insertion Sort?
+
+\item
+Figure~\ref{SlowSort} shows the best-case number of swaps for
+Selection Sort as \Thetan.\index{selection sort@Selection Sort}
+This is because the algorithm does not check to see if the \(i\)th
+record is already in the \(i\)th position; that is, it might perform
+unnecessary swaps.
+
+\begin{enumerate}
+\item Modify the algorithm so that it does not make unnecessary
+swaps.
+
+\item What is your prediction regarding whether this modification
+actually improves the running time?
+
+\item Write two programs to compare the actual running times of
+the original Selection Sort and the modified algorithm.
+Which one is actually faster?
+\end{enumerate}
+
+\item
+Recall that a sorting algorithm is said to be stable if the original
+ordering for duplicate keys is preserved.\index{sorting!stable algorithms}
+Of the sorting algorithms Insertion Sort, Bubble Sort, Selection Sort, 
+Shellsort, Mergesort, Quicksort, Heapsort, Binsort, and Radix Sort,
+which of these are stable, and which are not?
+For each one, describe either why it is or is not stable.
+If a minor change to the implementation would make it stable, describe
+the change.
+
+\item
+Recall that a sorting algorithm is said to be stable if the original
+ordering for duplicate keys is preserved.\index{sorting!stable algorithms}
+We can make any algorithm stable if we alter the input keys so that
+(potentially) duplicate key values are made unique in a way that the
+first occurrence of the original duplicate value is less than the
+second occurrence, which in turn is less than the third, and so on.
+In the worst case, it is possible that all \(n\) input records have
+the same key value.
+Give an algorithm to modify the key values such that every modified
+key value is unique, the resulting key values give the same sort order
+as the original keys, the result is stable (in that the duplicate
+original key values remain in their original order), and the process
+of altering the keys is done in linear time using only a constant
+amount of additional space.
+
+\item
+The discussion of Quicksort in Section~\ref{QuickSort} described using
+a stack instead of recursion to reduce the number of function calls
+made.\index{quicksort@Quicksort}\index{recursion}
+
+\begin{enumerate}
+\item How deep can the stack get in the worst case?\index{stack}
+
+\item Quicksort makes two recursive calls.
+The algorithm could be changed to make these two calls in a specific
+order.
+In what order should the two calls be made, and how does this affect
+how deep the stack can become?
+\end{enumerate}
+
+\item
+Give a permutation for the values~0 through~7 that will cause
+Quicksort (as implemented in Section~\ref{QuickSort}) to have its
+worst case behavior.
+
+\item
+Assume \Cref{L} is an array, \ifthenelse{\boolean{cpp}}{\Cref{length(L)}}{}
+\ifthenelse{\boolean{java}}{\Cref{L.length()}}{} returns the number of
+records in the array, and \Cref{qsort(L, i, j)} sorts the records of
+\Cref{L} from \Cref{i} to \Cref{j} (leaving the records sorted in
+\Cref{L}) using the Quicksort algorithm.\index{quicksort@Quicksort}
+What is the average-case time complexity for each of the following
+code fragments?
+
+\vspace{-0.1pt}
+\begin{enumerate}
+
+\vspace{-\bigskipamount}
+\item \xprogexer{ch7p1.book}
+
+\vspace{-\bigskipamount}
+\item \xprogexer{ch7p2.book}
+\end{enumerate}
+\vspace{-\bigskipamount}
+
+\item
+Modify Quicksort\index{quicksort@Quicksort} to find the smallest \(k\)
+values in an array of records.
+Your output should be the array modified so that the \(k\) smallest
+values are sorted in the first \(k\) positions of the array.
+Your algorithm should do the minimum amount of work necessary, that
+is, no more of the array than necessary should be sorted.
+
+\item
+Modify Quicksort\index{quicksort@Quicksort}
+to sort a sequence of variable-length strings stored one after the
+other in a character array, with a second array (storing pointers to
+strings) used to index\index{index} the strings.
+Your function should modify the index array so that the first pointer
+points to the beginning of the lowest valued string, and so on.
+
+\item
+Graph \(f_1(n) = n \log n\), \(f_2(n) = n^{1.5}\),
+and \(f_3(n) = n^2\) in the range \(1 \leq n \leq 1000\) to visually
+compare their growth rates.
+Typically, the constant factor in the running-time expression for an
+implementation of Insertion Sort\index{insertion sort@Insertion Sort}
+will be less than the constant factors for
+Shellsort\index{shellsort@Shellsort} or
+Quicksort.\index{quicksort@Quicksort}
+How many times greater can the constant factor be for Shellsort to be
+faster than Insertion Sort when \(n = 1000\)?
+How many times greater can the constant factor be for Quicksort to be
+faster than Insertion Sort when \(n = 1000\)?
+
+\item
+Imagine that there exists an algorithm \Cref{SPLITk} that can
+split a list~\cvar{L} of \(n\) elements into \(k\)~sublists, each
+containing one or more elements, such that sublist~\(i\) contains only
+elements whose values are less than all elements in sublist~\(j\) for
+\(i < j <= k\). 
+If \(n < k\), then \(k - n\) sublists are empty, and the rest are of
+length~1.
+Assume that SPLITk has time complexity O(length of~\cvar{L}).
+Furthermore, assume that the \(k\) lists can be concatenated
+again in constant time.  Consider the following algorithm:
+
+\xprogexer{SORTk.book}
+
+\begin{enumerate}
+\item
+What is the worst-case asymptotic running time for SORTk? Why?
+
+\item
+What is the average-case asymptotic running time of SORTk? Why?
+\end{enumerate}
+
+\item
+%[Rawlins]
+Here is a variation on sorting.
+The problem is to sort a collection of \(n\) nuts and \(n\) bolts by
+size.
+It is assumed that for each bolt in the collection, there is a
+corresponding nut of the same size, but initially we do not know which
+nut goes with which bolt.
+The differences in size between two nuts or two bolts can be too small
+to see by eye, so you cannot rely on comparing the sizes of two nuts
+or two bolts directly.
+Instead, you can only compare the sizes of a nut and a bolt by
+attempting to screw one into the other (assume this comparison to be a
+constant time operation).
+This operation tells you that either the nut is bigger than the bolt,
+the bolt is bigger than the nut, or they are the same size.
+What is the minimum number of comparisons needed to sort the nuts and
+bolts in the worst case?
+
+\item
+\begin{enumerate}
+\item
+Devise an algorithm to sort three numbers.\index{sorting!small data sets}
+It should make as few comparisons as possible.
+How many comparisons and swaps are required in the best, worst, and
+average cases?
+
+\item
+Devise an algorithm to sort five numbers.
+It should make as few comparisons as possible.
+How many comparisons and swaps are required in the best, worst, and
+average cases?
+
+\item
+Devise an algorithm to sort eight numbers.
+It should make as few comparisons as possible.
+How many comparisons and swaps are required in the best, worst, and
+average cases?
+\end{enumerate}
+
+\item
+% Derived from Bentley
+Devise an efficient algorithm to sort a set of numbers with values in
+the range 0 to 30,000. 
+There are no duplicates.
+Keep memory requirements to a minimum.
+
+\item
+% Bentley
+Which of the following operations are best implemented by first
+sorting the list of numbers?
+For each operation, briefly describe an algorithm to implement it, and
+state the algorithm's asymptotic complexity.
+
+\begin{enumerate}
+\item Find the minimum value.
+
+\item Find the maximum value.
+
+\item Compute the arithmetic mean.
+
+\item Find the median (i.e., the middle value).
+
+\item Find the mode (i.e., the value that appears the most times).
+\end{enumerate}
+
+\item
+Consider a recursive\index{recursion}
+Mergesort\index{mergesort@Mergesort} implementation that calls
+Insertion Sort\index{insertion sort@Insertion Sort} on sublists
+smaller than some threshold.
+If there are \(n\) calls to Mergesort, how many calls will there be to
+Insertion Sort?  Why?
+% There will be \(n+1\) calls to selection sort.  This is a
+% straightforward application of the Full Binary Tree Theorem because
+% the calling sequence can be viewed as a full binary tree with
+% mergesort calls as internal nodes and selection sort calls as leaf
+% nodes.  Its amazing where this thing turns up!
+
+\item
+Implement Mergesort\index{mergesort@Mergesort} for the case where the
+input is a linked list.
+
+\item
+Counting sort (assuming the input key values are integers in the range
+0 to $m-1$) works by counting the number of records with each key
+value in the first pass, and then uses this information to place the
+records in order in a second pass.
+Write an implementation of counting sort (see the implementation of
+radix sort for some ideas).
+What can we say about the relative values of $m$ and $n$ for this to
+be effective?
+If $m < n$, what is the running time of this algorithm?
+
+\item
+\label{BinSearchBound}
+Use an argument similar to that given in Section~\ref{LBSort} to prove
+that \(\log n\) is a worst-case lower bound for the problem of searching
+for a given value in a sorted array containing \(n\) elements.
+
+\item
+A simpler way to do the Quicksort partition step is to
+set index \Cref{split} to the position of the first value greater than
+the pivot.
+Then from position \Cref{split+1} have another index \Cref{curr} move
+to the right until it finds a value less than a pivot.
+Swap the values at \Cref{split} and \Cref{next}, and increment
+\Cref{split}.
+Continue in this way, swapping the smaller values to the left side.
+When \Cref{curr} reaches the end of the subarray, \Cref{split} will be
+at the split point between the two partitions.
+Unfortunately, this approach requires more swaps than does the
+version presented in Section~\ref{QuickSort}, resulting in a slower
+implementation.
+Give an example and explain why.
+
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+One possible improvement for Bubble Sort would be to add a flag
+variable and a test that determines if an exchange was made during the
+current iteration.
+If no exchange was made, then the list is sorted and so the algorithm
+can stop early.
+This makes the best case performance become $\On$ (because if the list
+is already sorted, then no iterations will take place on the first
+pass, and the sort will stop right there).
+
+Modify the Bubble Sort implementation to add this flag and test.
+Compare the modified implementation on a range of inputs to determine
+if it does or does not improve performance in practice.
+
+\item
+Double Insertion Sort\index{insertion sort@Insertion Sort!Double}
+is a variation on Insertion Sort that works from the middle of the
+array out.
+At each iteration, some middle portion of the array is sorted.
+On the next iteration, take the two adjacent elements to the sorted
+portion of the array.
+If they are out of order with respect to each other, than swap them.
+Now, push the left element toward the right in the array so long as it
+is greater than the element to its right.
+And push the right element toward the left in the array so long as it
+is less than the element to its left.
+The algorithm begins by processing the middle two elements of the
+array if the array is even.
+If the array is odd, then skip processing the middle item and
+begin with processing the elements to its immediate left and right.
+
+First, explain what the cost of Double Insertion Sort will be in
+comparison to standard Insertion sort, and why.
+(Note that the two elements being processed in the current iteration,
+once initially swapped to be sorted with with respect to each other,
+cannot cross as they are pushed into sorted position.)
+Then, implement Double Insertion Sort, being careful to properly
+handle both when the array is odd and when it is even.
+Compare its running time in practice against standard Insertion Sort.
+Finally, explain how this speedup might affect the threshold level and
+running time for a Quicksort implementation.
+
+\item
+Perform a study of Shellsort, using different increments.
+Compare the version shown in Section~\ref{ShellSort}, where each
+increment is half the previous one, with others.
+In particular, try implementing ``division by 3'' where the increments
+on a list of length \(n\) will be \(n/3\), \(n/9\), etc.
+Do other increment schemes work as well?
+
+\item
+The implementation for Mergesort given in Section~\ref{MergeSort}
+takes an array as input and sorts that array.
+At the beginning of Section~\ref{MergeSort} there is a simple
+pseudocode implementation for sorting a linked list using Mergesort.
+Implement both a linked list-based version of Mergesort and the
+array-based version of Mergesort, and compare their running times.
+
+\item
+Starting with the \Lang\ code for Quicksort\index{quicksort@Quicksort}
+given in this chapter,
+write a series of Quicksort implementations to test the following
+optimizations on a wide range of input data sizes.
+Try these optimizations in various combinations to try and develop the
+fastest possible Quicksort implementation that you can.
+
+\begin{enumerate}
+\item Look at more values when selecting a pivot.
+
+\item Do not make a recursive\index{recursion} call to \Cref{qsort}
+when the list size falls below a given threshold, and use
+Insertion Sort\index{insertion sort@Insertion Sort} to complete
+the sorting process.
+Test various values for the threshold size.
+
+\item Eliminate recursion\index{recursion} by using a
+stack\index{stack} and inline functions.
+\end{enumerate}
+
+\item
+\index{heap}\index{heapsort@Heapsort}
+It has been proposed that Heapsort can be optimized by altering the
+heap's siftdown function.\index{heap!siftdown}
+Call the value being sifted down \(X\).
+Siftdown does two comparisons per level: First the children of \(X\)
+are compared, then the winner is compared to \(X\).
+If \(X\) is too small, it is swapped with its larger child and the
+process repeated.
+The proposed optimization dispenses with the test against \(X\).
+Instead, the larger child automatically replaces \(X\), until \(X\)
+reaches the bottom level of the heap.
+At this point, \(X\) might be too large to remain in that position.
+This is corrected by repeatedly comparing \(X\) with its parent and
+swapping as necessary to ``bubble'' it up to its proper level.
+The claim is that this process will save a number of comparisons because
+most nodes when sifted down end up near the bottom of the tree anyway.
+Implement both versions of siftdown, and do an empirical study to
+compare their running times.\index{heap!siftdown}
+
+\item
+Radix Sort is typically implemented to support only a radix that is a
+power of two.\index{radix sort@Radix Sort}
+This allows for a direct conversion from the radix to some number of
+bits in an integer key value.
+For example, if the radix is~16, then a 32-bit key will be processed
+in 8~steps of 4~bits each.
+This can lead to a more efficient implementation because bit shifting
+can replace the division operations shown in the implementation of
+Section~\ref{BinRadix}.
+Re-implement the Radix Sort code given in Section~\ref{BinRadix} to use 
+bit shifting in place of division.
+Compare the running time of the old and new Radix Sort implementations.
+
+\item
+Write your own collection of sorting programs to implement the
+algorithms described in this chapter,
+and compare their running times.
+Be sure to implement optimized versions, trying to
+make each program as fast as possible.
+Do you get the same relative timings as shown in
+Figure~\ref{SortComp}?
+If not, why do you think this happened?
+How do your results compare with those of your classmates?
+What does this say about the difficulty of doing empirical timing
+studies?
+\index{sorting|)}
+
+\end{projects}

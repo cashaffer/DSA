@@ -1,0 +1,2490 @@
+% search.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\chapter{Searching}
+\label{Search}
+\def\CHHEAD{Chap.\ \thechapter\ Searching}    % Head title -- even pages
+
+%"You can run, but you can't hide." -- Dirty Harry
+
+\index{search|(}
+Organizing and retrieving information is at the heart of most computer
+applications, and searching is surely the most frequently performed
+of all computing tasks.
+Search can be viewed abstractly as a process to determine if
+an element with a particular value is a member of a particular set.
+The more common view of searching is an attempt to
+find the record within a collection of records that has
+a particular key value, or those records in a collection whose key
+values meet some criterion such as falling within a range of
+values.\index{search!range query}
+
+We can define searching formally as follows.
+\index{search!defined}
+Suppose that we have a collection \cvar{L} of \(n\) records of the
+form
+\[ (k_1, I_1), (k_2, I_2), ..., (k_n, I_n) \]
+where \(I_j\) is information associated with key \(k_j\)
+from record \(j\) for \( 1 \leq j \leq n \).
+Given a particular key value \svar{K},
+the \defit{search problem} is to locate a record
+\( (k_j, I_j) \) in \cvar{L} such that \(k_j = \svar{K}\)
+(if one exists).
+\defit{Searching} is a systematic method for
+locating the record (or records) with key value \(k_j = \svar{K}\).
+
+A \defit{successful} search is one in which a record with key
+\(k_j = \svar{K}\) is found.\index{search!successful}
+An \defit{unsuccessful} search is one in which no record with
+\(k_j = \svar{K}\) is found (and no such record
+exists).\index{search!unsuccessful}
+
+An \defit{exact-match query} is a search for the record whose key
+value matches a specified key value.\index{search!exact-match query}
+A \defit{range query} is a search for all records whose key value
+falls within a specified range of key values.\index{search!range query}
+
+We can categorize search algorithms into three general
+approaches:\index{search!methods}
+
+\begin{enumerate}
+\item
+Sequential and list methods.
+\item
+Direct access by key value (hashing).
+\item
+Tree indexing methods.
+\end{enumerate}
+
+\index{list!search|(}
+This and the following chapter treat these three approaches in turn.
+Any of these approaches are potentially suitable for implementing the
+Dictionary ADT\index{dictionary!ADT}
+introduced in Section~\ref{Dictionary}.
+However, each has different performance characteristics that make it
+the method of choice in particular circumstances.
+
+The current chapter considers methods for searching data stored in
+lists.
+List in this context means any list implementation including a
+linked list or an array.
+Most of these methods are appropriate for sequences\index{sequence}
+(i.e., duplicate key values are allowed), although special techniques
+applicable to sets\index{set!search} are discussed in
+Section~\ref{SetSearch}.
+The techniques from the first three sections of this chapter are most
+appropriate for searching a collection of records stored in RAM.
+Section~\ref{Hash} discusses hashing,\index{hashing} a technique for
+organizing data in an array such that the location of each record
+within the array is a function of its key value.
+Hashing is appropriate when records are stored either in RAM or on
+disk.
+
+Chapter~\ref{Indexing} discusses tree-based methods for organizing
+information on disk, including a commonly used file structure called
+the \Btree.\index{btree@\Btree}
+Nearly all programs that must organize large collections of records
+stored on disk use some variant of either hashing or the B-tree.
+Hashing is practical for only certain access functions
+(exact-match queries\index{search!exact-match query}) 
+and is generally appropriate only when duplicate key values are not
+allowed.
+B-trees are the method of choice for dynamic disk-based
+applications anytime hashing is not appropriate.
+
+\section{Searching Unsorted and Sorted Arrays}
+\label{OrderedSearch}
+
+\index{search!sequential|(}
+The simplest form of search has already been presented in
+Example~\ref{SeqMax}: the sequential search algorithm.
+Sequential search\index{search!sequential} on an unsorted list
+requires \Thetan\ time in the worst case.
+
+How many comparisons does linear search do on average?
+A major consideration is whether \svar{K} is in list \cvar{L} at
+all.
+We can simplify our analysis by ignoring everything about the input
+except the position of \svar{K} if it is found in \cvar{L}.
+Thus, we have \(n+1\) distinct possible events:
+That \svar{K} is in one of positions 0 to \(n-1\) in \cvar{L}
+(each position having its own probability), or that it is not in
+\cvar{L} at all.
+We can express the probability that \svar{K} is not in \cvar{L} as
+\[\mathbf{P}(\svar{K} \notin \cvar{L}) =
+1 - \sum_{i=1}^n \mathbf{P}(\svar{K} = \cvar{L}[i])\]
+\noindent where \(\mathbf{P}(\svar{x})\) is the probability of event
+\svar{x}.
+
+Let $p_i$ be the probability that \svar{K} is in position \(i\) of
+\cvar{L} (indexed from 0 to \(n-1\).
+For any position \(i\) in the list, we must look at \(i+1\) records to
+reach it.
+So we say that the cost when \svar{K} is in position \(i\) is \(i+1\).
+When \svar{K} is not in \cvar{L}, sequential search will require \(n\)
+comparisons.
+Let $p_n$ be the probability that \svar{K} is not in \cvar{L}.
+Then the average cost \Tn\ will be
+
+\[\Tn = n p_n + \sum_{i=0}^{n-1} (i+1) p_i.\]
+
+\noindent What happens to the equation if we assume all the \(p_i\)'s
+are equal (except \(p_0\))?
+
+\begin{eqnarray*}
+\Tn &=& p_n n + \sum_{i=0}^{n-1} (i+1) p\\
+&=& p_n n + p\sum_{i=1}^n i\\
+&=& p_n n + p\frac{n(n+1)}{2}\\
+&=& p_n n + \frac{1 - p_n}{n}\frac{n(n+1)}{2}\\
+&=& \frac{n + 1 + p_n(n-1)}{2}
+\end{eqnarray*}
+
+\noindent Depending on the value of \(p_n\),
+\(\frac{n+1}{2} \leq \Tn \leq n\).
+\index{search!sequential|)}
+
+\index{search!jump|(}
+For large collections of records that are searched repeatedly,
+sequential search is unacceptably slow.
+One way to reduce search time is to preprocess the records by
+sorting them.\index{sorting}
+Given a sorted array,
+an obvious improvement over simple linear search is to test if the
+current element in \cvar{L} is greater than \svar{K}.
+If it is, then we know that \svar{K} cannot appear later in the array,
+and we can quit the search early.
+But this still does not improve the worst-case cost of the algorithm.
+
+We can also observe that if we look first at position 1 in sorted
+array \cvar{L} and find that \svar{K} is bigger, then we rule out
+position 0 as well as position 1.
+Because more is often better, what if we look at position 2 in
+\cvar{L} and find that \svar{K} is bigger yet?
+This rules out positions 0, 1, and 2 with one comparison.
+What if we carry this to the extreme and look first at the last
+position in \cvar{L} and find that \svar{K} is bigger?
+Then we know in one comparison that \svar{K} is not in \cvar{L}.
+This is very useful to know, but what is wrong with the conclusion
+that we should always start by looking at the last position?
+The problem is that, while we learn a lot sometimes (in one comparison
+we might learn that \svar{K} is not in the list), usually we learn
+only a little bit (that the last element is not \svar{K}).
+
+The question then becomes: What is the right amount to jump?
+This leads us to an algorithm known as \defit{Jump Search}.
+For some value \(j\), we check every \(j\)'th element in \cvar{L},
+that is, we check elements \cvar{L}[\(j\)], \cvar{L}[\(2j\)], and so on.
+So long as \svar{K} is greater than the values we are checking, we
+continue on.
+But when we reach a value in \cvar{L} greater than \svar{K}, we do a
+linear search on the piece of length \(j-1\) that we know brackets
+\svar{K} if it is in the list.
+
+If we define \(m\) such that \(mj \leq n < (m+1)j\), then the total
+cost of this algorithm is at most \(m + j - 1\) 3-way comparisons.
+(They are 3-way because at each comparison of \svar{K} with some
+\cvar{L}[\(i\)] we need to know if \svar{K} is less than, equal to, or
+greater than \cvar{L}[\(i\)].)
+Therefore, the cost to run the algorithm on \(n\) items with a jump of
+size \(j\) is
+
+\[\textbf{T}(n, j) = m + j - 1 =
+\left\lfloor \frac{n}{j} \right\rfloor + j - 1.\]
+
+What is the best value that we can pick for \(j\)?
+We want to minimize the cost:
+
+\[\min_{1 \leq j \leq n} \left\{\left\lfloor\frac{n}{j}\right\rfloor +
+j - 1\right\}\]
+
+Take the derivative and solve for \(f'(j) = 0\) to find the minimum,
+which is \(j = \sqrt{n}\).
+In this case, the worst case cost will be
+roughly $2\sqrt{n}$.
+
+This example invokes a basic principle of algorithm design.
+We want to balance the work done while selecting a sublist with the
+work done while searching a sublist.
+In general, it is a good strategy to make subproblems of equal effort.
+This is an example of a
+\defit{divide and conquer}\index{divide and conquer} algorithm.
+\index{search!jump|)}
+
+What if we extend this idea to three levels?
+We would first make jumps of some size \(j\) to find a sublist of size
+\(j-1\) whose end values bracket value \svar{K}.
+We would then work through this sublist by making jumps of some
+smaller size, say \(j_1\).
+Finally, once we find a bracketed sublist of size \(j_1 - 1\), we
+would do sequential search to complete the process.
+
+This probably sounds convoluted to do two levels of jumping to be
+followed by a sequential search.
+While it might make sense to do a two-level algorithm (that is, jump
+search jumps to find a sublist and then does sequential search on the
+sublist),
+it almost never seems to make sense to do a three-level algorithm.
+Instead, when we go beyond two levels, we nearly always generalize by
+using recursion.
+This leads us to the most commonly used search algorithm for sorted
+arrays, the binary search\index{search!binary} described in
+Section~\ref{ProgTimeSec}.
+
+\index{search!interpolation|(}
+If we know nothing about the distribution of
+key values, then binary search is the best
+algorithm available for searching a sorted array
+(see Exercise~\ref{Search}.\ref{BinSearchBound}).
+However, sometimes we do know something about the expected
+key distribution.
+Consider the typical behavior of a person looking up a word in
+a large dictionary.\index{search!in a dictionary}
+Most people certainly do not use sequential search!
+Typically, people use a modified form of binary search, at least until
+they get close to the word that they are looking for.
+The search generally does not start at the middle of the dictionary.
+A person looking for a word starting with `S'
+generally assumes that entries beginning with `S' start about three
+quarters  of the way through the dictionary.
+Thus, he or she will first open the dictionary about three quarters of
+the way through and then make a decision based on what is found as to
+where to look next.
+In other words, people typically use some knowledge about the
+expected distribution of key values to ``compute'' where to look next.
+This form of ``computed'' binary search is called a
+\defit{dictionary search} or \defit{interpolation search}.
+In a dictionary search, we search \cvar{L} at a position \(p\) that is
+appropriate to the value of \svar{K} as follows.
+
+\[p = \frac{\svar{K} - \cvar{L}[1]}{\cvar{L}[n] - \cvar{L}[1]}\]
+
+This equation is computing the position of \svar{K} as a fraction of
+the distance between the smallest and largest key values.
+This will next be translated into that position which is the same
+fraction of the way through the array,
+and this position is checked first.
+As with binary search, the value of the key found eliminates
+all records either above or below that position.
+The actual value of the key found can then be used to
+compute a new position within the remaining range of the array.
+The next check is made based on the new computation.
+This proceeds until either the desired record is found, or the array
+is narrowed until no records are left.
+
+A variation on dictionary search is known as 
+\defit{Quadratic Binary Search} (QBS),
+and we will analyze this in detail because its analysis is easier than
+that of the general dictionary search.
+QBS will first compute \(p\) and then examine
+\(\cvar{L}[\lceil pn\rceil]\).
+If \(\svar{K} < \cvar{L}[\lceil pn\rceil]\) then QBS will sequentially
+probe to the left by steps of size \(\sqrt{n}\), that is, we step
+through
+\[\cvar{L}[\lceil pn - i\sqrt{n}\rceil], i = 1, 2, 3, ...\]
+until we reach a value less than or equal to \svar{K}.
+Similarly for \(\svar{K} > \cvar{L}[\lceil pn\rceil]\)
+we will step to the right by \(\sqrt{n}\) until we reach a value in
+\cvar{L} that is greater than \svar{K}.
+We are now within \(\sqrt{n}\) positions of \svar{K}.
+Assume (for now) that it takes a constant number of comparisons to
+bracket \svar{K} within a sublist of size \(\sqrt{n}\).
+We then take this sublist and repeat the process recursively.
+That is, at the next level we compute an interpolation to start
+somewhere in the subarray.
+We then step to the left or right (as appropriate) by steps of size
+\(\sqrt{\sqrt{n}}\).
+
+What is the cost for QBS?
+Note that \(\sqrt{c^n} =c^{n/2}\), and we will be repeatedly taking
+square roots of the current sublist size until we find the item that
+we are looking for.
+Because \(n = 2^{\log n}\) and we can cut \(\log n\) in half only
+\(\log \log n\) times, the cost is \Thetaloglogn\ \emph{if} the number
+of probes on jump search is constant.
+
+Say that the number of comparisons needed is \(i\), in which case the
+cost is \(i\) (since we have to do \(i\) comparisons).
+If \(\mathbf{P}_i\) is the probability of needing exactly \(i\)
+probes, then
+\[\sum_{i=1}^{\sqrt{n}} i \mathbf{P}(\mbox{need exactly $i$ probes})\]
+\[= 1 \mathbf{P}_1 + 2 \mathbf{P}_2 + 3 \mathbf{P}_3 + \cdots +
+\sqrt{n} \mathbf{P}_{\sqrt{n}}\]
+
+\noindent We now show that this is the same as
+\[\sum_{i=1}^{\sqrt{n}} \mathbf{P}(\mbox{need at least $i$ probes})\]
+
+\begin{eqnarray*}
+&=& 1 + (1-\mathbf{P}_1) + (1-\mathbf{P}_1-\mathbf{P}_2) +
+\cdots + \mathbf{P}_{\sqrt{n}}\\
+&=& (\mathbf{P}_1 + ... + \mathbf{P}_{\sqrt{n}}) +
+    (\mathbf{P}_2 + ... + \mathbf{P}_{\sqrt{n}}) +\\
+&& \qquad    (\mathbf{P}_3 + ... + \mathbf{P}_{\sqrt{n}}) + \cdots\\
+&=& 1 \mathbf{P}_1 + 2 \mathbf{P}_2 + 3 \mathbf{P}_3 + \cdots +
+\sqrt{n} \mathbf{P}_{\sqrt{n}}
+\end{eqnarray*}
+
+\noindent We require at least two probes to set the bounds, so the cost
+is 
+\[2 + \sum_{i=3}^{\sqrt{n}} \mathbf{P}(\mbox{need at least \(i\) probes}).\]
+
+We now make take advantage of a useful fact known as \v{C}eby\v{s}ev's
+Inequality.
+\v{C}eby\v{s}ev's inequality states that
+\(\mathbf{P}\)(need exactly \(i\) probes), or \(\mathbf{P}_i\), is
+\[ \mathbf{P}_i \leq \frac{p(1 - p)n}{(i - 2)^2 n} \leq
+\frac{1}{4(i-2)^2}\]
+\noindent because \(p(1-p) \leq 1/4\) for any probability \(p\).
+This assumes uniformly distributed data.
+Thus, the expected number of probes is
+\[2 + \sum_{i=3}^{\sqrt{n}} \frac{1}{4(i-2)^2}
+< 2 + \frac{1}{4}\sum_{i=1}^\infty \frac{1}{i^2} =
+2 + \frac{1}{4}\frac{\pi}{6} \approx 2.4112\]
+
+Is QBS better than binary search?
+Theoretically yes, because \Ologlogn\ grows slower than \Ologn.
+However, we have a situation here which illustrates the limits to the
+model of asymptotic complexity in some practical situations.
+Yes, \(c_1 \log n\) does grow faster than \(c_2 \log \log n\).
+In fact, it is exponentially faster!
+But even so, for practical input sizes, the absolute cost difference
+is fairly small.
+Thus, the constant factors might play a role.
+First we compare $\lg \lg n$ to $\lg n$.
+
+{\small
+\[\begin{array}{llll}
+&&&{\rm Factor}\\
+n  &\lg n&\lg \lg n&{\rm Difference}\\
+\hline
+16 &4    &2        &2\\
+256&8    &3        &2.7\\
+2^{16}&16   &4        &4\\
+2^{32}&32  &5      &6.4\\
+\end{array}\]
+}
+
+It is not always practical to reduce an algorithm's growth rate.
+There is a ``practicality window'' for every problem, in that we have
+a practical limit to how big an input we wish to solve for.
+If our problem size never grows too big, it might not matter if we can
+reduce the cost by an extra log factor, because the constant factors
+in the two algorithms might differ by more than the log of the log of
+the input size.
+
+For our two algorithms, let us look further and check the actual
+number of comparisons used. 
+For binary search, we need about \(\log n-1\) total comparisons.
+Quadratic binary search requires about \(2.4 \lg \lg n\) comparisons.
+If we incorporate this observation into our table, we get a different
+picture about the relative differences.
+
+{\small
+\[\begin{array}{llll}
+&&&{\rm Factor}\\
+n  &\lg n -1&2.4 \lg \lg n&{\rm Difference}\\
+\hline
+16&3&4.8&{\rm worse}\\
+256&7&7.2&\approx {\rm same}\\
+64K&15&9.6&1.6\\
+2^{32}&31&12&2.6
+\end{array}\]
+}
+
+But we still are not done.
+This is only a count of raw comparisons.
+Binary search is inherently much simpler than QBS,
+because binary search only needs to calculate the midpoint position of
+the array before each comparison, while quadratic binary search must
+calculate an interpolation point which is more expensive.
+So the constant factors for QBS are even higher.
+
+Not only are the constant factors worse on average, but QBS
+is far more dependent than binary search on good data
+distribution to perform well.
+For example, imagine that you are searching a telephone directory for
+the name ``Young.''
+Normally you would look near the back of the book.
+If~you found a name beginning with `Z,' you might look just a little
+ways toward the front.
+If~the next name you find also begins with 'Z,` you would look a
+little further toward the front.
+If~this particular telephone directory were unusual in that half of the
+entries begin with `Z,' then you would need to move toward
+the front many times, each time eliminating relatively few records
+from the search.
+In~the extreme, the performance of interpolation search might not be
+much better than sequential search if the distribution of key values
+is badly calculated.
+
+While it turns out that QBS is not a practical algorithm,
+this is not a typical situation.
+Fortunately, algorithm growth rates are usually well behaved, so that
+asymptotic algorithm analysis nearly always gives us a practical
+indication for which of two algorithms is better.
+\index{search!interpolation|)}
+
+\section{Self-Organizing Lists}
+\label{SelfOrg}
+
+\index{list!ordered by frequency|(}
+While ordering of lists is most commonly done by key value,
+this is not the only viable option.
+Another approach to organizing lists to speed search is to order the
+records by expected frequency of access.
+While the benefits might not be as great as when organized by key
+value, the cost to organize (at least approximately) by frequency of
+access can be much cheaper,
+and thus can speed up sequential search in some situations.
+
+Assume that we know, for each key \(k_i\), the probability \(p_i\) that
+the record with key \(k_i\) will be requested.
+Assume also that the list is ordered so that the most frequently
+requested record is first, then the next most frequently requested
+record, and so on.
+Search in the list will be done sequentially, beginning with the
+first position.
+Over the course of many searches, the expected number of comparisons
+required for one search is
+\[ \overline{C}_n = 1 p_0 + 2 p_1 + ... + n p_{n-1}. \]
+\noindent In other words, the cost to access the record in
+\cvar{L}[0] is 1 (because one key value is looked at), and the
+probability of this occurring is \(p_0\).
+The cost to access the record in \cvar{L}[1] is 2 (because
+we must look at the first and the second records' key values),
+with probability \(p_1\), and so on.
+For \(n\) records, assuming that all searches are
+for records that actually exist, the probabilities \(p_0\) through
+\(p_{n-1}\) must sum to one.
+
+Certain probability distributions give easily computed results.
+
+\begin{example}
+Calculate the expected cost to search a list
+when each record has equal chance of being accessed (the classic
+sequential search through an unsorted list).
+Setting \(p_i = 1/n\) yields\index{summation}
+\[ \overline{C}_n = \sum_{i=1}^n i/n = (n+1)/2.\]
+This result matches our expectation that half the records will be
+accessed on average by normal sequential search.
+If the records truly have equal access probabilities, then ordering
+records by frequency yields no benefit.
+We saw in Section~\ref{OrderedSearch} the more general case where we
+must consider the probability (labeled \(p_n\)) that the search key
+does not match that for any record in the array.
+In that case, in accordance with our general formula, we get
+\[ (1-p_n) \frac{n+1}{2} + p_n n = 
+\frac{n + 1 - n p_n n - p_n + 2 p_n}{2} =
+\frac{n + 1 + p_0 (n - 1)}{2}.\]
+\noindent Thus, \(\frac{n+1}{2} \leq \overline{C}_n \leq n\),
+depending on the value of \(p_0\).
+\end{example}
+
+A geometric probability distribution\index{geometric distribution}
+can yield quite different results.
+
+\newpage
+
+\begin{example}
+Calculate the expected cost for searching a list ordered by frequency
+when the probabilities are defined as
+\[ p_i = \left\{ \begin{array}{ll}
+1/2^i & \mbox{if \(0 \leq i \leq n-2\)}\\
+1/2^n & \mbox{if \(i = n-1\).}
+\end{array} \right. \]
+\noindent Then,\index{summation}
+\[ \overline{C}_n \approx \sum_{i=0}^{n-1} (i+1)/2^{i+1} =
+\sum_{i=1}^n (i/2^i) \approx 2. \]
+For this example, the expected number of accesses is a constant.
+This is because the probability for accessing the first record is
+high (one half), the second is much lower (one quarter) but still much
+higher than for the third record, and so on.
+This shows that for some probability distributions, ordering the list
+by frequency can yield an efficient search technique.
+\end{example}
+
+\vspace{-\smallskipamount}
+In many search applications, real access patterns follow a rule of
+thumb called the \defit{80/20 rule}.\index{80/20 rule}
+The 80/20 rule says that 80\% of the record accesses are to 20\%
+of the records.
+The values of 80 and 20 are only estimates; every data access pattern
+has its own values.
+However, behavior of this nature occurs surprisingly often in practice
+(which explains the success of caching techniques\index{cache} widely
+used by web browsers for speeding access to web pages,
+and by disk drive and CPU manufacturers for speeding access to data
+stored in slower memory; see the discussion on buffer
+pools\index{buffer pool} in Section~\ref{BuffPool}).
+When the 80/20 rule applies, we can expect considerable improvements
+to search performance from a list ordered by frequency of access over
+standard sequential search in an unordered list.
+
+\vspace{-\smallskipamount}
+\begin{example}
+\label{ZipfExamp}
+The 80/20 rule is an example of a 
+\defit{Zipf distribution}.\index{zipf distribution@Zipf distribution}
+Naturally occurring distributions often follow a Zipf distribution.
+Examples include the observed frequency for the use of words in a
+natural language such as English, and the size of the population for
+cities (i.e., view the relative proportions for the populations as
+equivalent to the ``frequency of use'').
+Zipf distributions are related to the
+Harmonic Series\index{harmonic series@Harmonic Series}
+defined in Equation~\ref{HarmonicEq}.
+Define the Zipf frequency for item \(i\) in the distribution for \(n\)
+records as \(1/(i\Harmonic)\)
+(see Exercise~\ref{Search}.\ref{ZipfExer}).
+The expected cost for the series whose members follow this Zipf
+distribution will be\index{summation}
+
+\vspace{-\medskipamount}
+\[ \overline{C}_n = \sum_{i=1}^n i/i\Harmonic = n/\Harmonic \approx
+n/\log_e n.\]
+\vspace{-\medskipamount}
+
+\noindent When a frequency distribution follows the 80/20 rule, the
+average search looks at about 10-15\% of the records in a list
+ordered by frequency.
+\end{example}
+
+\vspace{-\smallskipamount}
+\index{list!self-organizing|(}
+This is potentially a useful observation that typical ``real-life''
+distributions of record accesses, if the records were ordered by
+frequency, would require that we visit on average only 10-15\% of the
+list when doing sequential search.
+This means that if we had an application that used sequential search,
+and we wanted to make it go a bit faster (by a constant amount), we
+could do so without a major rewrite to the system to implement
+something like a search tree.
+But that is only true if there is an easy way to (at least
+approximately) order the records by frequency.
+
+In most applications, we have no means of knowing in advance the
+frequencies of access for the data records.
+To complicate matters further, certain records might be accessed
+frequently for a brief period of time, and then rarely thereafter.
+Thus, the probability of access for records might change over time (in
+most database systems, this is to be expected).
+\defit{Self-organizing lists} seek to solve both of these problems.
+
+\index{buffer pool!replacement schemes|(}
+Self-organizing lists modify the order of records within the
+list based on the actual pattern of record access.
+Self-organizing lists use a heuristic for
+deciding how to to reorder the list.
+These heuristics are similar to the rules for managing buffer
+pools (see Section~\ref{BuffPool}).
+In fact, a buffer pool\index{buffer pool} is a form of self-organizing
+list.
+Ordering the buffer pool by expected frequency of access is a good
+strategy, because typically we must search the contents of the buffers
+to determine if the desired information is already in main memory.
+When ordered by frequency of access, the buffer at the end of the
+list will be the one most appropriate for reuse when a new page
+of information must be read.
+Below are three traditional heuristics for managing self-organizing
+lists:
+
+\begin{enumerate}
+
+\item
+The most obvious way to keep a list ordered by frequency would be to
+store a count of accesses to each record and always maintain records
+in this order.
+This method will be referred to as \defit{count}.
+Count is similar to the least frequently used buffer replacement
+strategy.\index{least frequently used (LFU)}
+Whenever a record is accessed, it might move toward the front of
+the list if its number of accesses becomes greater than a record
+preceding it.
+Thus, count will store the records in the order of frequency
+that has actually occurred so far.
+Besides requiring space for the access counts, count does not
+react well to changing frequency of access over time.
+Once a record has been accessed a large number of times under the
+frequency count system, it will
+remain near the front of the list regardless of further access
+history.
+
+\item
+\index{move-to-front|(}
+Bring a record to the front of the list when it is
+found, pushing all the other records back one position.
+This is analogous to the least recently used
+buffer\index{least recently used (LRU)}
+replacement strategy and is called
+\defit{move-to-front}.
+This heuristic is easy to implement if the records are stored using a
+linked list.
+When records are stored in an array, bringing a record forward from
+near the end of the array will result in a
+large number of records (slightly) changing position.
+Move-to-front's cost is bounded in the sense that it requires at most
+twice the number of accesses required by the
+\defit{optimal static ordering} for
+\(n\)~records when at least \(n\)~searches are performed.
+In other words, if we had known the series of (at least~\(n\))
+searches in advance and had stored the records in order of frequency
+so as to minimize the total cost for these accesses, this cost would
+be at least half the cost required by the move-to-front heuristic.
+(This will be proved using
+amortized analysis\index{amortized analysis}
+in Section~\ref{AmortAnal}.)
+Finally, move-to-front responds well to local changes in frequency of
+access, in that if a record is frequently accessed for a brief period
+of time it will be near the front of the list during that period of
+access.
+Move-to-front does poorly when the records are processed in sequential
+order, especially if that sequential order is then repeated multiple
+times.
+
+\item
+Swap any record found with the record immediately
+preceding it in the list.
+This heuristic is called \defit{transpose}.\index{transpose}
+Transpose is good for list implementations based on either linked
+lists or arrays.
+Frequently used records will, over time, move to the front of the
+list.
+Records that were once frequently accessed but are no longer used will
+slowly drift toward the back.
+Thus, it appears to have good properties with respect to changing
+frequency of access.
+Unfortunately, there are some pathological sequences of access that
+can make transpose perform poorly.
+Consider the case where the last record of the list (call it~\svar{X})
+is accessed.
+This record is then swapped with the next-to-last record
+(call it~\svar{Y}),
+making \svar{Y} the last record.
+If~\svar{Y} is now accessed, it swaps with~\svar{X}.
+A repeated series of accesses alternating between \svar{X}
+and~\svar{Y} will continually search to the end of the list,
+because neither record will ever make progress toward the front.
+However, such pathological cases are unusual in practice.
+A variation on transpose would be to move the accessed record forward
+in the list by some fixed number of steps.
+\end{enumerate}
+
+\vspace{-\bigskipamount}
+
+\begin{example}
+Assume that we have eight records, with key values~\(A\) to~\(H\),
+and that they are initially placed in alphabetical order.
+Now, consider the result of applying the following access pattern:
+
+\vspace{-\medskipamount}
+\[ F~D~F~G~E~G~F~A~D~F~G~E.\]
+
+\vspace{-\medskipamount}
+\noindent 
+Assume that when a record's frequency count goes up, it moves
+forward in the list to become the last record with that value for its
+frequency count.
+After the first two accesses, \(F\)~will be the first record and \(D\)
+will be the second.
+The final list resulting from these accesses will be
+
+\vspace{-\medskipamount}
+\[ F~G~D~E~A~B~C~H,\]
+
+\vspace{-\medskipamount}
+\noindent and the total cost for the twelve accesses will be
+45~comparisons.
+
+If the list is organized by the move-to-front heuristic, then the
+final list will be
+
+\vspace{-\medskipamount}
+\[ E~G~F~D~A~B~C~H,\]
+
+\vspace{-\medskipamount}
+\noindent and the total number of comparisons required is~54.
+
+Finally, if the list is organized by the transpose heuristic, then the
+final list will be\index{transpose}
+
+\vspace{-\medskipamount}
+\[ A~B~F~D~G~E~C~H,\]
+
+\vspace{-\medskipamount}
+\noindent and the total number of comparisons required is~62.
+\end{example}
+\index{buffer pool!replacement schemes|)}
+
+While self-organizing lists do not generally perform as well
+as search trees or a sorted list, both of which require \Ologn\ search
+time, there are many situations in which self-organizing lists prove a
+valuable tool.
+Obviously they have an advantage over sorted lists in that they need
+not be sorted.\index{sorting}
+This means that the cost to insert a new record is low, which could
+more than make up for the higher search cost when insertions are
+frequent.
+Self-organizing lists are simpler to implement than search trees and
+are likely to be more efficient for small lists.
+Nor do they require additional space.
+Finally, in the case of an application where sequential
+search\index{search!sequential} is ``almost'' fast enough, changing an
+unsorted list to a self-organizing list might speed the
+application enough at a minor cost in additional code.
+
+\index{text compression|(}
+As an example of applying self-organizing lists, consider an
+algorithm for compressing and transmitting messages.
+The list is self-organized by the move-to-front rule.
+Transmission is in the form of words and numbers, by the following
+rules:
+
+\begin{enumerate}
+
+\item
+If the word has been seen before, transmit the current position of the
+word in the list.
+Move the word to the front of the list.
+
+\item
+If the word is seen for the first time, transmit the word.
+Place the word at the front of the list.
+\end{enumerate}
+
+Both the sender and the receiver keep track of the position of words
+in the list in the same way (using the move-to-front rule), so
+they agree on the meaning of the numbers that encode repeated
+occurrences of words.
+Consider the following example message to be transmitted
+(for simplicity, ignore case in letters).
+
+\vspace{-\smallskipamount}
+\begin{center}
+The car on the left hit the car I left.
+\end{center}
+
+\vspace{-\smallskipamount}
+The first three words have not been seen before, so they must be sent
+as full words.
+The fourth word is the second appearance of ``the,'' which at this
+point is the third word in the list.
+Thus, we only need to transmit the position value~``3.''
+The next two words have not yet been seen, so must be sent as full words.
+The seventh word is the third appearance of ``the,'' which coincidentally
+is again in the third position.
+The eighth word is the second appearance of ``car,'' which is now in the
+fifth position of the list.
+``I'' is a new word, and the last word ``left'' is now in the fifth
+position.
+Thus the entire transmission would be
+
+\vspace{-\smallskipamount}
+\begin{center}
+The car on 3 left hit 3 5 I 5.
+\end{center}
+
+\vspace{-\smallskipamount}
+This approach to compression is similar in spirit to
+Ziv-Lempel\index{ziv-lempel coding@Ziv-Lempel coding} coding, which is
+a class of coding algorithms commonly used in file compression
+utilities.
+Ziv-Lempel coding replaces repeated occurrences of strings with a
+pointer to the location in the file of the first occurrence of the
+string.
+The codes are stored in a self-organizing list in order to speed
+up the time required to search for a string that has previously been
+seen.
+\index{text compression|)}
+\index{move-to-front|)}
+\index{list!search|)}
+\index{list!self-organizing|)}
+\index{list!ordered by frequency|)}
+
+\section{Bit Vectors for Representing Sets}
+\label{SetSearch}
+
+\index{set!search|(}
+\index{search!sets|(}
+Determining whether a value is a member of a particular set is a
+special case of searching for keys in a sequence\index{sequence} of
+records.
+Thus, any of the search methods discussed in this book can be
+used to check for set membership.
+However, we can also take advantage of the restricted circumstances
+imposed by this problem to develop another representation.
+
+In the case where the set values fall within a limited range, we
+can represent the set using a bit array with a bit position allocated
+for each potential member.
+Those members actually in the set store a value of 1 in their
+corresponding bit;
+those members not in the set store a value of 0 in their corresponding
+bit.
+For example, consider the set of primes between~0 and~15.
+Figure~\ref{Primes} shows the corresponding bit array.
+To determine if a particular value is prime, we simply check
+the corresponding bit.
+This representation scheme is called a \defit{bit vector} or a
+\defit{bitmap}.
+The mark array used in several of the graph algorithms of
+Chapter~\ref{Graphs} is an example of such a set representation.
+
+\begin{figure}
+\pdffig{Primes}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}\vspace{-\smallskipamount}
+
+\capt{4.5in}{The bit array for the set of primes in the range 0 to 15}
+{The bit array for the set of primes in the range 0 to~15.
+The bit at position~\(i\) is set to 1 if and only if \(i\) is
+prime.}{Primes}
+\smallskip
+\end{figure}
+
+If the set fits within a single computer word, then
+set union,\index{set!union, intersection, difference} intersection,
+and difference can be performed by logical bit-wise operations.
+The union of sets~\(A\) and~\(B\) is the bit-wise OR function (whose
+symbol is \Cref{|} in \Lang).
+The intersection of sets~\(A\) and~\(B\) is the bit-wise AND function
+(whose symbol is \Cref{\&} in \Lang).
+For example, if we would like to compute the set of numbers between~0
+and~15 that are both prime and odd numbers, we need only compute the
+expression
+\[ 0011010100010100\ \&\ 0101010101010101. \]
+\noindent The set difference \(A - B\) can be implemented in \Lang\ using
+the expression \Cref{A\&\~{ }B} (\Cref{\~{ }}
+is the symbol for bit-wise negation).
+For larger sets that do not fit into a single computer word, the
+equivalent operations can be performed in turn on the series of words
+making up the entire bit vector.
+
+This method of computing sets from bit vectors is sometimes applied to
+document retrieval.\index{document retrieval}
+Consider the problem of picking from a collection of documents those
+few which contain selected keywords.
+For each keyword, the document retrieval system stores a bit vector
+with one bit for each document.
+If the user wants to know which documents contain a certain three
+keywords, the corresponding three bit vectors are AND'ed together.
+Those bit positions resulting in a value of 1 correspond to the
+desired documents.
+Alternatively, a bit vector can be stored for each document to
+indicate those keywords appearing in the document.
+Such an organization is called a \defit{signature file}.
+The signatures can be manipulated to find documents with desired
+combinations of keywords.
+\index{search!sets|)}
+\index{set!search|)}
+
+\section{Hashing}
+\label{Hash}
+
+\index{hashing|(}
+This section presents a completely different approach to searching
+arrays: by direct access based on key value.
+The process of finding a record using some computation to map its key
+value to a position in the array is called \defit{hashing}.
+Most hashing schemes place records in the array in whatever order
+satisfies the needs of the address calculation, thus the records are
+not ordered by value or frequency.
+The function that maps key values to positions is called a
+\defit{hash function} and will be denoted by {\bf h}.
+The array that holds the records is called the \defit{hash table} and
+will be denoted by~\cvar{HT}.\index{hashing!table}
+A position in the hash table is also known as a \defit{slot}.
+The number of slots in hash table~\cvar{HT} will be denoted by the
+variable~\(M\), with slots numbered from 0~to~\(M-1\).
+The goal for a hashing system is to arrange things such that, for any
+key value~\(K\) and some hash function {\bf h}, \(i = {\bf h}(K)\)
+is a slot in the table such that \(0 \leq {\bf h}(K) < M\), 
+and we have the key of the record stored at \(\cvar{HT}[i]\) equal to \(K\).
+
+Hashing is not good for applications where multiple
+records with the same key value are permitted.
+Hashing is not a good method for answering range
+searches.\index{search!range query}
+In other words, we cannot easily find all records (if any) whose key
+values fall within a certain range.
+Nor can we easily find the record with the minimum or maximum key
+value, or visit the records in key order.
+Hashing is most appropriate for answering the question,
+``What record, if any, has key value~\(K\)?''
+For applications where access involves only exact-match queries,
+hashing is usually the search method of choice because it is extremely
+efficient when implemented correctly.
+As you will see in this section, however, there are many approaches
+to hashing and it is easy to devise an inefficient implementation.
+Hashing is suitable for both in-memory and disk-based searching and
+is one of the two most widely used methods for organizing large
+databases stored on disk (the other is the B-tree,\index{btree@\Btree}
+which is covered in Chapter~\ref{Indexing}).
+
+As a simple (though unrealistic) example of hashing,
+consider storing \(n\) records each with a
+unique key value in the range 0 to~\(n-1\).
+In this simple case, a record with key~\(k\) can be stored in
+\cvar{HT}[\(k\)], and the hash function is simply
+\({\bf h}(k) = k\).
+To find the record with key value \(k\), simply look in \cvar{HT}[\(k\)].
+
+Typically, there are many more values in the key range than there are
+slots in the hash table.
+For a more realistic example, suppose that the key can take any value
+in the range~0 to 65,535 (i.e., the key is a two-byte unsigned
+integer), and that we expect to store approximately 1000~records at
+any given time.
+It is impractical in this situation to use a hash table with
+65,536 slots, because most of the slots will be left empty.
+Instead, we must devise a hash function that allows us to store the
+records in a much smaller table.
+Because the possible key range is larger than the size of the table,
+at least some of the slots must be mapped to from multiple key
+values.
+Given a hash function {\bf h} and two keys \(k_1\) and \(k_2\), if
+\({\bf h}(k_1) = \beta = {\bf h}(k_2)\) where \(\beta\) is a slot in
+the table, then we say that \(k_1\) and \(k_2\) have a
+\defit{collision}\index{hashing!collision resolution} at
+slot \(\beta\) under hash function~{\bf h}.
+
+Finding a record with key value~\(K\) in a database organized by hashing
+follows a two-step procedure:
+
+\begin{enumerate}
+
+\item
+Compute the table location \({\bf h}(K)\).
+
+\item
+Starting with slot \({\bf h}(K)\), locate the record containing key
+\(K\) using (if necessary) a
+\defit{collision resolution policy}.\index{hashing!collision resolution}
+
+\end{enumerate}
+
+\subsection{Hash Functions}
+\label{HashFun}
+
+\index{hashing!hash function|(}
+Hashing generally takes records whose key values come from a
+large range and stores those records in a table
+with a relatively small number of slots.
+Collisions occur when two records hash to the same slot in the
+table.
+If we are careful---or lucky---when selecting a hash function, then
+the actual number of collisions will be few.
+Unfortunately, even under the best of circumstances, collisions are
+nearly unavoidable.\footnote{The exception to this is \defit{perfect
+hashing}.
+Perfect hashing is a system in which records are hashed such that
+there are no collisions.\index{hashing!perfect}
+A hash function is selected for the specific set
+of records being hashed, which requires that the entire collection of
+records be available before selecting the hash function.
+Perfect hashing is efficient because it always finds the record that
+we are looking for exactly where the hash function computes it to
+be, so only one access is required.
+Selecting a perfect hash function can be expensive, but might be
+worthwhile when extremely efficient search performance is required.
+An example is searching for data on a read-only CD.\index{cd-rom@CD-ROM}
+Here the database will never change, the time for each access is
+expensive, and the database designer can build the hash table before
+issuing the CD.}
+For example, consider a classroom full of students.
+What is the probability that some pair of students
+shares the same birthday (i.e., the same day of the year, not
+necessarily the same year)?\index{birthday problem}
+If there are 23 students, then the odds are about even that two will
+share a birthday.
+This is despite the fact that there are 365 days in which students
+can have birthdays (ignoring leap years), on most of which no student
+in the class has a birthday.
+With more students, the probability of a shared birthday increases.
+The mapping of students to days based on their birthday is similar to
+assigning records to slots in a table (of size 365) using the
+birthday as a hash function.
+Note that this observation tells us nothing about \emph{which}
+students share a birthday, or on \emph{which} days of the year shared
+birthdays fall.
+
+To be practical, a database organized by hashing must store records in a
+hash table that is not so large that it wastes space.
+Typically, this means that the hash table will be around half full.
+Because collisions are extremely likely to occur under these
+conditions (by chance, any record inserted into a table that is half
+full will have a collision half of the time),
+does this mean that we need not worry about the ability of a
+hash function to avoid collisions?
+Absolutely not.
+The difference between a good hash function and a bad hash function
+makes a big difference in practice.
+Technically, any function that maps all possible key values to a
+slot in the hash table is a hash function.
+In the extreme case, even a function that maps all records to the same 
+slot is a hash function, but it does nothing to help us
+find records during a search operation.
+
+We would like to pick a hash function that stores the
+actual records in the collection such that each slot in the hash table 
+has equal probability of being filled.
+Unfortunately, we normally have no control over the key values of the
+actual records, so how well any particular hash function does this
+depends on the distribution of the keys within the allowable key range.
+In some cases, incoming data are well distributed across their key
+range.
+For example, if the input is a set of random numbers selected
+uniformly from the key range,
+any hash function that assigns the key range so that each slot in the
+hash table receives an equal share of the range will likely also
+distribute the input records uniformly within the table.
+However, in many applications the incoming records are highly
+clustered or otherwise poorly distributed.
+When input records are not well distributed throughout the key range
+it can be difficult to devise a hash function that does a good job of
+distributing the records throughout the table, especially if the 
+input distribution is not known in advance.
+
+There are many reasons why data values might be poorly distributed.
+
+\begin{enumerate}
+\item
+Natural frequency distributions tend to follow a common pattern where
+a few of the entities occur frequently while most entities occur
+relatively rarely.
+For example, consider the populations of the 100 largest cities in the
+United States.
+If you plot these populations on a number line, most of them
+will be clustered toward the low side, with a few
+outliers on the high side.
+This is an example of a Zipf distribution
+(see Section~\ref{SelfOrg}).\index{zipf distribution@Zipf distribution}
+Viewed the other way, the home town for a given person is far more
+likely to be a particular large city than a particular small town.
+
+\item
+Collected data are likely to be skewed in some way.
+Field samples might be rounded to, say, the
+nearest~5 (i.e., all numbers end in 5 or~0).
+
+\item
+If the input is a collection of common English words, the beginning
+letter will be poorly distributed.
+\end{enumerate}
+
+\noindent Note that in examples~2 and~3, either high- or
+low-order bits of the key are poorly distributed.
+
+When designing hash functions, we are generally faced with one of two
+situations.
+
+\begin{enumerate}
+
+\item
+We know nothing about the distribution of the incoming keys.
+In this case, we wish to select a hash function that evenly
+distributes the key range across the hash table,
+while avoiding obvious opportunities for clustering such as hash
+functions that are sensitive to the high- or low-order bits of the key
+value.
+
+\item
+We know something about the distribution of the incoming keys.
+In this case, we should use a distribution-dependent hash function
+that avoids assigning clusters of related key values to the same hash
+table slot.
+For example, if hashing English words, we should \emph{not} hash on
+the value of the first character because this is likely to be unevenly
+distributed.
+
+\end{enumerate}
+
+\noindent Below are several examples of hash functions that illustrate
+these points. 
+
+\begin{example}
+Consider the following hash function used to hash integers to a table
+of sixteen slots:
+
+\xprogexamp{Hint.book}
+
+The value returned by this hash function depends solely on
+the least significant four bits of the key.
+Because these bits are likely to be poorly distributed
+(as an example, a high percentage of the keys might be even numbers,
+which means that the low order bit is zero),
+the result will also be poorly distributed.
+This example shows that the size of the table~\(M\)
+can have a big effect on the performance of a hash system because this
+value is typically used as the modulus to ensure that the hash
+function produces a number in the range 0 to \(M-1\).
+\end{example}
+
+\begin{example}
+A good hash function for numerical values comes from
+the \defit{mid-square} method.
+The mid-square method squares the key value, and then takes the middle
+\(r\) bits of the result, giving a value in the range
+0 to \(2^r-1\).
+This works well because most or all bits of the key value contribute
+to the result.
+For example, consider records whose keys are 4-digit numbers in
+base~10.
+The goal is to hash these key values to a table of size 100
+(i.e., a range of 0 to 99).
+This range is equivalent to two digits in base 10.
+That is, \(r = 2\).
+If the input is the number 4567, squaring yields an 8-digit number,
+20857489.
+The middle two digits of this result are 57.
+All digits (equivalently, all bits when the number is viewed in binary)
+contribute to the middle two digits of the squared value.
+Figure~\ref{MidSquare} illustrates the concept.
+Thus, the result is not dominated by the distribution of the bottom
+digit or the top digit of the original key value.
+
+\begin{figure}
+\pdffig{MidSquare}
+\bigskip
+
+\capt{4.5in}{Illustration of mid-square method}
+{An illustration of the mid-square method, showing the details of long
+multiplication in the process of squaring the value 4567.
+The bottom of the figure indicates which digits of the answer are most
+influenced by each digit of
+the operands.}{MidSquare}
+
+\bigskip
+\bigskip
+
+\end{figure}
+\end{example}
+
+\begin{example}
+Here is a hash function for strings of characters:
+
+\xprogexamp{Hchar.book}
+
+This function sums the ASCII values of the letters in a string.
+If the hash table size \(M\) is small, this hash function should do a
+good job of distributing strings evenly among the hash table slots,
+because it gives equal weight to all characters.
+This is an example of the \defit{folding} approach to designing a hash
+function.
+Note that the order of the characters in the string has no effect on
+the result.
+A similar method for integers would add the digits of the key
+value, assuming that there are enough digits to
+(1) keep any one or two digits with bad distribution from skewing the
+results of the process and
+(2) generate a sum much larger than~\(M\).
+As with many other hash functions, the final step is to apply the
+modulus operator to the result, using table size \(M\) to generate a
+value within the table range.
+If the sum is not sufficiently large, then the modulus operator will
+yield a poor distribution.
+For example, because the ASCII value for ``A'' is 65 and ``Z'' is 90,
+\Cref{sum} will always be in the
+range 650 to 900 for a string of ten upper case letters.
+For a hash table of size 100 or less, a reasonable  distribution
+results.
+For a hash table of size 1000, the distribution is terrible because
+only slots 650 to 900 can possibly be the home slot for some key
+value, and the values are not evenly distributed even within those
+slots.
+\end{example}
+
+\begin{example}
+
+Here is a much better hash function for strings.
+
+\xprogexamp{Sfold.book}
+
+This function takes a string as input.
+It processes the string four bytes at a time, and interprets each of
+the four-byte chunks as a single
+\ifthenelse{\boolean{cpp}}{(unsigned)}{} long integer value.
+The integer values for the four-byte chunks are added together.
+In the end, the resulting sum is converted to the range 0 to \(M-1\)
+using the modulus operator.\footnote{Recall from Section~\ref{MiscNote}
+that the implementation for \(n \bmod m\) on many \LangCPP\ and \LangJava\
+compilers will yield a negative number if \(n\) is negative.
+Implementors for hash functions need to be careful that their
+hash function does not generate a negative number.
+This can be avoided either by insuring that \(n\) is positive when
+computing \(n \bmod m\), or adding \(m\) to the result if
+\(n \bmod m\) is negative.
+\ifthenelse{\boolean{cpp}}{All computation in \Cref{sfold} is done
+using unsigned long values in part to protect against taking the
+modulus of an negative number.}{}
+\ifthenelse{\boolean{java}}{Here, \Cref{sfold} takes the absolute
+value of \Cref{sum} before applying the modulus operator.}{}
+}
+
+For example, if the string ``aaaabbbb'' is passed to \Cref{sfold},
+then the first four bytes (``aaaa'') will be interpreted as the
+integer value  1,633,771,873 and the next four bytes (``bbbb'') will be
+interpreted as the integer value 1,650,614,882.
+Their sum is 3,284,386,755 (when viewed as an unsigned integer).
+If the table size is 101 then the modulus function will cause this key
+to hash to slot 75 in the table.
+Note that for any sufficiently long string, the sum for the integer
+quantities will typically cause a 32-bit integer to overflow (thus
+losing some of the high-order bits) because the resulting values are
+so large.
+But this causes no problems when the goal is to compute a
+hash function.
+\index{hashing!hash function|)}
+\end{example}
+
+\subsection{Open Hashing}
+\label{HashOpen}
+
+\index{hashing!open|(}
+While the goal of a hash function is to minimize collisions,
+some collisions are unavoidable in practice.
+Thus, hashing implementations must include some form of collision
+resolution policy.
+Collision resolution techniques can be broken into two classes:
+\defit{open hashing} (also called \defit{separate chaining}) and
+\defit{closed hashing}
+(also called \defit{open addressing}).\footnote{Yes,
+it is confusing when ``open hashing'' means the opposite of ``open
+addressing,'' but unfortunately, that is the way it is.}
+The difference between the two has to do with whether
+collisions are stored outside the table (open hashing), or
+whether collisions result in storing one of the records at another
+slot in the table (closed hashing).\index{hashing!closed}
+Open hashing is treated in this section, and closed hashing in
+Section~\ref{HashClose}.
+
+The simplest form of open hashing defines each slot in the
+hash table to be the head of a linked list.
+All records that hash to a particular slot are placed on that slot's
+linked list.
+Figure~\ref{OpenHash} illustrates a hash table where each
+slot stores one record and a link pointer to the rest of the list.
+
+\begin{figure}
+\pdffig{OpenHash}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{An illustration of open hashing}
+{An illustration of open hashing for seven numbers stored in a
+ten-slot hash table using the hash function
+\( {\bf h}(K) = K \bmod 10\).
+The numbers are inserted in the order 9877, 2007, 1000, 9530, 3013,
+9879, and 1057.
+Two of the values hash to slot~0, one value hashes to slot~2,
+three of the values hash to slot~7, and one value hashes to slot~9.
+}{OpenHash}
+\bigskip
+\end{figure}
+
+Records within a slot's list can be ordered in several ways:
+by insertion order, by key value order, or by frequency-of-access
+order.
+Ordering the list by key value provides an advantage in the case of an 
+unsuccessful search, because we know to stop searching the list once
+we encounter a key that is greater than the one being searched for.
+If records on the list are unordered or ordered by frequency, then an
+unsuccessful search will need to visit every record on the list.
+
+Given a table of size~\(M\) storing \(N\)~records, the hash function
+will (ideally) spread the records evenly among the \(M\)~positions in
+the table, yielding on average \(N/M\) records for each list.
+Assuming that the table has more slots than there are records to be
+stored, we can hope that few slots will contain more than one record.
+In the case where a list is empty or has only one record,
+a search requires only one access to the list.
+Thus, the average cost for hashing should be \Thetaone.
+However, if clustering causes many records to hash to only a few of
+the slots, then the cost to access a record will be much higher
+because many elements on the linked list must be searched.
+
+Open hashing is most appropriate when the hash table is kept in main
+memory, with the lists implemented by a standard in-memory linked
+list.
+Storing an open hash table on disk in an efficient way is
+difficult, because members of a given linked list might be stored on
+different disk blocks.
+This would result in multiple disk accesses when searching for a
+particular key value, which defeats the purpose of using hashing.
+
+There are similarities between open hashing and
+Binsort.\index{binsort@Binsort}
+One way to view open hashing is that each record is simply placed in a
+bin. 
+While multiple records may hash to the same bin, this initial binning
+should still greatly reduce the number of records accessed by
+a search operation.
+In a similar fashion, a simple Binsort reduces the number of
+records in each bin to a small number that can be sorted in some
+other way.
+
+\subsection{Closed Hashing}
+\label{HashClose}
+
+\index{hashing!closed|(}
+\index{hashing!collision resolution|(}
+Closed hashing stores all records directly in the hash table.
+Each record \svar{R} with key value \(k_R\) has a
+\defit{home position}\index{hashing!home position} that is
+\( {\bf h}(k_R) \), the slot computed by the hash function.
+If \svar{R} is to be inserted and another record already
+occupies \svar{R}'s home position, then \svar{R} will be stored at
+some other slot in the table.
+It is the business of the collision resolution policy to determine
+which slot that will be.
+Naturally, the same policy must be followed during search as during
+insertion, so that any record not found in its home position can
+be recovered by repeating the collision resolution process.
+\index{hashing!open|)}
+
+\subsubsection{Bucket Hashing}
+
+\index{hashing!bucket|(}
+One implementation for closed hashing groups hash table slots into
+\defit{buckets}.
+The \(M\)~slots of the hash table are divided into
+\(B\)~buckets, with each bucket consisting of \(M/B\) slots.
+The hash function assigns each record to the first slot
+within one of the buckets.
+If this slot is already occupied, then the bucket slots are searched
+sequentially until an open slot is found.
+If a bucket is entirely full, then the record is stored in an
+\defit{overflow bucket} of infinite capacity at the end of the table.
+All buckets share the same overflow bucket.
+A good implementation will use a hash function that distributes the
+records evenly among the buckets so that as few records as
+possible go into the overflow bucket.
+Figure~\ref{BuckHash} illustrates bucket hashing.
+
+\begin{figure}
+\pdffig{BuckHash}
+\vspace{-\medskipamount}
+\capt{4.5in}{An illustration of bucket hashing}
+{An illustration of bucket hashing for seven numbers stored in a
+five-bucket hash table using the hash function
+\( {\bf h}(K) = K \bmod 5\). 
+Each bucket contains two slots.
+The numbers are inserted in the order 9877, 2007, 1000, 9530, 3013,
+9879, and 1057.
+Two of the values hash to bucket~0, three values hash to bucket~2,
+one value hashes to bucket~3,
+and one value hashes to bucket~4.
+Because bucket~2 cannot hold three values, the third one ends up in
+the overflow bucket.}{BuckHash}
+\medskip\medskip
+\end{figure}
+
+When searching for a record, the first step is to hash the key to
+determine which bucket should contain the record.
+The records in this bucket are then searched.
+If the desired key value is not found and the bucket still has free
+slots, then the search is complete.
+If the bucket is full, then it is possible that the desired
+record is stored in the overflow bucket.
+In this case, the overflow bucket must be searched until the record is
+found or all records in the overflow bucket have been checked.
+If many records are in the overflow bucket, this will be an
+expensive process.
+
+A simple variation on bucket hashing is to hash a key value to some slot
+in the hash table as though bucketing were not being used.
+If the home position is full, then the collision resolution process is
+to move down through the table toward the end of the bucket while
+searching for a free slot in which to store the record.
+If the bottom of the bucket is reached, then the collision
+resolution routine wraps around to the top of the bucket to continue the
+search for an open slot.
+For example, assume that buckets contain eight records, with the first
+bucket consisting of slots~0 through~7.
+If a record is hashed to slot 5, the collision resolution process
+will attempt to insert the record into the table in the order 5,~6, 7,
+0, 1, 2, 3, and finally~4.
+If all slots in this bucket are full, then the record is assigned
+to the overflow bucket.
+The advantage of this approach is that initial collisions are reduced,
+Because any slot can be a home position rather than just the first
+slot in the bucket.
+Figure~\ref{BuckHash2} shows another example for this form of bucket
+hashing.
+
+\begin{figure}
+\pdffig{BuckHash2}
+\vspace{-\medskipamount}
+\capt{4.5in}{An illustration of another variant for bucket hashing}
+{An variant of bucket hashing for seven numbers stored in a
+10-slot hash table using the hash function
+\( {\bf h}(K) = K \bmod 10\). 
+Each bucket contains two slots.
+The numbers are inserted in the order 9877, 2007, 1000, 9530, 3013,
+9879, and 1057.
+Value 9877 first hashes to slot 7, so when value 2007 attempts to do
+likewise, it is placed in the other slot associated with that bucket
+which is slot~6.
+When value 1057 is inserted, there is no longer room in the bucket and
+it is placed into overflow.
+The other collision occurs after value 1000 is inserted to slot~0,
+causing 9530 to be moved to slot~1.}{BuckHash2}
+\medskip\medskip
+\end{figure}
+
+Bucket methods are good for implementing hash tables stored on disk,
+because the bucket size can be set to the size of a disk block.
+Whenever search or insertion occurs, the entire bucket is read
+into memory.
+Because the entire bucket is then in memory, processing an insert or
+search operation requires only one disk access,
+unless the bucket is full.
+If the bucket is full, then the overflow bucket must be retrieved
+from disk as well.
+Naturally, overflow should be kept small to minimize unnecessary disk
+accesses.
+\index{hashing!bucket|)}
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\subsubsection{Linear Probing}
+
+\index{hashing!linear probing|(}
+We now turn to the most commonly used form of hashing:
+closed hashing with no bucketing, and a collision resolution policy
+that can potentially use any slot in the hash table.
+
+During insertion, the goal of collision resolution is to find a free
+slot in the hash table when the home position for the record is
+already occupied.
+We can view any collision resolution method as generating a sequence
+of hash table slots that can potentially hold the record.
+The first slot in the sequence will be the home position for the key.
+If the home position is occupied, then the collision resolution policy
+goes to the next slot in the sequence.
+If this is occupied as well, then another slot must be found, and
+so on.
+This sequence of slots is known as the
+\defit{probe sequence},\index{hashing!probe sequence}
+and it is generated by some \defit{probe function} that we will call
+\textbf{p}.
+The insert function is shown in Figure~\ref{HashInsert}.
+
+\begin{figure}
+\xprogfig{HashIns.book}
+
+\ifthenelse{\boolean{cpp}}{\vspace{-\bigskipamount}}{}
+\capt{4.5in}{Hashing insert function}
+{Insertion method for a dictionary implemented by a hash table.}
+{HashInsert}
+
+\ifthenelse{\boolean{cpp}}{\vspace{-\medskipamount}}{}
+\end{figure}
+
+Method \Cref{hashInsert} first checks to see if the home slot for the
+key is empty.
+If the home slot is occupied, then we use the
+probe function,\index{hashing!probe function}
+\textbf{p}(\(k\), \(i\)) to locate a free slot in the table.
+Function \textbf{p} has two parameters,
+the key \(k\) and a count \(i\) for where in the probe sequence we
+wish to be.
+That is, to get the first position in the probe sequence after the
+home slot for key \(K\), we call \textbf{p}(\(K\), 1).
+For the next slot in the probe sequence, call  \textbf{p}(\(K\), 2).
+Note that the probe function returns an offset from the original home
+position, rather than a slot in the hash table.
+Thus, the \Cref{for} loop in \Cref{hashInsert} is computing positions
+in the table at each iteration by adding the value returned from the
+probe function to the home position.
+The \(i\)th call to \Cref{p} returns the \(i\)th offset to be used.
+
+Searching in a hash table follows the same probe sequence that was
+followed when inserting records.
+In this way, a record not in its home position can be recovered.
+A \Lang\ implementation for the search procedure is shown in 
+Figure~\ref{HashSearch}.\index{hashing!search}
+
+\begin{figure}
+\xprogfig{HashSch.book}
+
+\ifthenelse{\boolean{cpp}}{\vspace{-\bigskipamount}}{}
+\capt{4.5in}{Hashing search function}
+{Search method for a dictionary implemented by a hash table.}
+{HashSearch}
+\end{figure}
+
+The insert and search routines assume that at least
+one slot on the probe sequence of every key will be empty.
+Otherwise, they will continue in an infinite loop on unsuccessful
+searches.
+Thus, the dictionary should keep a count of the number of records
+stored, and refuse to insert into a table that has only one free slot.
+
+The discussion on bucket hashing presented a simple method of
+collision resolution.
+If the home position for the record is occupied, then move down
+the bucket until a free slot is found.
+This is an example of a technique for collision resolution
+known as \defit{linear probing}.
+The probe function\index{hashing!probe function}
+for simple linear probing is
+\[ {\bf p}(K, i) = i.\]
+That is, the \(i\)th offset on the probe sequence is just \(i\),
+meaning that the \(i\)th step is simply to move down \(i\)
+slots in the table.
+
+Once the bottom of the table is reached, the probe sequence
+wraps around to the beginning of the table.
+Linear probing has the virtue that all slots in the table will be
+candidates for inserting a new record before the probe sequence
+returns to the home position.\index{hashing!probe sequence}
+
+While linear probing is probably
+the first idea that comes to mind when considering collision
+resolution policies, it is not the only one possible.
+Probe function \Cref{p} allows us many options for how to do collision
+resolution.
+In fact, linear probing is one of the worst collision resolution
+methods.
+The main problem is illustrated by Figure~\ref{LinProbe}.
+Here, we see a hash table of ten slots used to store four-digit
+numbers, with hash function \({\bf h}(K) = K \bmod 10\).
+In Figure~\ref{LinProbe}(a), five numbers have been placed in the
+table, leaving five slots remaining.
+
+\begin{figure}
+\pdffig{LinProbe}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Example of problems with linear probing}
+{Example of problems with linear probing.
+(a)~Four values are inserted in the order 1001, 9050, 9877, and 2037
+using hash function \( {\bf h}(K) = K \bmod 10\).
+(b)~The value 1059 is added to the hash table.}{LinProbe}
+\medskip
+\end{figure}
+
+The ideal behavior for a collision resolution mechanism is that
+each empty slot in the table will have equal probability of
+receiving the next record inserted (assuming that every slot in the
+table has equal probability of being hashed to initially).
+In this example, assume that the hash function gives each slot
+(roughly) equal probability of being the home position for the next
+key.
+However, consider what happens to the next record if its key has its
+home position at slot~0.
+Linear probing will send the record to slot~2.
+The same will happen to records whose home position is at slot~1.
+A record with home position at slot~2 will remain in slot~2.
+Thus, the probability is 3/10 that the next record inserted will end
+up in slot~2.
+In a similar manner, records hashing to slots~7 or~8 will
+end up in slot~9.
+However, only records hashing to slot~3 will be stored in
+slot~3, yielding one chance in ten of this happening.
+Likewise, there is only one chance in ten that the next record will
+be stored in slot~4, one chance in ten for slot~5, and one chance in
+ten for slot~6.
+Thus, the resulting probabilities are not equal.
+
+To make matters worse, if the next record ends up in slot~9
+(which already has a higher than normal chance of happening),
+then the following record will end up in slot~2 with probability
+6/10.
+This is illustrated by Figure~\ref{LinProbe}(b).
+This tendency of linear probing to cluster items together is known as
+\defit{primary clustering}.\index{hashing!primary clustering}
+Small clusters tend to merge into big clusters, making the problem
+worse.
+The objection to primary clustering is that it leads to
+long\index{hashing!probe sequence}
+probe\index{hashing!linear probing|)}
+sequences.
+
+\subsubsection{Improved Collision Resolution Methods}
+
+How\index{hashing!probe sequence|(}
+can we avoid primary clustering?\index{hashing!primary clustering}
+One possible improvement might be to use linear probing, but to skip
+slots by a constant \(c\) other than~1.
+This would make the probe function
+\[ {\bf p}(K, i) = ci,\]
+and so the \(i\)th slot in the probe sequence will be
+\(({\bf h}(K) + ic) \bmod M\).
+In this way, records with adjacent home positions will not follow the
+same probe sequence.
+For example, if we were to skip by twos, then our offsets from the home
+slot would be~2, then~4, then~6, and so on.
+
+One quality of a good probe sequence is that it will cycle through all
+slots in the hash table before returning to the home position.
+Clearly linear probing (which ``skips'' slots by one each time) does
+this.
+Unfortunately, not all values for \(c\) will make this
+happen.\index{hashing!probe function}
+For example, if \(c = 2\) and the table contains an even number of
+slots, then any key whose home position is in an even slot will have
+a probe sequence that cycles through only the even slots.
+Likewise, the probe sequence for a key whose home position is in an
+odd slot will cycle through the odd slots.
+Thus, this combination of table size and linear probing constant
+effectively divides the records into two sets stored in two
+disjoint sections of the hash table.
+So long as both sections of the table contain the same number of
+records, this is not really important.
+However, just from chance it is likely that one section will become
+fuller than the other, leading to more collisions and poorer
+performance for those records.
+The other section would have fewer records, and thus better
+performance.
+But the overall system performance will be degraded,
+as the additional cost to the side that is more full outweighs the
+improved performance of the less-full side.
+
+Constant \(c\) must be relatively prime to \(M\) to generate a
+linear probing sequence that visits all slots in the table
+(that is, \(c\) and \(M\) must share no factors).
+For a hash table of size \(M = 10\), if \(c\)
+is any one of 1, 3, 7, or 9,
+then the probe sequence will visit all slots for any key.
+When \(M = 11\), any value for \(c\) between 1 and 10 generates a
+probe sequence that visits all slots for every key.
+
+Consider the situation where \(c = 2\) and we wish to insert a record
+with key \(k_1\) such that \({\bf h}(k_1) = 3\).
+The probe sequence for  \(k_1\) is 3, 5, 7, 9, and so on.
+If~another key \(k_2\) has home position at slot 5, then its probe
+sequence will be 5, 7, 9, and so on.
+The probe sequences of \(k_1\) and \(k_2\) are linked
+together in a manner that contributes to clustering.
+In other words, linear probing with a value of \(c > 1\) does not
+solve the problem of
+primary clustering.\index{hashing!primary clustering}
+We would like to find a probe function that does not link
+keys together in this way.\index{hashing!probe function}
+We would prefer that the probe sequence for \(k_1\) after the first step
+on the sequence should not be identical to the probe sequence of
+\(k_2\).
+Instead, their probe sequences should diverge.
+
+The ideal probe function\index{hashing!probe function} would select
+the next position on the probe
+sequence at random from among the unvisited slots; that is, the probe
+sequence should be a random permutation of the hash table positions.
+Unfortunately, we cannot actually select the next position in the
+probe sequence at random, because then we would not be able to duplicate
+this same probe sequence when searching for the key.
+However, we can do something similar called
+\defit{pseudo-random probing}.\index{hashing!pseudo-random probing}
+In pseudo-random probing, the \(i\)th slot in the probe sequence is
+\(({\bf h}(K) + r_i) \bmod M\)
+where \(r_i\) is the \(i\)th value in a random permutation of
+the numbers from 1 to \(M-1\).
+All insertion and search operations use the same random
+permutation.
+The probe function is\index{hashing!probe function}
+
+\vspace{-\medskipamount}
+\vspace{-\smallskipamount}
+\[ {\bf p}(K, i) = \Cref{Perm}[i-1],\]
+
+\vspace{-\medskipamount}
+\noindent where \Cref{Perm} is an array of length \(M-1\) containing a
+random permutation of the values from 1 to \(M - 1\).
+
+\begin{example}
+Consider a table of size \(M = 101\), with \(\Cref{Perm}[1] = 5\),
+ \(\Cref{Perm}[2] = 2\), and \(\Cref{Perm}[3] = 32\).
+Assume that we have two keys \(k_1\) and \(k_2\) where
+{\bf h}\((k_1) = 30\) and {\bf h}\((k_2)\) = 35.
+The probe sequence for \(k_1\) is 30, then 35, then 32, then 62.
+The probe sequence for \(k_2\) is 35, then 40, then 37, then 67.
+Thus, while \(k_2\) will probe to \(k_1\)'s home position as its second
+choice, the two keys' probe sequences diverge immediately thereafter.
+\end{example}
+
+Another probe function that eliminates
+primary clustering\index{hashing!primary clustering} is called
+\defit{quadratic} \defit{probing}.\index{hashing!quadratic probing}
+Here the probe function is\index{hashing!probe function} some
+quadratic function
+
+\vspace{-\medskipamount}
+\vspace{-\smallskipamount}
+\[ {\bf p}(K, i) = c_1 i^2 + c_2 i + c_3\]
+\noindent for some choice of constants \(c_1\), \(c_2\), and
+\(c_3\).
+The simplest variation is \({\bf p}(K, i) = i^2\)
+(i.e., \(c_1=1\), \(c_2=0\), and \(c_3=0\).
+Then the \(i\)th value in the probe sequence would be
+\(({\bf h}(K) + i^2) \bmod M\).
+Under quadratic probing, two keys with different home
+positions will have diverging probe sequences.
+
+\begin{example}
+Given a hash table of size \(M = 101\), assume
+for keys \(k_1\) and \(k_2\) that {\bf h}\((k_1) = 30\)
+and {\bf h}\((k_2)\) = 29.
+The probe sequence for \(k_1\) is 30, then 31, then 34, then 39.
+The probe sequence for \(k_2\) is 29, then 30, then 33, then 38.
+Thus, while \(k_2\) will probe to \(k_1\)'s home position as its second
+choice, the two keys' probe sequences diverge immediately thereafter.
+\end{example}
+
+Unfortunately, quadratic probing has the disadvantage that typically
+not all hash table slots will be on the probe sequence.
+Using \({\bf p}(K, i) = i^2\) gives particularly inconsistent results.
+For many hash table sizes, this probe function will cycle through a
+relatively small number of slots.
+If all slots on that cycle happen to be full, then the record cannot
+be inserted at all!
+For example, if our hash table has three slots, then records that hash
+to slot 0 can probe only to slots 0 and 1 (that is, the probe sequence
+will never visit slot 2 in the table).
+Thus, if slots 0 and 1 are full, then the record cannot be inserted
+even though the table is not full.
+A more realistic example is a table with 105 slots.
+The probe sequence starting from any given slot will only visit 23
+other slots in the table.
+If all 24 of these slots should happen to be full, even if other slots
+in the table are empty, then the record cannot be inserted because the
+probe sequence will continually hit only those same 24 slots.
+
+Fortunately, it is possible to get good results from quadratic probing
+at low cost.
+The right combination of probe function and table size will visit many
+slots in the table.
+In particular, if the hash table size is a prime number and the probe
+function is \({\bf p}(K, i) = i^2\), then at least half the slots in
+the table will be visited.
+Thus, if the table is less than half full, we can be certain that a
+free slot will be found.
+Alternatively, if the hash table size is a power of two and the probe
+function is \({\bf p}(K, i) = (i^2 + i)/2\), then every slot in the
+table will be visited by the probe function.
+
+Both pseudo-random probing\index{hashing!pseudo-random probing}
+and quadratic probing\index{hashing!quadratic probing} eliminate
+primary clustering, which is the problem of keys sharing substantial
+segments of a probe sequence.\index{hashing!primary clustering}
+If two keys hash to the same home position, however, then they will always
+follow the same probe sequence for every collision resolution method that
+we have seen so far.
+The probe sequences generated by
+pseudo-random\index{hashing!pseudo-random probing} and
+quadratic probing\index{hashing!quadratic probing}
+(for example) are entirely a function of the home
+position, not the original key value.
+This is because function~\Cref{p} ignores its input parameter~\(K\)
+for these collision resolution methods.
+If the hash function generates a cluster at a particular home
+position, then the cluster remains under pseudo-random and quadratic
+probing.
+This problem is called \defit{secondary clustering}.
+
+To avoid secondary clustering, we need to have the probe sequence make
+use of the original key value in its decision-making process.
+A simple technique for doing this is to return to
+linear probing\index{hashing!linear probing} by a constant step size
+for the probe function, but to\index{hashing!probe function}
+have that constant be determined by a second hash function,
+\(\bf{h}_2\).
+Thus, the probe sequence would be of the form
+\({\mathbf p}(K, i) = i * {\mathbf h}_2(K)\).
+This method is called \defit{double hashing}.\index{hashing!double}
+
+\vspace{-\smallskipamount}
+\begin{example}
+Assume a hash table has size \(M = 101\), and that there are three
+keys \(k_1\), \(k_2\), and \(k_3\) with {\bf h}\((k_1) = 30\),
+{\bf h}\((k_2) = 28\), \({\bf h}(k_3) = 30\),
+\({\bf h}_2(k_1) = 2\), \({\bf h}_2(k_2) = 5\), and
+\({\bf h}_2(k_3) = 5\).
+Then, the probe sequence for \(k_1\) will be 30, 32, 34, 36, and so on.
+The probe sequence for \(k_2\) will be 28, 33, 38, 43, and so on.
+The probe sequence for \(k_3\) will be 30, 35, 40, 45, and so on.
+Thus, none of the keys share substantial portions of the same probe
+sequence.
+Of course, if a fourth key \(k_4\) has \({\bf h}(k_4) = 28\) and
+\({\bf h}_2(k_4) = 2\), then it will follow the same probe sequence as
+\(k_1\).
+Pseudo-random\index{hashing!pseudo-random probing}
+or quadratic\index{hashing!quadratic probing} probing can be combined
+with double hashing to solve this problem.\index{hashing!double}
+\end{example}
+
+\vspace{-\smallskipamount}
+A good implementation of double hashing\index{hashing!double}
+should ensure that all of the probe sequence constants are relatively
+prime to the table size \(M\).
+This can be achieved easily.
+One way is to select \(M\) to be a prime number, and have \({\bf h}_2\)
+return a value in the range \(1 \leq {\bf h}_2(K) \leq M-1\).
+Another way is to set \(M = 2^m\) for some value \(m\) and have
+\({\bf h}_2\) return an odd\index{hashing!probe sequence|)}
+value\index{hashing!collision resolution|)}
+between 1~and~\(2^m\).\index{hashing!closed|)}
+
+\index{dictionary|(}
+Figure~\ref{HashImplementation} shows an implementation of the
+dictionary ADT by means of a hash table.
+The simplest hash function is used, with collision resolution by
+linear probing, as the basis for the structure of a hash table
+implementation.
+A suggested project at the end of this chapter asks you to improve
+the implementation with other hash functions and collision resolution
+policies.
+
+\begin{figure}
+\xprogfig{hashdict1.book}
+\medskip
+\capt{4.5in}{Dictionary implementation with a hash table}
+{A partial implementation for the dictionary ADT using a hash table.
+This uses a poor hash function and a poor collision resolution policy
+(linear probing), which can easily be replaced.
+Member functions \Cref{hashInsert} and \Cref{hashSearch} appear in
+Figures~\ref{HashInsert} and~\ref{HashSearch}, respectively.}
+{HashImplementation}
+\end{figure}
+\index{dictionary|)}
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\subsection{Analysis of Closed Hashing}
+
+How efficient is hashing?\index{hashing!analysis of|(}
+We can measure hashing performance in terms of the number of
+record accesses required when performing an operation.
+The primary operations of concern are insertion, deletion, and search.
+It is useful to distinguish between successful and unsuccessful searches.
+Before a record can be deleted, it must be found.
+Thus, the number of accesses required to delete a record is
+equivalent to the number required to successfully search for it.
+To insert a record, an empty slot along the record's probe
+sequence must be found.\index{hashing!probe sequence}
+This is equivalent to an
+unsuccessful search\index{search!unsuccessful} for the record
+(recall that a successful search for the record during insertion
+should generate an error because two records with the same key are not
+allowed to be stored in the table).
+
+When the hash table is empty, the first record inserted will always
+find its home position free.
+Thus, it will require only one record access to find a free slot.
+If all records are stored in their home positions, then successful
+searches will also require only one record access.
+As the table begins to fill up, the probability that a record can be
+inserted into its home position decreases.
+If a record hashes to an occupied slot, then the collision resolution
+policy must locate another slot in which to store it.
+Finding records not stored in their home position also requires
+additional record accesses as the record is searched for along its probe
+sequence.\index{hashing!probe sequence}
+As the table fills up, more and more records are likely to be located
+ever further from their home positions.
+
+From this discussion, we see that the expected cost of hashing is a
+function of how full the table is.
+Define the \defit{load factor}\index{hashing!load factor}
+for the table as \(\alpha = N/M\),
+where \(N\) is the number of records currently in the table.
+
+An estimate of the expected cost for an insertion (or an unsuccessful
+search) can be derived analytically as a function of \(\alpha\) in the
+case where we assume that the probe sequence follows a random
+permutation\index{permutation} of the slots in the hash
+table.\index{hashing!probe sequence}
+Assuming that every slot in the table has equal probability of being
+the home slot for the next record,
+the probability of finding the home position occupied is
+\(\alpha\).
+The probability of finding both the home position occupied and the
+next slot on the probe sequence occupied is \(\frac{N(N-1)}{M(M-1)}\).
+The probability of \(i\)~collisions is
+\[ \frac{N(N-1) \cdots (N-i+1)}{M(M-1) \cdots (M-i+1)}. \]
+If \(N\) and \(M\) are large, then this is approximately \((N/M)^i\).
+The expected number of probes is one plus the sum over \(i \geq 1\) of
+the probability of \(i\)~collisions, which is approximately
+
+\[ 1 + \sum_{i=1}^\infty(N/M)^i = 1/(1-\alpha). \]
+
+The cost for a successful search (or a deletion) has the same cost as
+originally inserting that record.
+However, the expected value for the insertion cost depends on the
+value of \(\alpha\) not at the time of deletion, but rather at the time
+of the original insertion.
+We can derive an estimate of this cost (essentially an average over all
+the insertion costs) by integrating from 0 to the current value of
+\(\alpha\), yielding a result of
+\[ \frac{1}{\alpha} \int_0^\alpha \frac{1}{1-x} dx =
+   \frac{1}{\alpha} \log_e \frac{1}{1-\alpha}. \]
+
+It is important to realize that these equations represent the expected
+cost for operations using the unrealistic assumption that the
+probe sequence\index{hashing!probe sequence} is based on a random
+permutation of the slots in the hash
+table (thus avoiding all expense resulting from clustering).
+Thus, these costs are lower-bound\index{lower bound} estimates in the
+average case.
+The true average cost under linear
+probing is \( \frac{1}{2}(1 + 1/(1-\alpha)^2) \) for
+insertions or unsuccessful searches and
+\( \frac{1}{2}(1 + 1/(1-\alpha)) \) for deletions or successful
+searches.
+Proofs for these results can be found in the references cited in
+Section~\ref{HashRead}.
+
+Figure~\ref{HashLoad} shows the graphs of these four equations to help
+you visualize the expected performance of hashing based on the load
+factor.
+The two solid lines show the costs in the case of a ``random''
+probe sequence for (1) insertion or unsuccessful search and (2)
+deletion or successful search.\index{hashing!probe sequence}
+As expected, the cost for insertion or unsuccessful search grows
+faster, because these operations typically search further down the
+probe sequence.
+The two dashed lines show equivalent costs for linear probing.
+As expected, the cost of linear probing grows faster than the cost for
+``random'' probing.
+
+\begin{figure}
+\includegraphics[viewport= 130 360 0 580]{../figs/hashplot.pdf}
+
+\smallskip
+\capt{4.5in}{Growth of expected record accesses with \(\alpha\)}
+{Growth of expected record accesses with \(\alpha\).
+The horizontal axis is the value for \(\alpha\), the vertical axis
+is the expected number of accesses to the hash table.
+Solid lines show the cost for ``random'' probing (a theoretical lower
+bound on the cost), while dashed lines
+show the cost for linear probing (a relatively poor collision
+resolution strategy).\index{hashing!linear probing}
+The two leftmost lines show the cost for insertion
+(equivalently, unsuccessful search);
+the two rightmost lines show the cost for deletion
+(equivalently, successful search).}{HashLoad}
+\bigskip
+\end{figure}
+
+From Figure~\ref{HashLoad} we see that the cost for
+hashing when the table is not too full is typically close to one
+record access.
+This is extraordinarily efficient, much better than
+binary search which requires \(\log n\) record accesses.
+As \(\alpha\) increases, so does the expected cost.
+For small values of \(\alpha\), the expected cost is low.
+It remains below two until the hash table is about half full.
+When the table is nearly empty, adding a new record to the table
+does not increase the cost of future search operations by much.
+However, the additional search cost caused by each additional
+insertion increases rapidly once the table becomes half full.
+Based on this analysis, the rule of thumb is to design a hashing
+system so that the hash table never gets above half full.
+Beyond that point performance will degrade rapidly.
+This requires that the implementor have some idea of how many records
+are likely to be in the table at maximum loading, and select the
+table size accordingly.
+
+You might notice that a recommendation to never let a hash table
+become more than half full contradicts the disk-based space/time
+tradeoff principle,\index{tradeoff!disk-based space/time principle}
+which strives to minimize disk space to increase information density.
+Hashing represents an unusual situation in that there is no benefit to
+be expected from locality of reference.\index{locality of reference}
+In a sense, the hashing system implementor does everything possible to
+eliminate the effects of locality of reference!
+Given the disk block containing the last record accessed, the chance
+of the next record access coming to the same disk block is no better
+than random chance in a well-designed hash system.
+This is because a good hashing implementation breaks up relationships
+between search keys.
+Instead of improving performance by taking advantage of locality of
+reference, hashing trades increased hash table space for an improved
+chance that the record will be in its
+home position.\index{tradeoff!space/time principle}
+Thus, the more space available for the hash table, the more efficient
+hashing should be.
+
+Depending on the pattern of record accesses, it might be possible to
+reduce the expected cost of access even in the face of collisions.
+Recall the 80/20 rule:\index{80/20 rule}
+80\% of the accesses will come to 20\% of the data.
+In other words, some records are accessed more frequently.
+If two records hash to the same home position, which would be better
+placed in the home position, and which in a slot further down the
+probe sequence?\index{hashing!probe sequence}
+The answer is that the record with higher frequency of access should be
+placed in the home position, because this will reduce the total number
+of record accesses.
+Ideally, records along a probe sequence will be ordered by their
+frequency of access.\index{hashing!probe sequence}
+
+One approach to approximating this goal is to modify the order of
+records along the probe sequence whenever a record is accessed.
+If a search is made to a record that is not in its home position, a
+self-organizing list\index{list!self-organizing} heuristic can be
+used.\index{hashing!probe sequence}
+For example, if the linear probing\index{hashing!linear probing}
+collision resolution policy is
+used, then whenever a record is located that is not in its home
+position, it can be swapped with the record preceding it in the
+probe sequence.\index{hashing!collision resolution}
+That other record will now be further from its home position, but
+hopefully it will be accessed less frequently.
+Note that this approach will not work for the other collision
+resolution policies presented in this section, because swapping a pair
+of records to improve access to one might remove the other from its
+probe sequence.\index{hashing!probe sequence}
+
+Another approach is to keep access counts for records and
+periodically rehash the entire table.
+The records should be inserted into the hash table in frequency
+order, ensuring that records that were frequently accessed during the
+last series of requests have the best chance of being near their home
+positions.
+\index{hashing!analysis of|)}
+
+\subsection{Deletion}
+\label{HashDel}
+
+\index{hashing!deletion|(}
+When deleting records from a hash table, there are two important
+considerations.
+
+\begin{enumerate}
+
+\item
+Deleting a record must not hinder later searches.
+In other words, the search process must still pass through
+the newly emptied slot to reach records whose probe sequence
+passed through this slot.
+Thus, the delete process cannot simply mark the slot as empty,
+because this will isolate records further down the
+probe sequence.\index{hashing!probe sequence}
+For example, in Figure~\ref{LinProbe}(a), keys 9877 and 2037 both hash
+to slot~7.
+Key 2037 is placed in slot~8 by the collision resolution policy.
+If 9877 is deleted from the table, a search for 2037 must still pass
+through Slot~7 as it probes to slot~8.
+
+\item
+We do not want to make positions in the hash table unusable because
+of deletion.
+The freed slot should be available to a future insertion.
+
+\end{enumerate}
+
+Both of these problems can be resolved by placing a special mark in
+place of the deleted record, called a
+\defit{tombstone}.\index{hashing!tombstone}
+The tombstone indicates that a record once occupied the slot but
+does so no longer.
+If a tombstone is encountered when searching along a
+probe sequence,\index{hashing!probe sequence} the search procedure
+continues with the search.
+When a tombstone is encountered during insertion, that slot
+can be used to store the new record.
+However, to avoid inserting duplicate keys, it will still be necessary
+for the search procedure to follow the probe sequence until a truly
+empty position has been found, simply to verify that a duplicate is
+not in the table.
+However, the new record would actually be inserted into the slot of
+the first tombstone encountered.
+
+The use of tombstones allows searches to work correctly and allows
+reuse of deleted slots.
+However, after a series of intermixed insertion and deletion
+operations, some slots will contain tombstones.
+This will tend to lengthen the average distance from a record's
+home position to the record itself, beyond where it could be if the
+tombstones did not exist.
+A typical database application will first load a collection of records
+into the hash table and then progress to a phase of intermixed
+insertions and deletions.
+After the table is loaded with the initial collection of
+records, the first few deletions will lengthen the average
+probe sequence\index{hashing!probe sequence} distance for records (it
+will add tombstones).
+Over time, the average distance will reach an equilibrium point
+because insertions will tend to decrease the average distance by
+filling in tombstone slots.
+For example, after initially loading records into the database, the
+average path distance might be 1.2 (i.e., an average of 0.2 accesses
+per search beyond the home position will be required).
+After a series of insertions and deletions, this average distance
+might increase to 1.6 due to tombstones.
+This seems like a small increase, but it is three times longer on
+average beyond the home position than before deletions.
+
+Two possible solutions to this problem are
+
+\begin{enumerate}
+
+\item
+Do a local reorganization upon deletion to try to shorten the average
+path length.
+For example, after deleting a key, continue to follow the
+probe sequence\index{hashing!probe sequence} of that key and swap
+records further down the probe sequence
+into the slot of the recently deleted record (being careful not to
+remove any key from its probe sequence).
+This will not work for all collision resolution policies.
+
+\item
+Periodically rehash the table by
+reinserting all records into a new hash table.
+Not only will this remove the tombstones, but it also provides an
+opportunity to place the most frequently accessed records into their
+home positions.
+\index{hashing!deletion|)}
+\index{hashing|)}
+
+\end{enumerate}
+
+\section{Further Reading}
+\label{HashRead}
+
+For a comparison of the efficiencies for various self-organizing
+techniques,\index{list!self-organizing} see Bentley and McGeoch,
+``Amortized Analysis of Self-Or\-gan\-izing Sequential Search
+Heuristics'' \cite{BentOrganize}.
+The text compression\index{text compression} example of
+Section~\ref{SelfOrg} comes from Bentley et al.,
+``A Locally Adaptive Data Compression Scheme'' \cite{BentCompress}.
+For more on
+Ziv-Lempel coding,\index{ziv-lempel coding@Ziv-Lempel coding}
+see \ttl{Data Compression: Methods and Theory} by
+James~A.~Storer \cite{Storer}.
+Knuth covers self-organizing lists and
+Zipf distributions in Volume 3 of
+\ttl{The Art of Computer Programming}\cite{KnuthV3}.
+
+\ttl{Introduction to Modern Information Retrieval} by Salton and
+McGill \cite{Salton} is an excellent source for more information about
+document retrieval techniques.\index{document retrieval}
+
+See the paper\index{hashing!perfect}
+``Practical Minimal Perfect Hash Functions for Large Data\-bases''
+by Fox et al. \cite{PerfHash} for an introduction and
+a good algorithm for perfect hashing.
+
+For further details on the analysis for various collision resolution
+policies, see Knuth,
+Volume 3 \cite{KnuthV3} and
+\ttl{Concrete Mathematics: A Foundation for Computer Science}
+by Graham, Knuth, and Patashnik \cite{ConcreteMath}.
+\index{hashing!collision resolution}
+
+The model of hashing presented in this chapter has been of a
+fixed-size hash table.
+A problem not addressed is what to do when the hash table gets half
+full and more records must be inserted.
+This is the domain of
+dynamic hashing methods.\index{hashing!dynamic}
+A good introduction to this topic is ``Dynamic Hashing Schemes'' by
+R.J. Enbody and H.C. Du \cite{DyHash}.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Create a graph showing expected cost versus the probability of
+an unsuccessful search when performing sequential search
+(see Section~\ref{OrderedSearch}).
+What can you say qualitatively about the rate of increase in expected
+cost as the probability of unsuccessful search grows?
+
+\item
+Modify the binary search routine\index{search!binary} of
+Section~\ref{ProgTimeSec} to implement interpolation
+search.\index{search!interpolation}
+Assume that keys are in the range 1 to 10,000, and that all key values
+within the range are equally likely to occur.
+
+\item
+Write an algorithm to find the \(K\)th
+smallest value in an unsorted array of \(n\) numbers (\(K <= n\)).
+Your algorithm should require \Thetan\ time in the average case.
+Hint: Your algorithm should look similar to
+Quicksort.\index{quicksort@Quicksort}
+
+\item
+\label{ZipfExer}
+Example~\ref{Search}.\ref{ZipfExamp} discusses a distribution where
+the relative frequencies of the records match the harmonic series.
+That is, for every occurrence of the first record, the second record
+will appear half as often, the third will appear one third as often,
+the fourth one quarter as often, and so on.
+The actual probability for the \(i\)th record was defined to be
+\(1/(i\Harmonic)\).
+Explain why this is correct.
+
+\item
+Graph the equations \(\Tn = \log_2 n\) and \(\Tn = n/\log_e n\).
+Which gives the better performance, binary search\index{search!binary}
+on a sorted list,
+or sequential search\index{search!sequential} on a list ordered by
+frequency where the frequency conforms to a Zipf
+distribution?\index{zipf distribution@Zipf distribution}
+Characterize the difference in running times.
+
+\item
+Assume that the values \(A\) through \(H\) are stored in a self-organizing
+list,\index{list!self-organizing}
+initially in ascending order.
+Consider the three self-organizing list heuristics: count,
+move-to-front, and transpose.
+For count, assume that the record is moved ahead in the list passing
+over any other record that its count is now greater than.
+For each, show the resulting list and the total number of
+comparisons required resulting from the following series of accesses:
+\[ D~H~H~G~H~E~G~H~G~H~E~C~E~H~G. \]
+
+\item
+For each of the three self-organizing list\index{list!self-organizing}
+heuristics (count, move-to-front, and transpose), describe a
+series of record accesses for which it would require the greatest number
+of comparisons of the three.
+
+\item
+Write an algorithm to implement the frequency count
+self-organizing list heuristic,\index{list!self-organizing}
+assuming that the list is implemented using an array.
+In particular, write a function \Cref{FreqCount} that takes as input a
+value to be searched for and which adjusts the list appropriately.
+If the value is not already in the list, add it to the end of the list
+with a frequency count of one.
+
+\item
+Write an algorithm to implement the move-to-front\index{move-to-front}
+self-organizing list\index{list!self-organizing}
+heu\-ri\-s\-tic, assuming that the list is implemented using an array.
+In particular, write a function \Cref{MoveToFront} that takes as input
+a value to be searched for and which adjusts the list appropriately.
+If the value is not already in the list, add it to the beginning of
+the list.
+
+\item
+Write an algorithm to implement the transpose\index{transpose}
+self-organizing list heuristic, assuming that the list is implemented
+using an array.
+In particular, write a function \Cref{Transpose} that takes as input a
+value to be searched for and which adjusts the list appropriately.
+If the value is not already in the list, add it to the end of the list.
+
+\item
+Write functions for computing union, intersection, and set difference
+on arbitrarily long bit vectors used to represent set membership as
+described in
+Section~\ref{SetSearch}.\index{set!union, intersection, difference}
+Assume that for each operation both vectors are of equal length.
+
+\item
+Compute the probabilities for the following
+situations.\index{birthday problem}
+These probabilities can be computed analytically, or you may write a
+computer program to generate the probabilities by simulation.
+
+\begin{enumerate}
+\item Out of a group of 23~students, what is the probability that
+2~students share the same birthday?
+
+\item Out of a group of 100~students, what is the probability that
+3~students share the same birthday?
+
+\item How many students must be in the class for the probability
+to be at least 50\% that there are 2~who share a birthday in the
+same month?
+\end{enumerate}
+
+\item
+Assume that you are hashing key \(K\) to a hash table of \(n\) slots
+(indexed from 0 to \(n-1\)).\index{hashing!hash function}
+For each of the following functions \({\bf h}(K)\), is the function
+acceptable as a hash function (i.e., would the hash program work
+correctly for both insertions and searches), and if so, is it a good
+hash function?
+Function \Cref{Random(n)} returns a random integer between 0 and
+\(n-1\), inclusive.
+
+\begin{enumerate}
+\item
+\({\bf h}(k) = k/n\) where \(k\) and \(n\) are integers.
+
+\item
+\({\bf h}(k) = 1\).
+
+\item
+\({\bf h}(k) = (k + \mbox{Random}(n)) \bmod n\).
+
+\item
+\({\bf h}(k) = k \bmod n\) where \(n\) is a prime number.
+\end{enumerate}
+
+\item
+Assume that you have a seven-slot closed hash table
+(the slots are numbered 0 through~6).
+Show the final hash table that would result if you used
+the hash function \(h({\bf k}) = {\bf k}\) mod 7 and linear probing
+on this list of numbers: 3,~12,~9,~2.\index{hashing!linear probing}
+After inserting the record with key value~2, list for each empty slot
+the probability that it will be the next one filled.
+
+\item
+Assume that you have a ten-slot closed hash table
+(the slots are numbered 0 through~9).
+Show the final hash table that would result if you used
+the hash function \(h({\bf k}) = {\bf k}\) mod 10 and quadratic probing
+on this list of numbers: 3,~12,~9,~2,~79,~46.\index{hashing!quadratic probing}
+After inserting the record with key value~46, list for each empty slot
+the probability that it will be the next one filled.
+
+\item
+Assume that you have a ten-slot closed hash table
+(the slots are numbered 0 through~9).
+Show the final hash table that would result if you used
+the hash function \(h({\bf k}) = {\bf k}\) mod 10 and pseudo-random probing
+on this list of numbers: 3,~12,~9,~2,~79,~44.\index{hashing!quadratic probing}
+The permutation of offsets to be used by the pseudo-random probing
+will be: 5, 9, 2, 1, 4, 8, 6, 3, 7.
+After inserting the record with key value~44, list for each empty slot
+the probability that it will be the next one filled.
+
+\item
+What is the result of running \Cref{sfold} from Section~\ref{HashFun}
+on the following strings?
+Assume a hash table size of 101 slots.
+
+\begin{enumerate}
+\item HELLO WORLD
+\item NOW HEAR THIS
+\item HEAR THIS NOW
+\end{enumerate}
+
+\item
+Using closed hashing,\index{hashing!closed} with
+double hashing\index{hashing!double} to resolve collisions,
+insert the following keys into a hash table of thirteen
+slots (the slots are numbered 0~through~12).
+The hash functions to be used are H1 and H2, defined below.
+You should show the hash table after all eight keys have been
+inserted.
+Be sure to indicate how you are using H1 and H2 to do the hashing.
+Function Rev(\(k\)) reverses the decimal digits of \(k\), for example,
+Rev\((37) = 73\); Rev\((7) = 7\).
+
+\medskip
+
+H1(\(k\)) = \(k\) mod 13.
+
+H2(\(k\)) = (Rev(\(k + 1\)) mod 11).
+
+\medskip
+
+Keys: 2,  8,  31, 20, 19, 18, 53, 27.
+
+\item
+Write an algorithm for a deletion function for hash
+tables\index{hashing!deletion} that
+replaces the record with a special value indicating a tombstone.
+Modify the functions \Cref{hashInsert} and \Cref{hashSearch} to work
+correctly with tombstones.
+
+\item
+Consider the following permutation for the numbers~1 to~6:
+
+\begin{center}
+2, 4, 6, 1, 3, 5.
+\end{center}
+
+\noindent Analyze what will happen if this permutation is used by an
+implementation of pseudo-random probing on a hash table of size seven.
+Will this permutation solve the problem of primary clustering?
+What does this say about selecting a permutation for use when
+implementing pseudo-random probing?
+
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+Implement a binary search and the quadratic binary search of
+Section~\ref{OrderedSearch}.
+Run your implementations over a large range of problem sizes, timing
+the results for each algorithm.
+Graph and compare these timing results.
+
+\item
+Implement the three self-organizing list heuristics count,
+move-to-front, and transpose.\index{list!self-organizing}
+Compare the cost for running the three heuristics on various input
+data.
+The cost metric should be the total number of comparisons required
+when searching the list.
+It is important to compare the heuristics using input data for which
+self-organizing lists are reasonable, that is, on frequency
+distributions that are uneven.
+One good approach is to read text files.
+The list should store individual words in the text file.
+Begin with an empty list, as was done for the text compression example
+of Section~\ref{SelfOrg}.
+Each time a word is encountered in the text file, search for it in the
+self-organizing list.
+If the word is found, reorder the list as appropriate.
+If the word is not in the list, add it to the end of the list and then
+reorder as appropriate.
+
+\item
+Implement the text compression system described in
+Section~\ref{SelfOrg}.\index{text compression}
+
+\item
+Implement a system for managing document retrieval.
+Your system should have the ability to insert (abstract references to) 
+documents into the system, associate keywords with a given document,
+and to search for documents with specified keywords.
+
+\item
+Implement a database stored on disk using bucket hashing.
+Define records to be 128~bytes long with a 4-byte key and 120~bytes of
+data.\index{hashing!bucket}
+The remaining 4~bytes are available for you to store necessary
+information to support the hash table.
+A bucket in the hash table will be 1024 bytes long, so each bucket
+has space for 8~records.
+The hash table should consist of 27~buckets (total space for
+216~records with slots indexed by positions 0 to 215) followed by the
+overflow bucket at record position 216 in the file.
+The hash function for key value \(K\) should be \(K \bmod 213\).
+(Note that this means the last three slots in the table will not be
+home positions for any record.)
+The collision resolution function should be linear probing with
+wrap-around within the bucket.
+For example, if a record is hashed to slot 5, the collision resolution
+process will attempt to insert the record into the table in the order
+5,~6, 7, 0, 1, 2, 3, and finally~4.
+If a bucket is full, the record should be placed in the overflow
+section at the end of the file.
+
+Your hash table should implement the dictionary ADT of
+Section~\ref{Dictionary}.\index{dictionary!ADT}
+When you do your testing, assume that the system is meant to store
+about 100 or so records at a time.
+
+\item
+Implement the dictionary ADT of
+Section~\ref{Dictionary} by means of a
+hash table with linear probing as the collision resolution
+policy.\index{hashing!linear probing}\index{dictionary!ADT}
+You might wish to begin with the code of Figure~\ref{HashImplementation}.
+Using empirical simulation, determine the cost of insert and delete as
+\(\alpha\) grows (i.e., reconstruct the dashed lines of
+Figure~\ref{HashLoad}).
+Then, repeat the experiment using quadratic probing and pseudo-random
+probing.
+What can you say about the relative performance of these three
+collision resolution policies?
+
+\index{search|)}
+
+\end{projects}

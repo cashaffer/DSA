@@ -1,0 +1,1535 @@
+% indexing.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\chapter{Indexing}
+\label{Indexing}
+\def\CHHEAD{Chap.\ \thechapter\ Indexing}    % Head title -- even pages
+
+\index{index|(}
+Many large-scale computing applications are centered around data sets
+that are too large to fit into main memory.
+The classic example is a large database of records with multiple
+search keys, requiring the ability to insert, delete, and search for
+records.
+Hashing\index{hashing} provides outstanding performance for such
+situations, but only in the limited case in which all searches are of
+the form\index{search} ``find the record with
+key value~\(K\).''\index{search!exact-match query}
+Many applications require more general search capabilities.
+One example is a range query\index{search!range query}
+search for all records whose key lies within some range.
+Other queries might involve visiting all records in order of their key
+value, or finding the record with the greatest key value.
+Hash tables are not organized to support any of these queries
+efficiently.
+
+This chapter introduces file structures used to organize a large
+collection of records stored on disk.\index{file structure}
+Such file structures support efficient insertion,
+deletion, and search operations, for exact-match queries, range
+queries, and largest/smallest key value searches.
+
+Before discussing such file structures, we must become familiar
+with some basic file-processing terminology.
+An \defit{entry-sequenced file}\index{entry-sequenced file}
+stores records in the order that they were added to the file.
+Entry-sequenced files are the disk-based equivalent to an unsorted
+list and so do not support efficient search.
+The natural solution is to sort the records by order of the search key.
+However, a typical database, such as a collection of employee or
+customer records maintained by a business, might contain multiple
+search keys.
+To answer a question about a particular customer might require a
+search on the name of the customer.
+Businesses often wish to sort and output the records by
+zip code order for a bulk mailing.
+Government paperwork might require the ability to search by
+Social Security number.
+Thus, there might not be a single ``correct'' order in which to store
+the records.
+
+\defit{Indexing} is the process of associating a key with the location
+of a corresponding data record.
+Section~\ref{ExternalSortSec} discussed the concept of a key sort, in
+which an \defit{index file}\index{index!file} is created whose
+records consist of key/pointer pairs.
+Here, each key is associated with a pointer to a complete record in
+the main database file.
+The index file could be sorted or organized using a tree structure,
+thereby imposing a logical order on the records without
+physically rearranging them.
+One database might have several associated index files,
+each supporting efficient access through a different key field.
+
+Each record of a database normally has a unique identifier,
+called the \defit{primary key}.\index{primary key}
+For example, the primary key for a set of personnel records might be
+the Social Security number or ID number for the individual.
+Unfortunately, the ID number is generally an inconvenient value on
+which to perform a search because the searcher is unlikely to know it.
+Instead, the searcher might know the desired employee's name.
+Alternatively, the searcher might be interested in finding all
+employees whose salary is in a certain range.
+If these are typical search requests to the database, then the name
+and salary fields deserve separate indices.
+However, key values in the name and salary indices are not likely to
+be unique.
+
+A key field such as salary, where a particular key value might be
+duplicated in multiple records, is called a
+\defit{secondary key}.\index{secondary key}
+Most searches are performed using a secondary key.
+The secondary key index (or more simply,
+\defit{secondary index})\index{secondary index}
+will associate a secondary key value with the primary key of each
+record having that secondary key value.
+At this point, the full database might be searched directly for the
+record with that primary key, or there might be a primary key index
+(or \defit{primary index})\index{primary index} 
+that relates each primary key value with a pointer to the
+actual record on disk.
+In the latter case, only the primary index provides the
+location of the actual record on disk, while the secondary indices 
+refer to the primary index.
+
+Indexing is an important technique for organizing large databases,
+and many indexing methods have been developed.
+Direct access through hashing\index{hashing} is discussed in
+Section~\ref{Hash}.
+A simple list\index{list} sorted by key
+value can also serve as an index to the record file.
+Indexing disk files by sorted lists are discussed in the following
+section.
+Unfortunately, a sorted list does not perform well for insert
+and delete operations.
+
+A third approach to indexing is the
+tree index.\index{index!tree}\index{search trees}
+Trees are typically used to organize large databases that must support
+record insertion, deletion, and
+key range searches.\index{range query}
+Section~\ref{ISAMsec} briefly describes ISAM\index{isam@ISAM},
+a tentative step toward solving the problem of storing a large
+database that must support insertion and deletion of records.
+Its shortcomings help to illustrate the value of tree indexing
+techniques.
+Section~\ref{TreeIndex} introduces the basic issues related to tree
+indexing.
+Section~\ref{TTTree} introduces the \TTtree,\index{two-three@\TTtree} a
+balanced tree structure that is a simple form of the
+\Btree\ covered\index{btree@\Btree} in Section~\ref{BTree}.
+\Btrees\ are the most widely used indexing method for large disk-based
+databases, and for implementing file systems.
+Since they have such great practical importance, many variations have
+been invented.
+Section~\ref{BTree} begins with a discussion of the variant normally
+referred to simply as a ``\Btree.''
+Section~\ref{BPlusTree} presents the most widely implemented variant,
+the \BPtree.\index{btree@\Btree!bplustree@\BPtree}
+
+\newpage
+
+\section{Linear Indexing}
+\label{LinIndexSec}
+
+\index{index!linear|(}
+A \defit{linear index} is an index file organized as a
+sequence\index{sequence} of key/pointer pairs where the keys are in
+sorted order and the pointers either (1) point to the position of the
+complete record on disk, (2) point to the position of the primary
+key in the primary index, or (3) are actually the value of the primary
+key.
+Depending on its size, a linear index might be stored in main
+memory or on disk.
+A linear index provides a number of advantages.
+It provides convenient access to variable-length database records,
+because each entry in the index file contains a fixed-length key field
+and a fixed-length pointer to the beginning of a (variable-length)
+record as shown in Figure~\ref{LinVar}.\index{variable-length record}
+A linear index also allows for efficient search and random access to
+database records, because it is amenable to
+binary search.\index{search!binary}
+
+\begin{figure}
+\pdffig{LinVar}
+
+\vspace{-\medskipamount}
+\capt{4.5in}{Linear indexing for variable-length records}
+{Linear indexing for variable-length records.
+Each record in the index file is of fixed length and contains a
+pointer to the beginning of the corresponding record in the database
+file.}{LinVar}
+\bigskip
+\medskip
+\medskip
+\end{figure}
+
+If the database contains enough records, the linear index might
+be too large to store in main memory.
+This makes binary search of the index more expensive because many disk
+accesses would typically be required by the search process.
+One solution to this problem is to store a second-level linear index
+in main memory that indicates which disk block in the index file
+stores a desired key.
+For example, the linear index on disk might reside in a series of
+1024-byte blocks.
+If each key/pointer pair in the linear index requires 8~bytes
+(a 4-byte key and a 4-byte pointer), then
+128~key/pointer pairs are stored per block.
+The second-level index, stored in main memory, consists of a simple
+table storing the value of the key in the first position of each block
+in the linear index file.
+This arrangement is shown in Figure~\ref{LinIndex}.
+If the linear index requires 1024~disk blocks (1MB), the second-level
+index contains only 1024~entries, one per disk block.
+To find which disk block contains a desired search key value,
+first search through the 1024-entry table to
+find the greatest value less than or equal to the search key.
+This directs the search to the proper block in the index file, which
+is then read into memory.
+At this point, a binary search\index{search!binary} within this block
+will produce a pointer to the actual record in the database.
+Because the second-level index is stored in main memory,
+accessing a record by this method requires two disk reads:
+one from the index file and one from the database file for the actual
+record.
+
+\begin{figure}
+\pdffig{LinIndex}
+
+\medskip
+\capt{4.5in}{A simple two-level linear index}
+{A simple two-level linear index.
+The linear index is stored on disk.
+The smaller, second-level index is stored in main memory.
+Each element in the second-level index stores the first key value in
+the corresponding disk block of the index file.
+In this example, the first disk block of the linear index stores keys
+in the range 1 to 2001, and the second disk block stores keys in the
+range 2003 to 5688.
+Thus, the first entry of the second-level index is key value 1
+(the first key in the first block of the linear index), while the
+second entry of the second-level index is key value 2003.}{LinIndex}
+\bigskip\medskip
+\end{figure}
+
+Every time a record is inserted to or deleted from the database,
+all associated secondary indices must be updated.
+Updates to a linear index are expensive, because the
+entire contents of the array might be shifted.
+Another problem is that multiple records with
+the same secondary key each duplicate that key value within the
+index.
+When the secondary key field has many duplicates, such as when it has
+a limited range (e.g., a field to indicate job category from among a
+small number of possible job categories),
+this duplication might waste considerable space.
+
+One improvement on the simple sorted array is a two-dimensional
+array where each row corresponds to a secondary key value.
+A row contains the primary keys whose records have the indicated
+secondary key value.
+Figure~\ref{TwoDArray} illustrates this approach.
+Now there is no duplication of secondary key values,
+possibly yielding a considerable space savings.
+The cost of insertion and deletion is reduced, because only one row
+of the table need be adjusted.
+Note that a new row is added to the array when a new secondary key
+value is added.
+This might lead to moving many records, but this will happen
+infrequently in applications suited to using this arrangement.
+
+\begin{figure}
+\pdffig{TwoDArr}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Two-dimensional linear index}
+{A two-dimensional linear index.
+Each row lists the primary keys associated with a particular
+secondary key value.
+In this example, the secondary key is a name.
+The primary key is a unique four-character code.}{TwoDArray}
+\bigskip
+\end{figure}
+
+A drawback to this approach is that the array must be of fixed
+size, which imposes an upper limit on the number of primary keys
+that might be associated with a particular secondary key.
+Furthermore, those secondary keys with fewer records than the width
+of the array will waste the remainder of their row.
+A better approach is to have a one-dimensional array of secondary key
+values, where each secondary key is associated with a linked
+list.\index{list!linked}
+This works well if the index is stored in main memory, but not so
+well when it is stored on disk because the linked list for a given key
+might be scattered across several disk blocks.
+
+Consider a large database of employee records.
+If the primary key is the employee's ID number and the secondary key
+is the employee's name, then each record in the name index associates a
+name with one or more ID numbers.
+The ID number index in turn associates an ID number with a unique
+pointer to the full record on disk.
+The secondary key index in such an organization is also known as an
+\defit{inverted list} or
+\defit{inverted file}.\index{index!inverted list}
+It is inverted in that searches work backwards from the
+secondary key to the primary key to the actual data record.
+It is called a list because each secondary key value
+has (conceptually) a list of primary keys associated with it.
+Figure~\ref{Inverted} illustrates this arrangement.
+Here, we have last names as the secondary key.
+The primary key is a four-character unique identifier.
+
+\begin{figure}
+\pdffig{Inverted}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Illustration of an inverted list}
+{Illustration of an inverted list.
+Each secondary key value is stored in the secondary key list.
+Each secondary key value on the list has a pointer to a list of the
+primary keys whose associated records have that secondary key
+value.}{Inverted}
+\bigskip
+\end{figure}
+
+\begin{figure}
+\pdffig{InvList}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}
+{Inverted list: sorted array of secondary keys and combined lists of
+primary keys}
+{An inverted list implemented as an array of secondary keys and
+combined lists of primary keys.
+Each record in the secondary key array contains a pointer to a record
+in the primary key array.
+The \Cref{next} field of the primary key array indicates the next
+record with that secondary key value.}{InvertList}
+\bigskip
+\end{figure}
+\index{index!linear|)}
+
+Figure~\ref{InvertList} shows a better approach to storing inverted
+lists.
+An array of secondary key values is shown as before.
+Associated with each secondary key is a pointer to an array of primary
+keys.
+The primary key array uses a linked-list implementation.
+This approach combines the storage for all of the secondary key lists
+into a single array, probably saving space.
+Each record in this array consists of a primary key value and a
+pointer to the next element on the list.
+It is easy to insert and delete secondary keys from this array, making
+this a good implementation for disk-based inverted files.
+
+\section{ISAM}
+\label{ISAMsec}
+
+\index{isam@ISAM|(}
+How do we handle large databases that require frequent update?
+The main problem with the linear index is that it is a single, large
+array that does not adjust well to updates because a single update can
+require changing the position of every key in the index.
+Inverted lists reduce this problem, but they are only suitable for
+secondary key indices with many fewer secondary key values than records.
+The linear index would perform well as a primary key index if it could
+somehow be broken into pieces such that individual updates affect only
+a part of the index.
+This concept will be pursued throughout the rest of this chapter,
+eventually culminating in the
+\BPtree,\index{btree@\Btree!bplustree@\BPtree}
+the most widely used indexing method today.
+But first, we begin by studying ISAM, an early attempt to solve the
+problem of large databases requiring frequent update.
+Its weaknesses help to illustrate why the \BPtree\ works so well.
+
+Before the invention of effective tree indexing
+schemes,\index{search trees}  a variety of
+disk-based indexing methods were in use.
+All were rather cumbersome, largely because no adequate method for
+handling updates was known.
+Typically, updates would cause the index to degrade in performance.
+ISAM is one example of such an index and was
+widely used by IBM prior to adoption of the \Btree.\index{btree@\Btree}
+
+\begin{figure}
+\pdffig{ISAM}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+
+\capt{4.5in}{ISAM}
+{Illustration of the ISAM indexing system.}{ISAM}
+\end{figure}
+
+ISAM is based on a modified form of the linear index, as illustrated by
+Figure~\ref{ISAM}.
+Records are stored in sorted order by primary key.
+The disk file is divided among a number of
+cylinders\index{disk drive!cylinder} on disk.\footnote{Recall from
+Section~\ref{DiskArch} that a cylinder is all of the tracks readable
+from a particular placement of the heads on the multiple platters of a
+disk drive.}
+Each cylinder holds a section of the list in sorted order.
+Initially, each cylinder is not filled to capacity, and the extra
+space is set aside in the \defit{cylinder overflow}.
+In memory is a table listing the lowest key value stored in each
+cylinder of the file.
+Each cylinder contains a table listing the lowest key value for
+each block in that cylinder, called the \defit{cylinder index}.
+When new records are inserted, they are placed in the correct
+cylinder's overflow area (in effect, a cylinder acts as a bucket).
+If a cylinder's overflow area fills completely, then a system-wide
+overflow area is used.
+Search proceeds by determining the proper cylinder from the
+system-wide table kept in main memory.
+The cylinder's block table is brought in from disk and
+consulted to determine the correct block.
+If the record is found in that block, then the search is complete.
+Otherwise, the cylinder's overflow area is searched.
+If that is full, and the record is not found, then the system-wide
+overflow is searched.
+
+After initial construction of the database,
+so long as no new records are inserted or deleted, access is
+efficient because it requires only two disk fetches.
+The first disk fetch recovers the block table for the desired
+cylinder.
+The second disk fetch recovers the block that, under good conditions,
+contains the record.
+After many inserts, the overflow list becomes too long, resulting in
+significant search time as the cylinder overflow area fills up.
+Under extreme conditions, many searches might eventually lead to the
+system overflow area.
+The ``solution'' to this problem is to periodically reorganize the
+entire database.
+This means re-balancing the records among the cylinders, sorting
+the records within each cylinder, and updating both the system
+index table and the within-cylinder block table.
+Such reorganization was typical of database systems during the 1960s
+and would normally be done each night or weekly.
+\index{isam@ISAM|)}
+
+\section{Tree-based Indexing}
+\label{TreeIndex}
+
+\index{index!tree|(}
+Linear indexing is efficient when the database is static,
+that is, when records are inserted and deleted rarely or never.
+ISAM is adequate for a limited number of updates, but not for frequent
+changes.\index{isam@ISAM}
+Because it has essentially two levels of indexing, ISAM will also break
+down for a truly large database where the number of cylinders is too
+great for the top-level index to fit in main memory.
+
+In their most general form, database applications have the following
+characteristics:
+
+\begin{enumerate}
+
+\item
+Large sets of records that are frequently updated.
+
+\item
+Search is by one or a combination of several keys.
+
+\item
+Key range queries or min/max queries are used.\index{search!range query}
+
+\end{enumerate}
+
+\index{bst@BST|(}
+For such databases, a better organization must be found.
+One approach would be to use the binary search tree (BST) to store
+primary and secondary key indices.
+BSTs can store duplicate key values, they provide efficient insertion
+and deletion as well as efficient search, and they can perform
+efficient range queries.
+When there is enough main memory, the BST is a viable
+option for implementing both primary and secondary key indices.
+
+Unfortunately, the BST can become unbalanced.
+Even under relatively good conditions, the depth of leaf nodes
+can easily vary by a factor of two.
+This might not be a significant concern when the tree is stored in
+main memory because the time required is still \Thetalogn\ for search
+and update.
+When the tree is stored on disk, however, the depth of nodes in the
+tree becomes crucial.
+Every time a BST node~\svar{B} is visited, it is necessary to visit
+all nodes along the path from the root to~\svar{B}.
+Each node on this path must be retrieved from disk.
+Each disk access returns a block of information.
+If a node is on the same block as its parent, then the cost to find
+that node is trivial once its parent is in main memory.
+Thus, it is desirable to keep subtrees together on the same
+block.
+Unfortunately, many times a node is not on the same block as its
+parent.
+Thus, each access to a BST node could potentially require that another
+block to be read from disk.
+Using a buffer pool\index{buffer pool} to store multiple blocks in
+memory can mitigate disk access problems if BST accesses display good
+locality of reference\index{locality of reference}.
+But a buffer pool cannot eliminate disk I/O entirely.
+The problem becomes greater if the BST is unbalanced, because nodes deep
+in the tree have the potential of causing many disk blocks to be read.
+Thus, there are two significant issues that must be addressed
+to have efficient search from a disk-based BST.
+The first is how to keep the tree balanced.
+The second is how to arrange the nodes on blocks so as to keep the
+number of blocks encountered on any path from the root to the leaves at
+a minimum.
+
+We could select a scheme for balancing the BST and allocating BST
+nodes to blocks in a way that minimizes disk I/O, as illustrated by
+Figure~\ref{PagedBST}.
+However, maintaining such a scheme in the face of insertions and
+deletions is difficult.
+In particular, the tree should remain balanced when an update takes
+place, but doing so might require much reorganization.
+Each update should affect only a few blocks, or its cost will be
+too high.
+As you can see from Figure~\ref{Rebalance},
+adopting a rule such as requiring the BST to be complete can cause a
+great deal of rearranging of data within the tree.
+
+\begin{figure}
+\pdffig{PagedBST}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Breaking the BST into blocks}
+{Breaking the BST into blocks.
+The BST is divided among disk blocks, each with space for three nodes.
+The path from the root to any leaf is contained on two blocks.}{PagedBST}
+\bigskip
+\end{figure}
+
+\begin{figure}
+\pdffig{BSTBal}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{Re-balancing a BST after insertion can be expensive}
+{An attempt to re-balance a BST after insertion can be expensive.
+(a)~A BST with six nodes in the shape of a complete binary tree.
+(b)~A node with value 1 is inserted into the BST of~(a).
+To maintain both the complete binary tree shape and the BST property,
+a major reorganization of the tree is required.}{Rebalance}
+\bigskip
+\end{figure}
+
+We can solve these problems by selecting another tree structure that
+automatically remains balanced after updates, and which is amenable
+to storing in blocks.
+There are a number of balanced tree data structures, and
+there are also techniques for keeping BSTs balanced.
+Examples are the AVL\index{avl tree@AVL tree} and
+splay trees\index{splay tree} discussed in Section~\ref{BalancedTree}.
+As an alternative, Section~\ref{TTTree} presents the \defit{\TTtree},
+which has the property that its leaves are always at the same level.
+The main reason for discussing the \TTtree\ here in preference to the
+other balanced search trees\index{search trees} is that it naturally
+leads to the \Btree\ of Section~\ref{BTree}, which is by far the most
+widely used indexing method today.
+\index{bst@BST|)}
+
+\section{2-3 Trees}
+\label{TTTree}
+
+\index{two-three@\TTtree|(}
+This section presents a data structure
+called the \TTtree.
+The \TTtree\ is not a binary tree, but instead its shape
+obeys the following definition:
+
+\begin{enumerate}
+\item
+A node contains one or two keys.
+\item
+Every internal node has either two children (if it contains one key)
+or three children (if it contains two keys).  Hence the name. 
+\item
+All leaves are at the same level in the tree, so
+the tree is always height balanced.
+\end{enumerate}
+
+In addition to these shape properties, the \TTtree\ has a search tree
+property analogous to that of a BST.
+For every node, the values of all descendants in the left subtree are
+less than the value of the first key, while values in the center
+subtree are greater than or equal to the value of the first key.
+If there is a right subtree (equivalently, if the node stores two
+keys), then the values of all descendants in the center subtree are
+less than the value of the second key, while values in the right
+subtree are greater than or equal to the value of the second key.
+To maintain these shape and search properties requires that special
+action be taken when nodes are inserted and deleted.
+The \TTtree\ has the advantage over the BST in that the \TTtree\ can
+be kept height balanced at relatively low cost.
+
+Figure~\ref{TTexamp} illustrates the \TTtree.
+Nodes are shown as rectangular boxes with two key fields.
+(These nodes actually would contain complete records or pointers to
+complete records, but the figures will show only the keys.)
+Internal nodes with only two children have an empty right key field.
+Leaf nodes might contain either one or two keys.
+Figure~\ref{TTNodeADT} is an implementation for the \TTtree\ node.
+\ifthenelse{\boolean{cpp}}
+{Class \Cref{TTNode} is assumed to be a private class of the the
+\TTtree\ class \Cref{TTTree}, and thus the data members of
+\Cref{TTNode} will be made public to simplify the presentation.}{}
+
+\begin{figure}
+\pdffig{TTExamp}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+
+\capt{4.5in}{A \TTtree}
+{A \TTtree.}{TTexamp}
+\vspace{-\medskipamount}
+\end{figure}
+
+\begin{figure}
+\xprogfig{TTNode.book}
+
+\ifthenelse{\boolean{cpp}}{\vspace{-\bigskipamount}}{}
+\capt{4.5in}
+{\TTtree\ node implementation}{The \TTtree\ node implementation.}{TTNodeADT}
+\end{figure}
+
+Note that this sample declaration does not distinguish
+between leaf and internal nodes and so is space inefficient, because
+leaf nodes store three pointers each.
+The techniques of Section~\ref{PointerBin} can be applied here to
+implement separate internal and leaf node types.
+
+From the defining rules for \TTtrees\ we can derive relationships
+between the number of nodes in the tree and the depth of the tree.
+A \TTtree\ of height \(k\) has at least \(2^{k-1}\) leaves, because if
+every internal node has two children it degenerates to the shape
+of a complete binary tree.
+A 2-3 tree of height \(k\) has at most \(3^{k-1}\) leaves, because
+each internal node can have at most three children.
+
+Searching for a value in a \TTtree\ is similar to searching in a BST.
+Search begins at the root.\index{bst@BST}
+If the root does not contain the search key \(K\), then the search
+progresses to the only subtree that can possibly contain \(K\).
+The value(s) stored in the root node determine which is the correct
+subtree.
+For example, if searching for the value~30 in the tree of
+Figure~\ref{TTexamp}, we begin with the root node.
+Because 30 is between 18 and~33, it can only be in the middle
+subtree.
+Searching the middle child of the root node yields the desired
+record.
+If searching for~15, then the first step is again to search the root
+node.
+Because 15 is less than~18, the first (left) branch is taken.
+At the next level, we take the second branch to the leaf node
+containing~15.
+If the search key were~16, then upon encountering the leaf
+containing~15 we would find that the search key is not in the tree.
+Figure~\ref{TTfindfunc} is an implementation for the \TTtree\ search
+method.
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\begin{figure}
+\xprogfig{TTfind.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}
+{\TTtree\ search method}{Implementation for the \TTtree\ search
+method.}{TTfindfunc}
+\end{figure}
+
+Insertion into a \TTtree\ is similar to insertion into a BST to the
+extent that the new record is placed in the appropriate leaf node.
+Unlike BST insertion, a new child is not created to hold the record
+being inserted,\index{bst@BST} that is, the \TTtree\ does not grow
+downward.
+The first step is to find the leaf node that would contain the record
+if it were in the tree.
+If this leaf node contains only one value, then the new record can be
+added to that node with no further modification to the tree, as
+illustrated in Figure~\ref{TTEasyIn}.
+In this example, a record with key value~14 is inserted.
+Searching from the root, we come to the leaf node that stores~15.
+We add~14 as the left value (pushing the record with key~15 to the
+rightmost position).
+
+\begin{figure}
+\pdffig{TTEasyIn}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Simple insert into a \TTtree}
+{Simple insert into the \TTtree\ of Figure~\ref{TTexamp}.
+The value~14 is inserted into the tree at the leaf node containing~15.
+Because there is room in the node for a second key, it is simply added
+to the left position with 15 moved to the right position.}{TTEasyIn}
+\medskip
+\end{figure}
+
+If we insert the new record into a leaf node~\svar{L} that already
+contains two records, then more space must be created.
+Consider the two records of node~\svar{L} and the record to be
+inserted without further concern for which two
+were already in~\svar{L} and which is the new record.
+The first step is to split \svar{L} into two nodes.
+Thus, a new node --- call it \(\svar{L}'\) --- must be created from free
+store.
+\svar{L} receives the record with the least of the three key values.
+\(\svar{L}'\) receives the greatest of the three.
+The record with the middle of the three key value is passed up to the
+parent node along with a pointer to \(\svar{L}'\).
+This is called a \defit{promotion}.
+The promoted key is then inserted into the parent.
+If the parent currently contains only one record (and thus has only
+two children), then the promoted record and the pointer to
+\(\svar{L}'\) are simply added to the parent node.
+If the parent is full, then the split-and-promote process is repeated.
+Figure~\ref{TTPromote} illustrates a simple promotion.
+Figure~\ref{TTSplit} illustrates what happens when promotions
+require the root to split, adding a new level to the tree.
+In either case, all leaf nodes continue to have equal depth.
+Figures~\ref{TTIns} and \ref{TTsplitcode} present an
+implementation for the insertion process.
+
+\begin{figure}
+\pdffig{TTPromot}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Node-splitting insert for a \TTtree}
+{A simple node-splitting insert for a \TTtree.
+The value~55 is added to the \TTtree\ of Figure~\ref{TTexamp}.
+This makes the node containing values~50 and~52 split, promoting
+value~52 to the parent node.}{TTPromote}
+\medskip
+\end{figure}
+
+\begin{figure}
+\pdffig{TTSplit}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{Splitting the \TTtree\ root}
+{Example of inserting a record that causes the \TTtree\ root to split.
+(a)~The value~19 is added to the \TTtree\ of Figure~\ref{TTexamp}.
+This causes the node containing~20 and~21 to split, promoting~20.
+(b)~This in turn causes the internal node containing~23 and~30 to
+split, promoting~23.
+(c)~Finally, the root node splits, promoting~23
+to become the left record in the new root.
+The result is that the tree becomes one level higher.}{TTSplit}
+\bigskip
+\end{figure}
+
+\begin{figure}
+\xprogfig{TTins.book}
+\vspace{-\bigskipamount}\vspace{-1pt}
+
+\capt{4.5in}
+{The \TTtree\ insert routine}{The \TTtree\ insert routine.}{TTIns}
+\end{figure}
+
+\begin{figure}
+\xprogfig{TTNodeAdd.book}
+\vspace{-\medskipamount}\vspace{-1pt}
+
+\capt{4.5in}
+{The \TTtree\ splitnode routine}
+{The \TTtree\ node \Cref{add} method.}
+{TTsplitcode}
+\end{figure}
+
+Note that \Cref{inserthelp} of Figure~\ref{TTIns} takes
+three parameters.
+The first is a pointer to the root of the current subtree, named
+\Cref{rt}.
+The second is the key for the record to be
+inserted, and the third is the record itself.
+The return value for \Cref{inserthelp} is a pointer to a \TTtree\
+node.
+If \Cref{rt} is unchanged, then a pointer to \Cref{rt} is returned.
+If \Cref{rt} is changed (due to the insertion causing the node to
+split), then a pointer to the new subtree root is returned, with the
+key value and record value in the leftmost fields, and a pointer to
+the (single) subtree in the center pointer field.
+This revised node will then be added to the parent, as illustrated in
+Figure~\ref{TTSplit}.
+
+When deleting a record from the \TTtree, there are three cases to
+consider.
+The simplest occurs when the record is to be removed from a leaf node
+containing two records.
+In this case, the record is simply removed, and no other nodes are
+affected.
+The second case occurs when the only record in a leaf node is to be
+removed.
+The third case occurs when a record is to be removed from an internal
+node.
+In both the second and the third cases, the deleted record is replaced
+with another that can take its place while maintaining the correct
+order, similar to removing a node from a BST.\index{bst@BST}
+If the tree is sparse enough, there is no such record available that
+will allow all nodes to still maintain at least one record.
+In this situation, sibling nodes are merged together.
+The delete operation for the \TTtree\ is excessively complex and
+will not be described further.
+Instead, a complete discussion of deletion will be postponed until the
+next section, where it can be generalized for a particular variant of
+the \Btree.
+
+The \TTtree\ insert and delete routines do not add new nodes at the
+bottom of the tree.
+Instead they cause leaf nodes to split or merge, possibly causing a
+ripple effect moving up the tree to the root.
+If necessary the root will split, causing a new root node to be
+created and making the tree one level deeper.
+On deletion, if the last two children of the root merge,
+then the root node is removed and the tree will lose a level.
+In either case, all leaf nodes are always at the same level.
+When all leaf nodes are at the same level, we say that a tree is
+\defit{height balanced}.\index{tree!height balanced}
+Because the \TTtree\ is height balanced, and every internal node has
+at least two children, we know that the maximum depth of the tree
+is \(\log n\).
+Thus, all \TTtree\ insert, find, and delete operations require
+\Thetalogn\ time.
+\index{two-three@\TTtree|)}
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\section{B-Trees}
+\label{BTree}
+
+\index{btree@\Btree|(}
+This section presents the \Btree.
+\Btrees\ are usually attributed to R.~Bayer and E.~McCreight
+who described the \Btree\ in a 1972 paper.
+By 1979, \Btrees\ had replaced virtually all large-file access
+methods other than hashing.\index{hashing}
+\Btrees, or some variant of \Btrees, are \emph{the} standard file
+organization for applications requiring insertion, deletion, and key
+range searches.
+They are used to implement most modern file systems.
+\Btrees\ address effectively all of the major problems encountered
+when implementing disk-based search trees:\index{search trees}
+
+\begin{enumerate}
+
+\item
+\Btrees\ are always height balanced, with all leaf nodes at the same
+level.\index{tree!height balanced}
+
+\item Update and search operations affect only a few disk blocks.
+The fewer the number of disk blocks affected, the less disk I/O is
+required.
+
+\item
+\Btrees\ keep related records (that is, records with similar key
+values) on the same disk block, which helps to minimize disk I/O on
+searches due to locality of reference.\index{locality of reference}
+
+\item
+\Btrees\ guarantee that every node in the tree will be
+full at least to a certain minimum percentage.
+This improves space efficiency while reducing the typical number of
+disk fetches necessary during a search or update operation.
+
+\end{enumerate}
+
+A \Btree\ of order~\(m\) is defined to have
+the following shape properties:
+
+\begin{itemize}
+\item
+The root is either a leaf or has at least two children.
+\item
+Each internal node, except for the root, has between
+\(\lceil m/2 \rceil \) and \(m\) children.
+\item
+All leaves are at the same level in the tree, so the tree is always
+height balanced.\index{tree!height balanced}
+\end{itemize}
+
+The \Btree\ is a generalization of the
+\TTtree.\index{two-three@\TTtree}
+Put another way, a \TTtree\ is a \Btree\ of order three.
+Normally, the size of a node in the \Btree\ is chosen to fill a disk
+block.
+A \Btree\ node implementation typically allows 100 or more children.
+Thus, a \Btree\ node is equivalent to a disk block, and a ``pointer''
+value stored in the tree is actually the number of the block
+containing the child node (usually interpreted as an offset from the
+beginning of the corresponding disk file).
+In a typical application, the \Btree's access to the disk file will be
+managed using a buffer pool and a block-replacement scheme such as
+LRU\index{least recently used (LRU)}
+(see Section~\ref{BuffPool}).\index{buffer pool}
+
+Figure~\ref{BTexamp} shows a \Btree\ of order four.
+Each node contains up to three keys, and
+internal nodes have up to four children.
+
+\begin{figure}
+\pdffig{BTexamp}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+
+\capt{4.5in}{A \Btree\ of order four}
+{A \Btree\ of order four.}{BTexamp}
+\end{figure}
+
+Search in a \Btree\ is a generalization of search in a \TTtree.
+It is an alternating two-step process, beginning with the root node of
+the \Btree.
+
+\begin{enumerate}
+
+\item
+Perform a binary search\index{search!binary} on the records in the
+current node.
+If a record with the search key is found, then return that record.
+If the current node is a leaf node and the key is not found,
+then report an unsuccessful search.
+
+\item
+Otherwise, follow the proper branch and repeat the process.
+
+\end{enumerate}
+
+For example, consider a search for the record with key value~47 in the
+tree of Figure~\ref{BTexamp}.
+The root node is examined and the second (right) branch taken.
+After examining the node at level~1, the third branch is taken to the
+next level to arrive at the leaf node containing a record with key
+value~47.
+
+\Btree\ insertion is a generalization of \TTtree\ insertion.
+The first step is to find the leaf node that should contain the
+key to be inserted, space permitting.
+If there is room in this node, then insert the key.
+If there is not, then split the node into two and promote the middle
+key to the parent.
+If the parent becomes full, then it is split in turn, and its middle
+key promoted.
+
+Note that this insertion process is guaranteed to keep all nodes at
+least half full.
+For example, when we attempt to insert into a full internal node of a
+\Btree\ of order four, there will now be five children that must be
+dealt with.
+The node is split into two nodes containing two keys each, thus
+retaining the \Btree\ property.
+The middle of the five children is promoted to its parent.
+
+\subsection{B$^+$-Trees}
+\label{BPlusTree}
+
+\index{btree@\Btree!bplustree@\BPtree|(}
+The previous section mentioned that \Btrees\ are universally used
+to implement large-scale disk-based systems.
+Actually, the \Btree\ as described in the previous section is almost
+never implemented,  nor is the \TTtree\ as described in
+Section~\ref{TTTree}.
+What is most commonly implemented is a variant of the \Btree,
+called the \BPtree.
+When greater efficiency is required, a more complicated
+variant known as the \BStree\ is used.
+
+%\TODO Consider again the linear index.
+When data are static, a linear index provides an extremely efficient
+way to search.
+The problem is how to handle those pesky inserts and deletes.
+We could try to keep the core idea of storing a sorted array-based
+list, but make it more flexible by breaking the list into manageable
+chunks that are more easily updated.
+How might we do that?
+First, we need to decide how big the chunks should be.
+Since the data are on disk, it seems reasonable to store a chunk that
+is the size of a disk block, or a small multiple of the disk block
+size.
+If the next record to be inserted belongs to a chunk that hasn't
+filled its block then we can just insert it there.
+The fact that this might cause other records in that chunk to move a
+little bit in the array is not important, since this does not cause
+any extra disk accesses so long as we move data within that chunk.
+But what if the chunk fills up the entire block that contains it?
+We could just split it in half.
+What if we want to delete a record?
+We could just take the deleted record out of the chunk, but we might
+not want a lot of near-empty chunks.
+So we could put adjacent chunks together if they have only a small
+amount of data between them.
+Or we could shuffle data between adjacent chunks that together contain
+more data.
+The big problem would be how to find the desired chunk when processing
+a record with a given key.
+Perhaps some sort of tree-like structure could be used to locate the
+appropriate chunk.
+These ideas are exactly what motivate the \BPtree.
+The \BPtree\ is essentially a mechanism for managing a sorted
+array-based list, where the list is broken into chunks.
+
+The most significant difference between the \BPtree\ and the BST or
+the standard \Btree\ is that\index{bst@BST}
+the \BPtree\ stores records only at the leaf nodes.
+Internal nodes store key values, but these
+are used solely as placeholders to guide the search.
+This means that internal nodes are significantly different in
+structure from leaf nodes.
+Internal nodes store keys to guide the search, associating each key
+with a pointer to a child \BPtree\ node.
+Leaf nodes store actual records, or else keys and pointers to actual
+records in a separate disk file if the \BPtree\ is being used
+purely as an index.
+Depending on the size of a record as compared to the size of a key,
+a leaf node in a \BPtree\ of order~\(m\) might have enough room to
+store more or less than \(m\)~records.
+The requirement is simply that the leaf nodes store enough records to
+remain at least half full.
+The leaf nodes of a \BPtree\ are normally
+linked together to form a doubly linked list.
+Thus, the entire collection of records can be traversed in sorted
+order by visiting all the leaf nodes on the linked list.
+Here is a \Lang-like pseudocode representation for the \BPtree\ node
+\ifthenelse{\boolean{cpp}}
+{class.
+Leaf node and internal node subclasses would implement this base class.}{}
+\ifthenelse{\boolean{java}}
+{interface.
+Leaf node and internal node subclasses would implement this interface.}{}
+
+\xproghere{BPNode.book}
+
+An important implementation detail to note is that while
+Figure~\ref{BTexamp} shows internal nodes containing three keys and
+four pointers, class \Cref{BPNode} is slightly different in that it
+stores key/pointer pairs.
+Figure~\ref{BTexamp} shows the \BPtree\ as it is traditionally drawn.
+To simplify implementation in practice, nodes really do 
+associate a key with each pointer.
+Each internal node should be assumed to hold in the leftmost position
+an additional key that is less than or equal to any possible key value
+in the node's leftmost subtree.
+\BPtree\ implementations typically store an additional dummy record
+in the leftmost leaf node whose key value is less than any legal key
+value.
+
+\BPtrees\ are exceptionally good for range queries.
+Once the first record in the range has been found, the rest of the
+records with keys in the range can be accessed by sequential
+processing of the remaining records in the first node, and then
+continuing down the linked list of leaf nodes as far as necessary.
+Figure~\ref{BPexamp} illustrates the \BPtree.
+
+\begin{figure}
+\pdffig{BPexamp}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Example of a \BPtree}
+{Example of a \BPtree\ of order four.
+Internal nodes must store between two and four children.
+For this example, the record size is assumed to be such that
+leaf nodes store between three and five records.}{BPexamp}
+\bigskip
+\end{figure}
+
+Search in a \BPtree\ is nearly identical to search in a regular
+\Btree, except that the search must always continue to the proper
+leaf node.
+Even if the search-key value is found in an internal node, this is
+only a placeholder and does not provide access to the actual record.
+To find a record with key value~33 in the \BPtree\ of
+Figure~\ref{BPexamp}, search begins at the root.
+The value~33 stored in the root merely serves as a placeholder,
+indicating that keys with values greater than or equal to 33 are found
+in the second subtree.
+From the second child of the root, the first branch is taken to reach
+the leaf node containing the actual record (or a pointer to the actual
+record) with key value~33.
+Figure~\ref{BPfindfunc} shows a pseudocode sketch of the
+\BPtree\ search algorithm.
+
+\begin{figure}
+\xprogfig{BPfind.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{\BPtree\ search method}
+{Implementation for the \BPtree\ search method.}{BPfindfunc}
+\end{figure}
+
+\begin{figure}
+\pdffig{BPins}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Examples of \BPtree\ insertion}
+{Examples of \BPtree\ insertion.
+(a)~A \BPtree\ containing five records.
+(b)~The result of inserting a record with key value~50 into the tree
+of~(a).
+The leaf node splits, causing creation of the first internal node.
+(c)~The \BPtree\ of (b) after further insertions.
+(d)~The result of inserting a record with key value~30 into the tree
+of~(c).
+The second leaf node splits, which causes the internal node to split
+in turn, creating a new root.}{BPins}
+\bigskip
+\end{figure}
+
+\BPtree\ insertion is similar to \Btree\ insertion.
+First, the leaf \svar{L} that should contain the record is found.
+If \svar{L} is not full, then the new record is added, and no
+other \BPtree\ nodes are affected.
+If \svar{L} is already full, split it in two (dividing the records
+evenly among the two nodes) and promote a copy of the
+least-valued key in the newly formed right node.
+As with the \TTtree,\index{two-three@\TTtree} promotion might cause
+the parent to split in turn, perhaps eventually leading to splitting
+the root and causing the \BPtree\ to gain a new level.
+\BPtree\ insertion keeps all leaf nodes at equal depth.
+Figure~\ref{BPins} illustrates the insertion process through several
+examples.
+Figure~\ref{BPinsertcode} shows a \Lang-like pseudocode sketch of the \BPtree\
+insert algorithm.
+
+\begin{figure}
+\xprogfig{BPinsert.book}
+
+\vspace{-\bigskipamount}\vspace{-1pt}
+
+\capt{4.5in}
+{Sketch of the \BPtree\ insert algorithm}
+{A \Lang-like pseudocode sketch of the \BPtree\ insert algorithm.}
+{BPinsertcode}
+\end{figure}
+
+To delete record \svar{R} from the \BPtree,
+first locate the leaf \svar{L} that contains \svar{R}.
+If \svar{L} is more than half full, then we need only remove \svar{R},
+leaving \svar{L} still at least half full.
+This is demonstrated by Figure~\ref{BPdelsimp}.
+
+\begin{figure}
+\pdffig{BPsimDel}
+
+\medskip
+\capt{4.5in}{Simple deletion from a \BPtree}
+{Simple deletion from a \BPtree.
+The record with key value~18 is removed from the tree of
+Figure~\ref{BPexamp}.
+Note that even though 18 is also a placeholder used to direct search
+in the parent node, that value need not be removed from internal nodes
+even if no record in the tree has key value~18.
+Thus, the leftmost node at level one in this example retains the key
+with value 18 after the record with key value 18 has been removed
+from the second leaf node.}{BPdelsimp}
+\bigskip
+\end{figure}
+
+If deleting a record reduces the number of records in the node below
+the minimum threshold (called an \defit{underflow}), then we must do
+something to keep the node sufficiently full.
+The first choice is to look at the node's adjacent siblings to
+determine if they have a spare record that can be used to fill the
+gap.
+If so, then enough records are transferred from the
+sibling so that both nodes have about the same number of records.
+This is done so as to delay as long as possible the next time when a
+delete causes this node to underflow again.
+This process might require that the parent node has its placeholder
+key value revised to reflect the true first key value in each node.
+Figure~\ref{BPborrow} illustrates the process.
+
+\begin{figure}
+\pdffig{BPborrow}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{Deletion from a \BPtree\ via borrowing from a sibling}
+{Deletion from the \BPtree\ of Figure~\ref{BPexamp} via borrowing from
+a sibling.
+The key with value~12 is deleted from the leftmost leaf, causing the
+record with key value 18 to shift to the leftmost leaf to take its
+place.
+Note that the parent must be updated to properly indicate the key
+range within the subtrees.
+In this example, the parent node has its leftmost key value changed
+to~19.}{BPborrow}
+\bigskip
+\end{figure}
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+If neither sibling can lend a record to the under-full node
+(call it~\(N\)),
+then \(N\) must give its records to a sibling and be removed
+from the tree.
+There is certainly room to do this, because the sibling is at most
+half full (remember that it had no records to contribute to the
+current node), and \(N\) has become less than half full because it is
+under-flowing.
+This merge process combines two subtrees of the parent, which might
+cause it to underflow in turn.
+If the last two children of the root merge together, then the tree
+loses a level.
+Figure~\ref{BPmerge} illustrates the node-merge deletion process.
+Figure~\ref{BPDelAlg} shows \Lang-like pseudocode for the
+\BPtree\ delete algorithm.
+
+\begin{figure}
+\pdffig{BPmerge}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{Deletion from a \BPtree\ via collapsing siblings}
+{Deleting the record with key value~33 from the \BPtree\ of
+Figure~\ref{BPexamp} via collapsing siblings.
+(a)~The two leftmost leaf nodes merge together to form a single leaf.
+Unfortunately, the parent node now has only one child.
+(b)~Because the left subtree has a spare leaf node, that node is passed
+to the right subtree.
+The placeholder values of the root and the right internal node are
+updated to reflect the changes.
+Value~23 moves to the root, and old root value~33 moves to the
+rightmost internal node.}{BPmerge}
+\bigskip
+\end{figure}
+
+\begin{figure}
+\xprogfig{BPremove.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}
+{Sketch of the \BPtree\ delete algorithm}
+{\Lang-like pseudocode for the \BPtree\ delete algorithm.}
+{BPDelAlg}
+\end{figure}
+
+The \BPtree\ requires that all nodes be at least half full
+(except for the root).
+Thus, the storage utilization must be at least 50\%.
+This is satisfactory for many implementations, but note that keeping
+nodes fuller will result both in
+less space required (because there is less empty space in the disk file)
+and in more efficient processing (fewer blocks on average will be read
+into memory because the amount of information in each block is greater).
+Because \Btrees\ have become so popular, many algorithm designers have
+tried to improve \Btree\ performance.
+One method for doing so is to use the \BPtree\ variant known as the
+\BStree.\index{btree@\Btree!bstartree@\BStree}
+The \BStree\ is identical to the \BPtree, except for the rules used
+to split and merge nodes.
+Instead of splitting a node in half when it overflows, the \BStree\
+gives some records to its neighboring sibling, if possible.
+If the sibling is also full, then these two nodes split into three.
+Similarly, when a node underflows, it is combined with its two
+siblings, and the total reduced to two nodes.
+Thus, the nodes are always at least two thirds full.\footnote{
+This concept can be extended further if higher space utilization is
+required.
+However, the update routines become much more complicated.
+I once worked on a project where we implemented 3-for-4 node split
+and merge routines.
+This gave better performance than the 2-for-3 node split and merge
+routines of the \BStree.
+However, the spitting and merging routines were so complicated that
+even their author could no longer understand them
+once they were completed!}
+
+\subsection{B-Tree Analysis}
+
+\index{btree@\Btree!analysis|(}
+The asymptotic cost of search, insertion, and deletion of
+records from \Btrees, \BPtrees, and \BStrees\ is \Thetalogn\
+where \(n\) is the total number of records in the tree.
+However, the base of the log is the (average) branching factor of the
+tree.
+Typical database applications use extremely high branching factors,
+perhaps 100 or more.
+Thus, in practice the \Btree\ and its variants are extremely shallow.
+
+As~an illustration, consider a \BPtree\ of order 100 and leaf
+nodes that contain up to 100 records.
+A~\BPtree\ with height one (that is, just a single leaf node) can have
+at most 100~records.
+A~\BPtree\ with height two (a root internal node whose children are
+leaves) must have at least 100~records
+(2~leaves with 50~records each).
+It has at most 10,000~records (100~leaves with 100~records each).
+A~\BPtree\ with height three must have at least 5000~records
+(two second-level nodes with 50~children containing 50~records each)
+and at most one million records (100~second-level nodes with 100~full
+children each).
+A~\BPtree\ with height four must have at least 250,000~records and at
+most 100~million records.
+Thus, it would require an \emph{extremely} large database to generate
+a \BPtree\ of more than height four.
+
+The \BPtree\ split and insert rules guarantee that every node (except
+perhaps the root) is at least half full.
+So they are on average about $3/4$ full.
+But the internal nodes are purely overhead, since the keys stored
+there are used only by the tree to direct search, rather than store
+actual data.
+Does this overhead amount to a significant use of space?
+No, because once again the high fan-out rate of the tree structure
+means that the vast majority of nodes are leaf nodes.
+Recall (from Section~\ref{Kary}) that a full \Kary\ tree has
+approximately $1/K$ of its nodes as internal nodes.
+This means that while half of a full binary tree's nodes are internal
+nodes, in a \BPtree\ of order 100 probably only about $1/75$ of its
+nodes are internal nodes.
+This means that the overhead associated with internal nodes is very
+low.
+
+We can reduce the number of disk fetches required for the \Btree\
+even more by using the following methods.
+First, the upper levels of the tree can be stored in main memory at all
+times.
+Because the tree branches so quickly, the top two levels
+(levels~0 and~1) require relatively little space.
+If the \Btree\ is only height four, then at most two disk fetches
+(internal nodes at level two and leaves at level three) are required
+to reach the pointer to any given record.
+
+A buffer pool could be used to manage nodes of the \Btree.
+Several nodes of the tree would typically be in main memory at one
+time.
+The most straightforward approach is to use a standard method such as
+LRU to do node replacement.
+However, sometimes it might be desirable to ``lock'' certain nodes
+such as the root into the buffer pool.
+In general, if the buffer pool is even of modest size (say at least
+twice the depth of the tree), no special techniques for node
+replacement will be required because the upper-level nodes will
+naturally be accessed frequently.
+\index{btree@\Btree!analysis|)}
+\index{btree@\Btree!bplustree@\BPtree|)}
+
+
+\index{btree@\Btree|)}
+\index{index!tree|)}
+
+\section{Further Reading}
+
+For an expanded discussion of the issues touched on in this chapter,
+see a general file processing text such as\index{file structure}
+\ttl{File Structures: A Conceptual Toolkit} by
+Folk and Zoellick \cite{FZ}.
+In particular, Folk and Zoellick provide a good discussion of the
+relationship between primary and secondary indices.
+The most thorough discussion on various implementations
+for the \Btree\ is the survey article by 
+Comer \cite{Comer}.\index{btree@\Btree}
+Also see \cite{Salzberg} for further details on implementing \Btrees.
+See Shaffer and Brown \cite{PBTree} for a discussion of buffer pool
+management strategies for \BPtree-like data structures.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Assume that a computer system has disk blocks of 1024 bytes, and that
+you are storing records that have 4-byte keys and 4-byte data fields.
+The records are sorted and packed sequentially into the disk file.
+
+\begin{enumerate}
+\item Assume that a linear index uses 4~bytes to store the key and
+4~bytes to store the block ID for the associated records.
+What is the greatest number of records that can be stored in the 
+file if a linear index of size 256KB is used?
+
+\item What is the greatest number of records that can be stored in the 
+file if the linear index is also stored on disk (and thus its size is
+limited only by the second-level index) when using a second-level
+index of 1024 bytes (i.e., 256 key values) as illustrated by
+Figure~\ref{LinIndex}?
+Each element of the second-level index references the smallest key
+value for a disk block of the linear index.
+\end{enumerate}
+
+\item
+Assume that a computer system has disk blocks of 4096 bytes, and that
+you are storing records that have 4-byte keys and 64-byte data fields.
+The records are sorted and packed sequentially into the disk file.
+
+\begin{enumerate}
+\item Assume that a linear index uses 4~bytes to store the key and
+4~bytes to store the block ID for the associated records.
+What is the greatest number of records that can be stored in the 
+file if a linear index of size 2MB is used?
+
+\item What is the greatest number of records that can be stored in the
+file if the linear index is also stored on disk (and thus its size is
+limited only by the second-level index) when using a second-level
+index of 4096 bytes (i.e., 1024 key values) as illustrated by
+Figure~\ref{LinIndex}?
+Each element of the second-level index references the smallest key
+value for a disk block of the linear index.
+\end{enumerate}
+
+\item
+Modify the function \Cref{binary} of Section~\ref{ProgTimeSec}
+so as to support variable-length records with fixed-length
+keys indexed by a simple linear index\index{index!linear}
+as illustrated by Figure~\ref{LinVar}.
+
+\item
+Assume that a database stores records consisting of a 2-byte integer
+key and a variable-length data field consisting of a string.
+Show the linear index\index{index!linear} (as illustrated by
+Figure~\ref{LinVar}) for the following collection of records:
+
+\begin{center}
+\begin{tabular}{ll}
+397 &Hello world!\\
+82  &XYZ\\
+1038&This string is rather long\\
+1037&This is shorter\\
+42  &ABC\\
+2222&Hello new world!\\
+\end{tabular}
+\end{center}
+
+\item
+Each of the following series of records consists of a four-digit
+primary key (with no duplicates) and a four-character secondary key
+(with many duplicates).
+
+\begin{center}
+\begin{tabular}{ll}
+3456&DEER\\
+2398&DEER\\
+2926&DUCK\\
+9737&DEER\\
+7739&GOAT\\
+9279&DUCK\\
+1111&FROG\\
+8133&DEER\\
+7183&DUCK\\
+7186&FROG\\
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item
+Show the inverted list (as illustrated by Figure~\ref{Inverted}) for
+this collection of records.\index{index!inverted list}
+
+\item
+Show the improved inverted list (as illustrated by
+Figure~\ref{InvertList}) for this collection of records.
+\end{enumerate}
+
+\item
+Under what conditions will ISAM\index{isam@ISAM}
+be more efficient than a \BPtree\ implementation?
+
+\item
+Prove that the number of leaf nodes in a \TTtree\ with height \(k\) is
+between \(2^{k-1}\) and \(3^{k-1}\).\index{two-three@\TTtree}
+
+\item
+Show the result of inserting the values~55 and~46 into the \TTtree\ of
+Figure~\ref{TTexamp}.\index{two-three@\TTtree}
+
+\item
+You are given a series of records whose keys are letters.
+The records arrive in the following order:
+C, S, D, T, A, M, P, I, B, W, N, G, U, R, K, E, H, O, L, J.
+Show the \TTtree\ that results from inserting these
+records.\index{two-three@\TTtree}
+
+\item
+You are given a series of records whose keys are letters.
+The records are inserted in the following order:
+C, S, D, T, A, M, P, I, B, W, N, G, U, R, K, E, H, O, L, J.
+Show the tree that results from inserting these records when the
+\TTtree\ is modified to be a \TTPtree, that is, the internal nodes
+act only as placeholders.\index{two-three@\TTtree}
+Assume that the leaf nodes are capable of holding up to two records.
+
+\item
+Show the result of inserting the value~55 into the \Btree\ of
+Figure~\ref{BTexamp}.\index{btree@\Btree}
+
+\item
+Show the result of inserting the values~1, 2, 3, 4, 5, and 6 (in that
+order) into the \BPtree\ of
+Figure~\ref{BPexamp}.\index{btree@\Btree!bplustree@\BPtree}
+
+
+\item
+Show the result of deleting the values~18, 19, and 20 (in that
+order) from the \BPtree\ of
+Figure~\ref{BPmerge}b.\index{btree@\Btree!bplustree@\BPtree}
+
+\item
+You are given a series of records whose keys are letters.
+The records are inserted in the following order:
+C, S, D, T, A, M, P, I, B, W, N, G, U, R, K, E, H, O, L, J.
+Show the \BPtree\ of order four that results from inserting these
+records.\index{btree@\Btree!bplustree@\BPtree}
+Assume that the leaf nodes are capable of storing up to three records.
+
+\item
+Assume that you have a \BPtree\ whose
+internal\index{btree@\Btree!bplustree@\BPtree}
+nodes can store up to 100 children and whose leaf nodes can store up
+to 15 records.
+What are the minimum and maximum number of records that can be stored
+by the \BPtree\ with heights 1, 2, 3, 4, and 5?
+
+\item
+Assume that you have a \BPtree\ whose
+internal\index{btree@\Btree!bplustree@\BPtree} nodes can store up to
+50 children and whose leaf nodes can store up to 50 records.
+What are the minimum and maximum number of records that can be stored
+by the \BPtree\ with heights 1, 2, 3, 4, and 5?
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+Implement a two-level linear index for variable-length records as
+illustrated by Figures~\ref{LinVar}
+and~\ref{LinIndex}.\index{index!linear}
+Assume that disk blocks are 1024 bytes in length.
+Records in the database file should typically range between 20 and
+200~bytes, including a 4-byte key value.\index{variable-length record}
+Each record of the index file should store a key value and the byte
+offset in the database file for the first byte of the corresponding
+record.
+The top-level index (stored in memory) should be a simple array
+storing the lowest key value on the corresponding block in the index
+file.
+
+\item
+Implement the \TTPtree, that is, a \TTtree\ where the internal nodes
+act only as placeholders.\index{two-three@\TTtree}
+Your \TTPtree\ should implement the dictionary interface of
+Section~\ref{Dictionary}.
+
+\item
+Implement the dictionary ADT of Section~\ref{Dictionary} for a large
+file stored on disk by means of the \BPtree\ of Section~\ref{BTree}.
+Assume that disk blocks are 1024 bytes, and thus both leaf nodes and
+internal nodes are also\index{dictionary!ADT}
+1024~bytes.\index{btree@\Btree!bplustree@\BPtree}
+Records should store a 4-byte (\Cref{int}) key value and a 60-byte
+data field.
+Internal nodes should store key value/pointer pairs where the
+``pointer'' is actually the block number on disk for the child node.
+Both internal nodes and leaf nodes will need room to store various
+information such as a count of the records stored on that node, and a
+pointer to the next node on that level.
+Thus, leaf nodes will store 15~records, and internal nodes will
+have room to store about 120 to 125 children depending on how you
+implement them.
+Use a buffer pool (Section~\ref{BuffPool})
+to manage access to the nodes stored on disk.
+\index{index|)}
+
+\end{projects}

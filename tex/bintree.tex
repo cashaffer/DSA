@@ -1,0 +1,2905 @@
+% bintree.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\chapter{Binary Trees}
+\label{BinaryTree}
+\def\CHHEAD{Chap.\ \thechapter\ Binary Trees}    % Head title -- even pages
+
+\index{binary tree|(}
+The list representations of Chapter~\ref{LSQ}\index{list} have a
+fundamental limitation:
+Either search or insert can be made efficient, but not both at the
+same time.\index{list!search}\index{list!insert}
+Tree structures permit both efficient access and update to
+large collections of data.
+Binary trees in particular are widely used and relatively easy to
+implement.
+But binary trees are useful for many things besides searching.
+Just a few examples of applications that trees can speed up include
+prioritizing jobs, describing mathematical expressions and the
+syntactic elements of computer programs,
+or organizing the information needed to drive data compression
+algorithms.
+
+This chapter begins by presenting definitions and some key properties
+of binary trees.
+Section~\ref{BinTravers} discusses how to process all nodes of the
+binary tree in an organized manner.\index{traversal!binary tree}
+Section~\ref{BTImpl} presents various methods for implementing binary
+trees and their nodes.\index{binary tree!implementation}
+Sections~\ref{BST} through~\ref{Huffman} present three examples
+of binary trees used in specific applications:
+the Binary Search Tree (BST) for implementing dictionaries,
+heaps\index{heap} for implementing priority queues\index{priority queue},
+and Huffman coding\index{huffman coding tree@Huffman coding tree}
+trees for text compression.\index{text compression}
+The BST, heap, and Huffman coding tree each have distinctive
+structural features that affect their implementation and use.
+
+\section{Definitions and Properties}
+\label{BTProper}
+
+\index{binary tree!terminology|(}
+A \defit{binary tree} is made up of a finite set of elements called
+\defit{nodes}.\index{binary tree!node}\index{tree!terminology}
+This set either is empty or consists of a node called the
+\defit{root} together with two binary trees, called the left and right
+\defit{subtrees}, which are disjoint from each other and from the
+root.
+(Disjoint means that they have no nodes in common.)\index{disjoint}
+The roots of these subtrees are \defit{children} of the root.
+There is an \defit{edge} from a node to each of its children, and a
+node is said to be the \defit{parent} of its children.
+
+If \(n_1\), \(n_2\), ..., \(n_k\) is a sequence of nodes in the tree such
+that \(n_i\) is the parent of \(n_{i+1}\) for \(1 \leq i < k\), then this
+sequence is called a \defit{path} from \(n_1\) to \(n_k\).
+The \defit{length} of the path is \(k-1\).
+If there is a path from node~\svar{R} to node~\svar{M},
+then \svar{R}~is an \defit{ancestor} of~\svar{M}, and
+\svar{M}~is a \defit{descendant} of~\svar{R}.
+Thus, all nodes in the tree are descendants of the root of the tree,
+while the root is the ancestor of all nodes.
+The \defit{depth} of a node~\svar{M} in the tree is the length of the
+path from the root of the tree to~\svar{M}.
+The \defit{height} of a tree is one more than the depth of the deepest
+node in the tree.
+All nodes of depth~\(d\) are at
+\defit{level}~\(d\) in the tree.
+The root is the only node at level~0, and its depth is~0.
+A \defit{leaf} node is any node that has two empty children.
+An \defit{internal} node is
+any node that has at least one non-empty child.
+
+\begin{figure}
+\pdffig{BinExamp}
+
+\medskip
+\capt{4.5in}{An example binary tree}
+{A binary tree.
+Node~\svar{A} is the root.
+Nodes~\svar{B} and~\svar{C} are \svar{A}'s children.
+Nodes~\svar{B} and~\svar{D} together form a subtree.
+Node~\svar{B} has two children: Its left child is the empty tree and
+its right child is~\svar{D}.
+Nodes~\svar{A}, \svar{C}, and~\svar{E} are ancestors of~\svar{G}.
+Nodes~\svar{D}, \svar{E}, and~\svar{F} make up level~2 of the tree;
+node~\svar{A} is at level~0.
+The edges from~\svar{A} to~\svar{C} to~\svar{E} to~\svar{G}
+form a path of length~3.
+Nodes~\svar{D}, \svar{G}, \svar{H}, and~\svar{I} are leaves.
+Nodes~\svar{A}, \svar{B}, \svar{C}, \svar{E}, and~\svar{F} are internal
+nodes.
+The depth of~\svar{I} is~3.
+The height of this tree is~4.}{BinExample}
+\bigskip\smallskip
+\end{figure}
+
+\vspace{-\smallskipamount}
+Figure~\ref{BinExample} illustrates the various terms used to identify 
+parts of a binary tree.
+Figure~\ref{BinDiff} illustrates an important point regarding the
+structure of binary trees.
+Because \emph{all} binary tree nodes have two children
+(one or both of which might be empty), the two binary
+trees of Figure~\ref{BinDiff} are \emph{not} the same.
+
+\begin{figure}
+\pdffig{BinDiff}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Two different binary trees}
+{Two different binary trees.
+(a)~A binary tree whose root has a non-empty left child.
+(b)~A binary tree whose root has a non-empty right child.
+(c)~The binary tree of (a) with the missing right child made explicit.
+(d)~The binary tree of (b) with the missing left child made explicit.}
+{BinDiff}
+\bigskip
+\end{figure}
+
+Two restricted forms of binary tree are sufficiently
+important to warrant special names.
+Each node in a \defit{full} binary tree\index{binary tree!full|(}
+is either (1) an internal node with exactly two non-empty children or
+(2) a leaf.
+A \defit{complete} binary tree\index{binary tree!complete} has
+a restricted shape obtained by starting at the root and filling the
+tree by levels from left to right.
+In the complete binary tree of height \(d\), all levels
+except possibly level \(d-1\) are completely full.
+The bottom level has its nodes filled in from the left side.
+
+\begin{figure}
+\pdffig{FullComp}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{Full and complete binary trees}
+{Examples of full and complete binary trees.
+(a)~This tree is full (but not complete).\index{binary tree!complete}
+(b)~This tree is complete (but not full).}{FullComplete}
+\medskip
+\end{figure}
+
+Figure~\ref{FullComplete} illustrates the differences between full and
+complete binary trees.\footnote{
+While these definitions for full and complete binary tree are the ones
+most commonly used, they are not universal.
+Because the common meaning of the words ``full'' and ``complete'' are
+quite similar, there is little that you can do to distinguish between
+them other than to memorize the definitions.
+Here is a memory aid that you might find useful:
+``Complete'' is a wider word than ``full,'' and complete binary
+trees tend to be wider than full binary trees because each level of a
+complete binary tree is as wide as possible.}
+There is no particular relationship between these two tree shapes;
+that is, the tree of Figure~\ref{FullComplete}(a) is full but not
+complete while the tree of Figure~\ref{FullComplete}(b) is complete
+but not full.
+The heap data structure (Section~\ref{HeapSec}) is an example
+of a\index{heap}\index{binary tree!complete}
+complete binary tree.
+The Huffman coding tree (Section~\ref{Huffman}) is an example of a
+full binary tree.\index{huffman coding tree@Huffman coding tree}
+\index{binary tree!terminology|)}
+
+
+\subsection{The Full Binary Tree Theorem}
+\label{BinSpace}
+
+Some\index{full binary tree theorem|(}
+binary tree\index{binary tree!implementation}
+implementations store data only at the leaf nodes,
+using the internal nodes to provide structure to the tree.
+More generally, binary tree implementations might require some amount
+of space for internal nodes, and a different amount for leaf nodes.
+Thus, to analyze the space required by such implementations, it is
+useful to know the minimum and maximum fraction of the nodes that are
+leaves in a tree containing \(n\) internal nodes.
+
+Unfortunately, this fraction is not fixed.
+A binary tree of \(n\)~internal nodes might have only one leaf.
+This occurs when the internal nodes are arranged in a chain ending
+in a single leaf as shown in Figure~\ref{OneLeaf}.
+In this case, the number of leaves is low because each
+internal node has only one non-empty child.
+To find an upper bound on the number of leaves for a tree of \(n\)
+internal nodes, first note that the upper bound will occur when each
+internal node has two non-empty children, that is, when the tree is
+full.
+However, this observation does not tell what shape of tree will yield
+the highest percentage of non-empty leaves.
+It turns out not to matter, because all full binary trees with
+\(n\) internal nodes have the same number of leaves.
+This fact allows us to compute the space requirements for a full
+binary tree implementation whose leaves require a different amount of
+space from its internal nodes.
+
+\begin{figure}
+\pdffig{OneLeaf}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+
+\capt{4.5in}{A tree containing many internal nodes and a single leaf}
+{A tree containing many internal nodes and a single leaf.}{OneLeaf}
+\end{figure}
+
+\begin{theorem}
+{\bf Full Binary Tree Theorem:}
+The number of leaves in a non-empty full binary tree is one
+more than the number of internal nodes.
+\end{theorem}
+
+\begin{proof}
+\index{proof!induction|(}
+The proof is by mathematical induction on~\(n\), the
+number of internal nodes.
+This is an example of an induction proof
+where we reduce from an arbitrary instance of size \(n\) to an instance
+of size \(n-1\) that meets the induction hypothesis.
+
+\begin{itemize}
+
+\item
+{\bf Base Cases}: The non-empty tree with zero internal nodes has
+one leaf node.
+A full binary tree with one internal node has two leaf nodes.
+Thus, the base cases for \(n = 0\) and \(n = 1\) conform to the theorem.
+
+\item
+{\bf Induction Hypothesis}: Assume that any full binary
+tree~\cvar{T} containing \(n-1\) internal nodes has \(n\) leaves.
+
+\item
+{\bf Induction Step}:
+Given tree \cvar{T} with \(n\) internal nodes, select an internal
+node~\svar{I} whose children are both leaf nodes.
+Remove both of \svar{I}'s children, making \svar{I} a leaf node.
+Call the new tree \(\cvar{T}'\).
+\(\cvar{T}'\) has \(n-1\) internal nodes.
+From the induction hypothesis, \(\cvar{T}'\) has \(n\) leaves.
+Now, restore \svar{I}'s two children.
+We once again have tree \cvar{T} with \(n\) internal nodes.
+How many leaves does \cvar{T} have?
+Because \(\cvar{T}'\) has \(n\) leaves, adding the two children yields
+\(n+2\).
+However, node \svar{I} counted as one of the leaves in \(\cvar{T}'\)
+and has now become an internal node.
+Thus, tree \cvar{T} has \(n+1\) leaf nodes and \(n\) internal
+nodes.
+
+\end{itemize}
+
+By mathematical induction the theorem holds for all values of
+\(n \geq 0\).
+\index{proof!induction|)}
+\end{proof}
+\medskip
+
+When analyzing the space requirements for a binary tree
+implementation,\index{binary tree!space requirements}
+it is useful to know how many empty subtrees a tree contains.
+A simple extension of the Full Binary Tree Theorem tells us exactly
+how many empty subtrees there are in \emph{any} binary tree, whether
+full or not.
+Here are two approaches to proving the following theorem, and
+each suggests a useful way of thinking about binary trees.
+
+\begin{theorem}
+\label{SubTreeThrm}
+\index{binary tree!null pointers@\NULL\ pointers}
+The number of empty subtrees in a non-empty binary tree is one
+more than the number of nodes in the tree.
+\end{theorem}
+
+\noindent{\sffamily\textbf{Proof 1}}:
+Take an arbitrary binary tree \cvar{T} and replace every
+empty subtree with a leaf node.
+Call the new tree \(\cvar{T}'\).
+All nodes originally in~\cvar{T} will be internal nodes in
+\(\cvar{T}'\) (because even the leaf nodes of \cvar{T} have children
+in~\(\cvar{T}'\)).
+\(\cvar{T}'\) is a full binary tree, because every internal node of
+\cvar{T} now must have two children in \(\cvar{T}'\), and each leaf node
+in \cvar{T} must have two children in \(\cvar{T}'\)
+(the leaves just added).
+The Full Binary Tree Theorem tells us that the number of leaves
+in a full binary tree is one more than the number of internal nodes.
+Thus, the number of new leaves that were added to create
+\(\cvar{T}'\) is one more than the number of nodes in \cvar{T}.
+Each leaf node in \(\cvar{T}'\) corresponds to an
+empty subtree in \cvar{T}.
+Thus, the number of empty subtrees in \cvar{T} is one more
+than the number of nodes in \cvar{T}.
+\hfill\(\Box\)
+\bigskip
+
+\noindent{\sffamily\textbf{Proof 2}}:
+By definition, every node in binary tree~\cvar{T} has two children,
+for a total of \(2n\) children in a tree of \(n\) nodes.
+Every node except the root node has one parent, for a total of
+\(n-1\) nodes with parents.
+In other words, there are \(n-1\) non-empty children.
+Because the total number of children is \(2n\), the remaining \(n+1\)
+children must be empty.
+\hfill\(\Box\)
+\index{full binary tree theorem|)}
+\index{binary tree!full|)}
+
+\subsection{A Binary Tree Node ADT}
+\label{BinADT}
+
+\index{binary tree!node|(}
+Just as a linked list is comprised of a collection of link objects, a
+tree is comprised of a collection of node objects.
+Figure~\ref{BinNodeADT} shows an ADT for binary tree nodes, called
+\Cref{BinNode}.\index{abstract data type (ADT)}
+This class will be used by some of the binary tree structures presented
+later.
+Class \Cref{BinNode} is a \Gen\ with parameter \Cref{E}, which
+is the type for the data record stored in the node.
+Member functions are provided that set or return the element value,
+set or return a \pointref\ to the left child,
+set or return a \pointref\ to the right child,
+or indicate whether the node is a leaf.
+
+\begin{figure}
+\xprogfig{BinNode.book}
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+\capt{4.5in}{A binary tree node ADT}
+{A binary tree node ADT.}{BinNodeADT}
+\end{figure}
+\index{binary tree!node|)}
+
+\section{Binary Tree Traversals}
+\label{BinTravers}
+
+\index{traversal!binary tree|(}
+Often we wish to process a binary tree by ``visiting'' each of its
+nodes, each time performing a specific action such as printing the
+contents of the node.
+Any process for visiting all of the nodes in some order is
+called a \defit{traversal}.
+Any traversal that lists every node in the tree exactly once is
+called an \defit{enumeration}\index{traversal!enumeration} of the
+tree's nodes.
+Some applications do not require that the nodes be visited in any
+particular order as long as each node is visited precisely once.
+For other applications, nodes must be visited in an order that
+preserves some relationship.
+For example, we might wish to make sure that we visit any given node
+\emph{before} we visit its children.
+This is called a \defit{preorder traversal}.
+
+\newpage
+
+\begin{example}
+The preorder enumeration for the tree of
+Figure~\ref{BinExample} is
+
+\vspace{-\medskipamount}
+\[{\rm A B D C E G F H I.}\]
+
+\vspace{-\medskipamount}
+The first node printed is the root.
+Then all nodes of the left subtree are printed (in preorder) before
+any node of the right subtree.
+\end{example}
+
+Alternatively, we might wish to visit each node only
+\emph{after} we visit its children (and their subtrees).
+For example, this would be necessary if we wish to return all nodes in 
+the tree to free store.
+We would like to delete the children of a node before deleting the
+node itself.
+But to do that requires that the children's children be deleted
+first, and so on.
+This is called a \defit{postorder traversal}.
+
+\begin{example}
+The postorder enumeration for the tree of Figure~\ref{BinExample}
+is \[{\rm D B G E H I F C A.}\]
+
+\vspace{-\medskipamount}
+\end{example}
+
+An \defit{inorder traversal} first visits the left child
+(including its entire subtree), then visits the node, and finally
+visits the right child (including its entire
+subtree).
+The binary search tree of Section~\ref{BST} makes use of this
+traversal to print all nodes in ascending order of value.
+
+\begin{example}
+The inorder enumeration for the tree of Figure~\ref{BinExample}
+is \[{\rm B D A G E C H F I.}\]
+
+\vspace{-\smallskipamount}
+\vspace{-\medskipamount}
+\end{example}
+
+\index{recursion|(}
+A traversal routine is naturally written as a recursive
+function.
+Its input parameter is a \pointref\ to a node which we will call
+\ifthenelse{\boolean{java}}{\Cref{rt}}{}
+\ifthenelse{\boolean{cpp}}{\Cref{root}}{}
+because each node can be viewed as the root of a some
+subtree.
+The initial call to the traversal function passes in a \pointref\ to
+the root node of the tree.
+The traversal function visits
+\ifthenelse{\boolean{java}}{\Cref{rt}}{}
+\ifthenelse{\boolean{cpp}}{\Cref{root}}{}
+and its children (if any) 
+in the desired order.
+For example, a preorder traversal specifies that
+\ifthenelse{\boolean{java}}{\Cref{rt}}{}
+\ifthenelse{\boolean{cpp}}{\Cref{root}}{}
+be visited before its children.
+This can easily be implemented as follows.
+
+\xproghere{preorder.book}
+
+\noindent Function \Cref{preorder} first checks that the tree is not
+empty (if it is, then the traversal is done and \Cref{preorder} simply
+returns).
+Otherwise, \Cref{preorder} makes  a call to \Cref{visit},
+which processes the root node (i.e., prints the value or performs
+whatever computation as required by the application).
+Function \Cref{preorder} is then called recursively on the left
+subtree, which will visit all nodes in that subtree.
+Finally, \Cref{preorder} is called on the right subtree, visiting all
+nodes in the right subtree.
+Postorder and inorder traversals are similar.
+They simply change the order in which the node and its children are
+visited, as appropriate.
+
+An important decision in the implementation of any recursive function
+on trees is when to check for an empty subtree.
+Function \Cref{preorder} first checks to see if the value for
+\ifthenelse{\boolean{java}}{\Cref{rt}}{}\ifthenelse{\boolean{cpp}}{\Cref{root}}{}
+is \NULL.
+If not, it will recursively call itself on the left and right children
+of
+\ifthenelse{\boolean{java}}{\Cref{rt}}{}\ifthenelse{\boolean{cpp}}{\Cref{root}}{}.
+In other words, \Cref{preorder} makes no attempt to avoid calling
+itself on an empty child.
+Some programmers use an alternate design in which the left and
+right pointers of the current node are checked so that the recursive
+call is made only on non-empty children.
+Such a design typically looks as follows:
+
+\xproghere{preorder2.book}
+
+At first it might appear that \Cref{preorder2} is more efficient
+than \Cref{preorder}, because it makes only half as many recursive
+calls. (Why?)
+On the other hand, \Cref{preorder2} must access the left and right
+child pointers twice as often.
+The net result is little or no performance improvement.
+
+In reality, the design of \Cref{preorder2} is inferior to
+that of \Cref{preorder} for two reasons.
+First, while it is not apparent in this simple example,
+for more complex traversals it can become awkward to place the check
+for the \NULL\ pointer in the calling code.
+Even here we had to write two tests for \NULL,
+rather than the one needed by \Cref{preorder}.
+The more important concern with \Cref{preorder2} is that it
+tends to be error prone.
+While \Cref{preorder2} insures that no recursive
+calls will be made on empty subtrees, it will fail if the initial call 
+passes in a \NULL\ pointer.
+This would occur if the original tree is empty.
+To avoid the bug, either \Cref{preorder2} needs
+an additional test for a \NULL\ pointer at the beginning
+(making the subsequent tests redundant after all), or the caller of
+\Cref{preorder2} has a hidden obligation\index{obligations, hidden} to
+pass in a non-empty tree, which is unreliable design.
+The net result is that many programmers forget to test for the
+possibility that the empty tree is being traversed.
+By using the first design, which explicitly supports processing of
+empty subtrees, the problem is avoided.
+\index{recursion|)}
+
+\index{design pattern!visitor|(}
+Another issue to consider when designing a traversal is how to
+define the visitor function that is to be executed on every node.
+One approach is simply to write a new version of the traversal for
+each such visitor function as needed.
+The disadvantage to this is that whatever function does the traversal
+must have access to the \Cref{BinNode} class.
+It is probably better design to permit only the tree class to have
+access to the \Cref{BinNode} class.
+
+Another approach is for the tree class to supply a generic traversal
+function which takes the visitor
+\ifthenelse{\boolean{cpp}}{either as a template parameter or}{}
+as a function parameter.
+This is known as the
+\defit{visitor design pattern}.\index{design pattern!visitor}
+A major constraint on this approach is that the
+\defit{signature} for all visitor functions, that is, their return
+type and parameters, must be fixed in advance.
+Thus, the designer of the generic traversal function must be able to
+adequately judge what parameters and return type will likely be needed 
+by potential visitor functions.
+\index{design pattern!visitor|)}
+
+Handling information flow between parts of a program can
+be a significant design challenge, especially when dealing with
+recursive functions such as tree traversals.
+In general, we can run into trouble either with passing in the correct
+information needed by the function to do its work,
+or with returning information to the recursive function's caller.
+We will see many examples throughout the book that illustrate methods
+for passing information in and out of recursive functions as they
+traverse a tree structure.
+Here are a few simple examples.
+
+First we consider the simple case where a computation requires
+that we communicate information back up the tree to the end user.
+
+\begin{example}
+We wish to count the number of nodes in a binary tree.
+The key insight is that the total count for any (non-empty) subtree is
+one for the root plus the counts for the left and right subtrees.
+Where do left and right subtree counts come from?
+Calls to function \Cref{count} on the subtrees will compute this for
+us.
+Thus, we can implement \Cref{count} as follows.
+
+\xprogexamp{count.book}
+
+\end{example}
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+Another problem that occurs when recursively processing data
+collections is controlling which members of the collection will be
+visited.
+For example, some tree ``traversals'' might in fact visit only some
+tree nodes, while avoiding processing of others.
+Exercise~\ref{BinaryTree}.\ref{BSTRangeExer} must solve exactly this
+problem in the context of a binary search tree.
+It must visit only those children of a given node that might possibly
+fall within a given range of values.
+Fortunately, it requires only a simple local calculation to determine
+which child(ren) to visit.
+
+A more difficult situation is illustrated by the following problem.
+Given an arbitrary binary tree we wish to determine if,
+for every node~\svar{A}, are all nodes in \svar{A}'s left subtree
+less than the value of~\svar{A}, and are all nodes in \svar{A}'s right
+subtree greater than the value of \svar{A}?
+(This happens to be the definition for a binary search tree, described
+in Section~\ref{BST}.)
+Unfortunately, to make this decision we need to know some context
+that is not available just by looking at the node's parent or children.
+As shown by Figure~\ref{BSTCheckFig},
+it is not enough to verify that \svar{A}'s left child has a value less
+than that of \svar{A}, and that \svar{A}'s right child has a greater value.
+Nor is it enough to verify that \svar{A} has a value consistent with
+that of its parent.
+In fact, we need to know information about what range of values is
+legal for a given node.
+That information might come from any of the node's ancestors.
+Thus, relevant range information must be passed down the tree.
+We can implement this function as follows.
+
+\begin{figure}
+\pdffig{BSTCheckFig}
+\capt{4.5in}{Binary tree checking}
+{To be a binary search tree, the left child of the node with value~40
+must have a value between~20 and~40.}{BSTCheckFig}
+\end{figure}
+
+\xproghere{checkBST.book}
+
+\index{traversal!binary tree|)}
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\section{Binary Tree Node Implementations}
+\label{BTImpl}
+
+\index{binary tree!node|(}
+In this section we examine ways to implement binary tree nodes.
+We begin with some options for pointer-based
+binary tree node implementations.
+Then comes a discussion on techniques for determining the space
+requirements for a given
+implementation.\index{binary tree!space requirements} 
+The section concludes with an introduction to the 
+array-based implementation for complete binary trees.
+
+\subsection{Pointer-Based Node Implementations}
+\label{PointerBin}
+
+By definition, all binary tree nodes have two children,
+though one or both children can be empty.
+Binary tree nodes typically contain a value field,
+with the type of the field depending on the application.
+The most common node implementation includes a value field and
+pointers to the two children.
+
+Figure~\ref{BinNodeClass} shows a simple implementation for the
+\Cref{BinNode} abstract class, which we will name \Cref{BSTNode}.
+Class \Cref{BSTNode} includes a data member of type \Cref{E},
+(which is the second \Gen\ parameter) for the element type.
+To support search structures such as the Binary Search Tree, an
+additional field is included, with corresponding access methods,
+to store a key value
+(whose purpose is explained in Section~\ref{Dictionary}).
+Its type is determined by the first \Gen\ parameter, named
+\Cref{Key}.
+Every \Cref{BSTNode} object also has two pointers,
+one to its left child and another to its right child.
+\ifthenelse{\boolean{cpp}}
+{Overloaded \Cref{new} and \Cref{delete} operators could be added to
+support a freelist,
+as described in Section~\ref{freelist}.}
+{}Figure~\ref{BinStPic}
+illustrates the \Cref{BSTNode} implementation.
+
+\begin{figure}
+\xprogfig{BSTNode.book}
+\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{A binary tree node class implementation}
+{A binary tree node class implementation.}{BinNodeClass}
+\vspace{-\smallskipamount}
+
+\end{figure}
+
+\begin{figure}
+\pdffig{BinLink}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{Binary tree node implementation}
+{Illustration of a typical pointer-based binary tree implementation,
+where each node stores two child pointers and a value.}{BinStPic}
+\end{figure}
+
+Some programmers find it convenient to add a pointer to the
+node's parent, allowing easy upward movement in the
+tree.\index{binary tree!parent pointer}
+Using a parent pointer is somewhat analogous to adding a link to the
+previous node in a doubly linked list.\index{list!doubly linked}
+In practice, the parent pointer is almost always unnecessary
+and adds to the space overhead for the tree implementation.
+It is not just a problem that parent pointers take space.
+More importantly, many uses of the parent pointer are driven by
+improper understanding of recursion and so indicate poor programming.
+If you are inclined toward using a parent pointer, consider if there
+is a more efficient implementation possible.
+
+\index{object-oriented programming!class hierarchy|(}
+An important decision in the design of a pointer-based node
+implementation is whether the same class definition will be used for
+leaves and internal nodes.
+Using the same class for both will simplify the implementation, but
+might be an inefficient use of space.
+Some applications require data values only for the leaves.
+Other applications require one type of value for the leaves and
+another for the internal nodes.
+Examples include the binary trie of Section~\ref{Trie},\index{trie}
+the \PRquad\ of Section~\ref{Spatial},\index{pr quadtree@\PRquad}
+the Huffman coding tree\index{huffman coding tree@Huffman coding tree}
+of Section~\ref{Huffman}, and the expression
+tree\index{expression tree} illustrated by Figure~\ref{DiffNodes}. 
+By definition, only internal nodes have non-empty children.
+If we use the same node implementation for both internal and leaf
+nodes, then both must store the child pointers.
+But it seems wasteful to store child pointers in the leaf nodes.
+Thus, there are many reasons why it can save space to have separate
+implementations for internal and leaf nodes.
+
+\begin{figure}
+\pdffig{DiffNode}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Expression Tree}
+{An expression tree\index{expression tree} for \(4x(2x + a) - c\).}{DiffNodes}
+\vspace{-\medskipamount}
+\end{figure}
+
+\index{expression tree|(}
+As an example of a tree that stores different information at the leaf
+and internal nodes, consider the expression tree illustrated by
+Figure~\ref{DiffNodes}.\index{expression tree}
+The expression tree represents an algebraic
+expression\index{equation, representation}
+composed of binary operators such as addition, subtraction,
+multiplication, and division.
+Internal nodes store operators, while the leaves store operands.
+The tree of Figure~\ref{DiffNodes} represents the expression
+\(4x(2x~+~a)~-~c\).
+The storage requirements for a leaf in an expression tree are quite
+different from those of an internal node.
+Internal nodes store one of a small set of operators,
+so internal nodes could store a small code identifying the
+operator such as a single byte for the operator's character symbol.
+In contrast, leaves store variable names or numbers,
+which is considerably larger in order
+to handle the wider range of possible values.
+At the same time, leaf nodes need not store child pointers.
+
+\Lang\ allows us to differentiate leaf from internal
+nodes through the use of class inheritance.\index{inheritance}
+A \defit{base class} provides a general definition for an object,
+and a \defit{subclass} modifies a base class to add more detail.
+A base class can be declared for binary tree nodes in general,
+with subclasses defined for the internal and leaf nodes.
+The base class of Figure~\ref{VarNodeI} is named \Cref{VarBinNode}.
+It includes a virtual member function named
+\Cref{isLeaf}, which indicates the node type.
+Subclasses for the internal and leaf node types each implement
+\Cref{isLeaf}.
+Internal nodes store child pointers of the base class type; they do not
+distinguish their children's actual subclass.
+Whenever a node is examined, its version of \Cref{isLeaf} indicates
+the node's subclass.
+
+\begin{figure}
+\xprogfig{VarBinNode.book}
+
+\bigskip
+\xprogfig{VarLeafNode.book}
+
+\bigskip
+\xprogfig{VarIntlNode.book}
+
+\bigskip
+\xprogfig{traverse.book}
+
+\capt{4.5in}{Separate internal and leaf node representations:
+inheritance}{An implementation for separate internal and leaf node
+representations using \Lang\ class inheritance\index{inheritance}
+and virtual functions.}{VarNodeI}
+\smallskip
+\end{figure}
+
+Figure~\ref{VarNodeI} includes two subclasses derived from class
+\Cref{VarBinNode}, named \Cref{LeafNode} and \Cref{IntlNode}.
+Class \Cref{IntlNode} can access its children through
+pointers of type \Cref{VarBinNode}.
+Function \Cref{traverse} illustrates the use of these classes.
+When \Cref{traverse} calls method \Cref{isLeaf},
+\Lang's runtime environment
+determines which subclass this particular instance of \Cref{rt}
+happens to be and calls that subclass's version of \Cref{isLeaf}.
+Method \Cref{isLeaf} then provides the actual node type to its caller.
+The other member functions for the derived subclasses are accessed by
+type-casting the base class pointer as appropriate, as shown in
+function \Cref{traverse}.
+
+There is another approach that we can take to represent separate leaf
+and internal nodes, also using a virtual base class and separate node
+classes for the two types.
+This is to implement nodes using the
+\defit{composite design pattern}.\index{design pattern!composite}
+This approach is noticeably different from the one of
+Figure~\ref{VarNodeI} in that the node classes themselves implement
+the functionality of \Cref{traverse}.
+Figure~\ref{VarNodeC} shows the implementation.
+Here, base class \Cref{VarBinNode} declares a member function
+\Cref{traverse} that each subclass must implement.
+Each subclass then implements its own appropriate behavior for its
+role in a traversal.
+The whole traversal process is called by invoking \Cref{traverse} on
+the root node, which in turn invokes \Cref{traverse} on its children.
+
+\begin{figure}
+\xprogfig{VarBinNodeC.book}
+
+\bigskip
+\xprogfig{VarLeafNodeC.book}
+
+\bigskip
+\xprogfig{VarIntlNodeC.book}
+
+\bigskip
+\xprogfig{traverseC.book}
+
+\capt{4.5in}{Separate internal and leaf node representations:
+composite}{A second implementation for separate internal and leaf node
+representations using \Lang\ class inheritance\index{inheritance}
+and virtual functions using the composite design pattern.
+Here, the functionality of \Cref{traverse} is
+embedded into the node subclasses.}{VarNodeC}
+\end{figure}
+
+When comparing the implementations of Figures~\ref{VarNodeI}
+and~\ref{VarNodeC}, each has advantages and disadvantages.
+The first does not require that the node classes know about
+the \Cref{traverse} function.\index{traversal!binary tree}
+With this approach, it is easy to add new methods to the tree class
+that do other traversals or other operations on nodes of the tree.
+However, we see that \Cref{traverse} in Figure~\ref{VarNodeI} does
+need to be familiar with each node subclass.
+Adding a new node subclass would therefore require modifications to
+the \Cref{traverse} function.
+In contrast, the approach of Figure~\ref{VarNodeC} requires that any
+new operation on the tree that requires a traversal also be
+implemented in the node subclasses.
+On the other hand, the approach of Figure~\ref{VarNodeC}
+avoids the need for the \Cref{traverse} function to know
+anything about the distinct abilities of the node subclasses.
+Those subclasses handle the responsibility of performing a traversal
+on themselves.
+A secondary benefit is that there is no need for \Cref{traverse} to
+explicitly enumerate all of the different node subclasses,
+directing appropriate action for each.
+With only two node classes this is a minor point.
+But if there were many such subclasses, this could become a bigger
+problem.
+A disadvantage is that the traversal operation must not be called on a
+\NULL\ pointer, because there is no object to catch the call.
+This problem could be avoided by using a flyweight (see
+Section~\ref{FlyweightPatt}) to implement empty
+nodes.\index{design pattern!flyweight}
+
+Typically, the version of Figure~\ref{VarNodeI} would be preferred in
+this example if \Cref{traverse} is a member function of
+the tree class, and if the node subclasses are hidden from users of
+that tree class.
+On the other hand, if the nodes are objects that have meaning
+to users of the tree separate from their existence as nodes in the
+tree, then the version of Figure~\ref{VarNodeC} might be preferred
+because hiding the internal behavior of the nodes becomes more
+important.
+
+Another advantage of the composite design is that implementing each
+node type's functionality might be easier.
+This is because you can focus solely on the information passing and
+other behavior needed by this node type to do its job.
+This breaks down the complexity that many programmers feel overwhelmed
+by when dealing with complex information flows related to recursive
+processing.
+\index{object-oriented programming!class hierarchy|)}
+\index{expression tree|)}
+\index{binary tree!node|)}
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\subsection{Space Requirements}
+
+\index{binary tree!space requirements|(}
+\index{binary tree!overhead}
+This section presents techniques for calculating the amount of
+overhead required by a binary tree implementation.
+Recall that overhead is the amount of space necessary to maintain the
+data structure.
+In other words, it is any space not used to store data records.
+The amount of overhead depends on several factors including which
+nodes store data values (all nodes, or just the leaves),
+whether the leaves store child pointers, and whether the tree is a
+full binary tree.
+
+In a simple pointer-based implementation for the binary tree such as
+that of Figure~\ref{BinNodeClass}, every node has two pointers to its
+children (even when the children are \NULL).
+This implementation requires total space amounting to \(n(2P + D)\) for
+a tree of \(n\)~nodes.
+Here, \(P\)~stands for the amount of space required by a pointer, and
+\(D\) stands for the amount of space required by a data value.
+The total overhead space will be \(2Pn\) for the entire tree.
+Thus, the overhead fraction will be \(2P/(2P + D)\).
+The actual value for this expression depends on the relative size of
+pointers versus data fields.
+If we arbitrarily assume that \(P = D\), then a full tree
+has about two thirds of its total space taken up in overhead.
+Worse yet, Theorem~\ref{SubTreeThrm}\index{full binary tree theorem}
+tells us that about half of the
+pointers are ``wasted'' \NULL\ values that serve only to indicate tree
+structure, but which do not provide access to new data.
+
+\ifthenelse{\boolean{cpp}}{A common}{}
+\ifthenelse{\boolean{java}}{In Java, the most typical}{}
+implementation is not to store any actual
+data in a node, but rather a \pointref\ to the data record.
+In this case, each node will typically store three pointers, all of
+which are overhead, resulting in an overhead fraction of
+\(3P/(3P + D)\).
+
+If only leaves store data values, then the fraction of total space
+devoted to overhead depends on whether the tree is
+full.\index{binary tree!full} 
+If the tree is not full, then conceivably there might only be one leaf
+node at the end of a series of internal nodes.
+Thus, the overhead can be an arbitrarily high percentage for non-full
+binary trees.
+The overhead fraction drops as the tree becomes closer to full,
+being lowest when the tree is truly full.
+In this case, about one half of the nodes are internal.
+
+Great savings can be had by eliminating the pointers from leaf
+nodes in full binary trees.
+Again assume the tree stores a \pointref\ to the data field.
+Because about half of the nodes are leaves and half internal nodes,
+and because only internal nodes now have child pointers, the
+overhead fraction in this case will be approximately
+\[\frac{\frac{n}{2} (2P)}{\frac{n}{2} (2P) + Dn} = \frac{P}{P + D}.\]
+\noindent If \(P = D\), the overhead drops to about one half of the
+total space.
+However, if only leaf nodes store useful information, the overhead
+fraction for this implementation is actually three quarters of the
+total space, because half of the ``data'' space is unused.
+
+If a full binary tree\index{binary tree!full} needs to store data only
+at the leaf nodes, a better implementation would have
+the internal nodes store two pointers and no data
+field while the leaf nodes store only a \pointref\ to the data field.
+This implementation requires
+\(\frac{n}{2}2P + \frac{n}{2}(p+d)\) units of space.
+If \(P = D\), then the overhead is \(3P/(3P + D) = 3/4\).
+It might seem counter-intuitive that the overhead ratio has gone up
+while the total amount of space has gone down.
+The reason is because we have changed our definition of ``data'' to
+refer only to what is stored in the leaf nodes,
+so while the overhead fraction is higher, it is from a
+total storage requirement that is lower.
+
+There is one serious flaw with this analysis.
+When using separate implementations for internal and leaf nodes,
+there must be a way to distinguish between the node types.
+When separate node types are implemented via \Lang\ subclasses,
+the runtime environment stores information with
+each object allowing it to determine, for example, the correct
+subclass to use when the \Cref{isLeaf} virtual function\index{virtual
+function} is called.\index{inheritance}
+Thus, each node requires additional space.
+Only one bit is truly necessary to distinguish the two possibilities.
+In rare applications where space is a critical resource,
+implementors can often find a spare bit within the node's value field
+in which to store the node type indicator.
+An alternative is to use a spare bit within a node pointer to
+indicate node type.
+For example, this is often possible when the compiler requires that
+structures and objects start on word boundaries, leaving the last bit
+of a pointer value always zero.
+Thus, this bit can be used to store the node-type flag and is reset to
+zero before the pointer is dereferenced.
+Another alternative when the leaf value field is smaller than a
+pointer is to replace the pointer to a leaf with that leaf's value.
+When space is limited, such techniques can make the difference between
+success and failure.
+In any other situation, such ``bit packing'' tricks should be
+avoided because they are difficult to debug and understand at
+best, and are often machine dependent at worst.\footnote{In
+the early to mid 1980s, I worked on a Geographic
+Information System that stored spatial data in quadtrees
+(see Section~\ref{Spatial}).
+At the time space was a critical resource, so we used a bit-packing
+approach where we stored the nodetype flag as the last bit in the
+parent node's pointer.
+This worked perfectly on various 32-bit workstations.
+Unfortunately, in those days IBM PC-compatibles used 16-bit pointers.
+We never did figure out how to port our code to the 16-bit machine.}
+\index{binary tree!space requirements|)}
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\subsection{Array Implementation for Complete Binary Trees}
+\label{Complete}
+
+\index{binary tree!complete}
+The previous section points out that a large
+fraction of the space in a typical binary tree node implementation is
+devoted to structural overhead, not to storing data.
+This section presents a simple, compact implementation
+for complete binary trees.
+Recall that complete binary trees have all levels except the bottom
+filled out completely, and the bottom level has all of its nodes filled
+in from left to right.
+Thus, a complete binary tree of \(n\)~nodes has only one possible shape.
+You might think that a complete binary tree is such an unusual
+occurrence that there is no reason to develop a special
+implementation for it.
+However, the complete binary tree has practical uses, the most
+important being the heap\index{heap} data structure discussed in
+Section~\ref{HeapSec}.
+Heaps are often used to implement priority queues\index{priority queue}
+(Section~\ref{HeapSec}) and for external sorting algorithms
+(Section~\ref{RepSelSec}).\index{sorting!external}
+
+We begin by assigning numbers to the node positions in the complete
+binary tree, level by level, from left to right as shown in
+Figure~\ref{BinArray}(a). 
+An array can store the tree's data values efficiently, placing
+each data value in the array position corresponding to that node's
+position within the tree.
+Figure~\ref{BinArray}(b) lists the array indices for the
+children, parent, and siblings of each node in
+Figure~\ref{BinArray}(a).
+From Figure~\ref{BinArray}(b), you should see a pattern regarding the
+positions of a node's relatives within the array.
+Simple formulas can be derived for calculating the array index
+for each relative of a node \(r\) from \(r\)'s index.
+No explicit pointers are necessary to reach a node's left or
+right child.
+This means there is no overhead to the array implementation if the
+array is selected to be of size \(n\) for a tree of \(n\) nodes.
+
+\begin{figure}
+\pdffig{BinArray}
+\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\begin{center}
+\sffamily
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+Position      & 0  & 1 & 2 & 3 &  4 &  5 & 6 & 7 & 8 &  9 & 10 & 11\\
+\hline
+\hline
+Parent        & \,--\, & 0 & 0 & 1 &  1 &  2 &  2 & 3 & 3 & 4 & 4 &  5\\
+\hline
+Left Child    & 1  & 3 & 5 & 7 &  9 & 11 & \,--\, & \,--\, & \,--\, & \,--\, & \,--\, &  \,--\,\\
+\hline
+Right Child   & 2  & 4 & 6 & 8 & 10 & \,--\, & \,--\, & \,--\, & \,--\, & \,--\, & \,--\, &  \,--\,\\
+\hline
+Left Sibling  & \,--\, & \,--\, & 1 & \,--\, &  3 & \,--\, & 5 & \,--\, & 7 & \,--\, &  9 &  \,--\,\\
+\hline
+Right Sibling & \,--\, & 2 & \,--\, & 4 & \,--\, &  6 & \,--\, & 8 & \,--\, & 10 & \,--\, & \,--\,\\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+\begin{center}
+{\textsf{\footnotesize (b)}}
+\end{center}
+
+\capt{4.5in}{Complete binary tree stored in an array}
+{A complete binary tree and its array implementation.
+(a)~The complete binary tree with twelve nodes.
+Each node has been labeled with its position in the tree.
+(b)~The positions for the relatives of each node.
+A dash indicates that the relative does not exist.}
+{BinArray}
+\bigskip
+\end{figure}
+
+The formulae for calculating the array indices of the various
+relatives of a node are as follows.
+The total number of nodes in the tree is \(n\).
+The index of the node in question is \(r\),
+which must fall in the range 0 to \(n-1\).\index{binary tree!complete}
+
+\begin{itemize}
+\item
+Parent\((r) = \lfloor(r - 1)/2\rfloor\) if \(r \neq 0\).
+\item
+Left child\((r) = 2r + 1\) if \(2r + 1 < n\).
+\item
+Right child\((r) = 2r + 2\) if \(2r + 2 < n\).
+\item
+Left sibling\((r) = r - 1\) if \(r\) is even.
+\item
+Right sibling\((r) = r + 1\) if \(r\) is odd and \(r + 1 < n\).
+\end{itemize}
+
+\section{Binary Search Trees}
+\label{BST}
+
+Section~\ref{Dictionary} presented the\index{bst@BST|(}
+dictionary ADT,\index{abstract data type (ADT)} along with
+dictionary implementations based on sorted and unsorted lists.
+When implementing the dictionary with an unsorted list,
+inserting a new record into the dictionary can be performed quickly by
+putting it at the end of the list.
+However, searching an unsorted list for a particular record
+requires \Thetan\ time in the average case.
+For a large database, this is probably much too slow.
+Alternatively, the records can be stored in a sorted list.
+If the list is implemented using a linked list, then no speedup to the
+search operation will result from storing the records in sorted order.
+On the other hand, if we use a sorted array-based list to implement
+the dictionary, then binary search can be used to find a record in
+only \Thetalogn\ time.
+However, insertion will now require \Thetan\ time on average because,
+once the proper location for the new record in the sorted list has
+been found, many records might be shifted to make room for the new
+record.
+
+Is there some way to organize a collection of records so
+that inserting records and searching for records can both be done
+quickly?
+This section presents the binary search tree (BST), 
+which allows an improved solution to this problem.
+
+A BST is a binary tree that conforms to the following condition, known 
+as the {\bf Binary Search Tree Property}:
+All\index{bst@BST!search tree property} nodes stored in the left
+subtree of a node whose key value is~\(K\) have key values less
+than~\(K\).
+All nodes stored in the right subtree of a node whose key value
+is~\(K\) have key values greater than or equal to~\(K\).
+Figure~\ref{BSTShape} shows two BSTs for a collection of values.
+One consequence of the Binary Search Tree Property is that if the BST
+nodes are printed using an inorder traversal\index{traversal!binary tree}
+(see Section~\ref{BinTravers}),
+the resulting enumeration\index{traversal!enumeration} will be in
+sorted order from lowest to highest.
+
+\begin{figure}
+\pdffig{BSTShape}
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+\capt{4.5in}{Two Binary Search Trees}
+{Two Binary Search Trees for a collection of values.
+Tree (a) results if values are inserted
+in the order 37, 24, 42, 7, 2, 40, 42, 32, 120.
+Tree (b) results if the same values are inserted in the
+order 120, 42, 42, 7, 2, 32, 37, 24, 40.}{BSTShape}
+\smallskip
+\end{figure}
+
+Figure~\ref{BSTClass} shows a class declaration for the BST
+that implements the dictionary
+ADT.\index{dictionary}\index{abstract data type (ADT)}
+The public member functions include those required by the dictionary
+ADT, along with a constructor and destructor.
+Recall from the discussion in Section~\ref{Dictionary} that there are
+various ways to deal with keys and comparing records (three approaches
+being key/value pairs, a special comparison
+\ifthenelse{\boolean{cpp}}{method,}{}
+\ifthenelse{\boolean{java}}{method such as using the
+\Cref{Comparator} class,}{}
+and passing in a comparator function).
+Our BST implementation will handle comparison by explicitly storing
+a key separate from the data value at each node of the tree.
+
+\begin{figure}
+\xprogfig{BST1.book}
+\ifthenelse{\boolean{java}}{\xprogfig{BST2.book}}{}
+
+\capt{4.5in}{BST implementation}
+{The binary search tree implementation.}{BSTClass}
+\end{figure}
+
+\ifthenelse{\boolean{cpp}}{
+\begin{figure}
+\xprogfig{BST2.book}
+\captcont
+\end{figure}
+}{}
+
+\index{bst@BST!search|(}
+To find a record with key value \(K\) in a BST, begin at the root.
+If~the root stores a record with key value \(K\),
+then the search is over.
+If~not, then we must search deeper in the tree.
+What makes the BST efficient during search is that we need search only
+one of the node's two subtrees.
+If~\(K\) is less than the root node's key value,
+we search only the left subtree.
+If~\(K\) is greater than the root node's key value, we search only the
+right subtree.
+This process continues until a record with key value \(K\) is found,
+or we reach a leaf node.
+If~we reach a leaf node without encountering \(K\), then
+no record exists in the BST whose key value is \(K\).
+
+\begin{example}
+Consider searching for the node with key value 32 in the tree of
+Figure~\ref{BSTShape}(a).
+Because 32 is less than the root value of 37, the search
+proceeds to the left subtree.
+Because 32 is greater than 24, we search in 24's right subtree.
+At this point the node containing 32 is found.
+If the search value were 35, the same path would be followed to the
+node containing 32.
+Because this node has no children, we know that 35 is not
+in the BST.
+\end{example}
+
+Notice that in Figure~\ref{BSTClass}, public member function
+\Cref{find} calls private member function \Cref{findhelp}.
+Method \Cref{find} takes the search key as an explicit parameter
+and its BST as an implicit parameter, and returns the record that
+matches the key.
+However, the find operation is most easily implemented as a
+recursive\index{recursion} function whose parameters are the root of a
+subtree and the search key.
+Member \Cref{findhelp} has the desired form for this recursive
+subroutine and is implemented as follows.
+
+\xproghere{BSTfind.book}
+\index{bst@BST!search|)}
+
+\noindent Once the desired record is found, it is passed through
+return values up the chain of recursive calls.
+If a suitable record is not found, \Cref{null} is returned.
+
+\index{bst@BST!insert|(}
+Inserting a record with key value \(k\) requires that we first find
+where that record would have been if it were in the tree.
+This takes us to either a leaf node, or to an internal node with no
+child in the appropriate direction.\footnote{This assumes that no node
+has a key value equal to the one being inserted.
+If we find a node that duplicates the key value to be inserted,
+we have two options.
+If the application does not allow nodes with equal keys, then this
+insertion should be treated as an error (or ignored).
+If duplicate keys are allowed, our convention will be to insert the
+duplicate in the right subtree.}
+Call this node \(\svar{R}\,'\).
+We then add a new node containing the new record as a child
+of \(\svar{R}\,'\).
+Figure~\ref{BSTAdd} illustrates this operation.
+The value 35 is added as the right child of the node with value 32.
+Here is the implementation for \Cref{inserthelp}:
+
+\begin{figure}
+\pdffig{BSTAdd}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Inserting a node into a BST}
+{An example of BST insertion.
+A record with value~35 is inserted into the BST of
+Figure~\ref{BSTShape}(a).
+The node with value~32 becomes the parent of the new node
+containing~35.}{BSTAdd}
+\bigskip
+\end{figure}
+
+\xproghere{BSTinsert.book}
+
+You should pay careful attention to the implementation for
+\Cref{inserthelp}.
+Note that \Cref{inserthelp} returns a pointer to a \Cref{BSTNode}.
+What is being returned is a subtree identical to the old subtree,
+except that it has been modified to contain the new record being
+inserted.
+Each node along a path from the root to the parent of the new node
+added to the tree will have its appropriate child pointer assigned to
+it.
+Except for the last node in the path, none of these nodes will
+actually change their child's pointer value.
+In that sense, many of the assignments seem redundant.
+However, the cost of these additional assignments is worth paying to
+keep the insertion process simple.
+The alternative is to check if a given assignment is necessary, which
+is probably more expensive than the assignment!
+
+The shape of a BST depends on the order in which elements are inserted.
+A new element is added to the BST as a new leaf node,
+potentially increasing the depth of the tree.
+Figure~\ref{BSTShape} illustrates two BSTs for a collection of
+values.
+It is possible for the BST containing~\(n\) nodes to be a chain of
+nodes with height \(n\).
+This would happen if, for example, all elements were inserted in
+sorted order.
+In general, it is preferable for a BST to be as shallow as
+possible.\index{bst@BST!insert|)}
+This keeps the average cost of a BST operation low.
+
+\index{bst@BST!remove|(}
+Removing a node from a BST is a bit trickier than inserting a node,
+but it is not complicated if all of the possible cases are considered
+individually.
+Before tackling the general node removal process, let us first discuss
+how to remove from a given subtree the node with the smallest key
+value.
+This routine will be used later by the general node removal function.
+To~remove the node with the minimum key value from a subtree,
+first find that node by continuously moving down the left link until
+there is no further left link to follow.
+Call this node \svar{S}.
+To~remove \svar{S}, simply have the parent of \svar{S} change its
+pointer to point to the right child of \svar{S}.
+We know that \svar{S} has no left child (because if \svar{S} did have
+a left child, \svar{S} would not be the node with minimum key value).
+Thus, changing the pointer as described will maintain a BST, with
+\svar{S} removed.
+The code for this method, named \Cref{deletemin}, is as follows:
+
+\xproghere{BSTdeletemin.book}
+
+\begin{example}
+Figure~\ref{DelMin} illustrates the \Cref{deletemin} process.
+Beginning at the root node with value~10,
+\Cref{deletemin} follows the left link until there is no further left
+link, in this case reaching the node with value~5.
+The node with value~10 is changed to point to the right child of the
+node containing the minimum value.
+This is indicated in Figure~\ref{DelMin} by a dashed line.
+\end{example}
+
+A pointer to the node containing the minimum-valued element is stored
+in parameter \Cref{S}.
+The return value of the \Cref{deletemin} method is the subtree of
+the current node with the minimum-valued node in the subtree removed.
+As with method \Cref{inserthelp}, each node on the path back to the
+root has its left child pointer reassigned to the subtree resulting
+from its call to the \Cref{deletemin} method.
+
+A useful companion method is \Cref{getmin} which returns a
+\pointref\ to the node containing the minimum value in the subtree.
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\xproghere{BSTgetmin.book}
+
+\begin{figure}
+\pdffig{DelMin}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Deleting the node with minimum value}
+{An example of deleting the node with minimum value.
+In this tree, the node with minimum value,~5, is the left child of the
+root.
+Thus, the root's \Cref{left} pointer is changed to point to 5's right
+child.}{DelMin}
+\bigskip
+\end{figure}
+
+Removing a node with given key value \svar{R} from the BST requires
+that we first find \svar{R} and then remove it from the tree.
+So, the first part of the remove operation is a search to find
+\svar{R}.
+Once \svar{R} is found, there are several possibilities.
+If \svar{R} has no children, then \svar{R}'s parent has its pointer
+set to \NULL.
+If \svar{R} has one child, then \svar{R}'s parent has
+its pointer set to \svar{R}'s child (similar to \Cref{deletemin}).
+The problem comes if \svar{R} has two children.
+One simple approach, though expensive, is to set \svar{R}'s parent to
+point to one of \svar{R}'s subtrees, and then reinsert the remaining
+subtree's nodes one at a time.
+A better alternative is to find a value in one of the
+subtrees that can replace the value in \svar{R}.
+
+Thus, the question becomes:
+Which value can substitute for the one being removed?
+It cannot be any arbitrary value, because we must preserve the BST
+property without making major changes to the structure of the tree.
+Which value is most like the one being removed?
+The answer is the least key value greater than (or equal to) the one
+being removed, or else the greatest key value less than the one being
+removed.
+If either of these values replace the one being removed,
+then the BST property is maintained.
+
+\begin{example}
+Assume that we wish to remove the value~37 from the BST
+of Figure~\ref{BSTShape}(a).
+Instead of removing the root node, we remove the node with the least
+value in the right subtree (using the \Cref{deletemin}
+operation).
+This value can then replace the value in the root.
+In this example we first remove the node with value~40,
+because it contains the least value in the right subtree.
+We then substitute~40 as the new value for the root node.
+Figure~\ref{Remove} illustrates this process.
+\end{example}
+
+\begin{figure}
+\pdffig{Remove}
+\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+
+\capt{4.5in}{Removing a node from the BST}
+{An example of removing the value~37 from the BST.
+The node containing this value has two children.
+We replace value~37 with the least value from the
+node's right subtree, in this case~40.}{Remove}
+\medskip
+\end{figure}
+
+When duplicate node values do not appear in the tree, it makes no
+difference whether the replacement is the greatest value from the
+left subtree or the least value from the right subtree.
+If duplicates are stored, then we must select
+the replacement from the \emph{right} subtree.
+To~see why, call the greatest value in the left subtree~\svar{G}.
+If multiple nodes in the left subtree have value~\svar{G},
+selecting \svar{G} as the replacement value for the root of the
+subtree will result in a tree with equal values to the left of the
+node now containing~\svar{G}.
+Precisely this situation occurs if we replace value~120 with the
+greatest value in the left subtree of Figure~\ref{BSTShape}(b).
+Selecting the least value from the right subtree does not
+have a similar problem, because it does not violate the Binary Search
+Tree Property if equal values appear in the right subtree.
+
+From the above, we see that if we want to remove the record stored in
+a node with two children, then we simply call \Cref{deletemin} on the
+node's right subtree and substitute the record returned for the record
+being removed.
+Figure~\ref{RHelpFig} shows an implementation for \Cref{removehelp}.
+\index{bst@BST!remove|)}
+
+\begin{figure}
+\vspace{-\smallskipamount}
+
+\xprogfig{BSTremove.book}
+\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{BST \Cref{removehelp} implementation}
+{Implementation for the BST \Cref{removehelp} method.}{RHelpFig}
+\vspace{-\smallskipamount}
+\end{figure}
+
+The cost for \Cref{findhelp} and \Cref{inserthelp} is the depth of the
+node found or inserted.\index{bst@BST!efficiency}
+The cost for \Cref{removehelp} is the depth of the node being removed,
+or in the case when this node has two children,
+the depth of the node with smallest value in its right subtree. 
+Thus, in the worst case, the cost for any one of these operations is
+the depth of the deepest node in the tree.
+This is why it is desirable to keep BSTs \defit{balanced}, that is,
+with least possible height.
+If a binary tree is balanced, then the height for a tree of \(n\) nodes
+is approximately \(\log n\).
+However, if the tree is completely unbalanced, for example in the
+shape of a linked list, then the height for a tree with \(n\) nodes
+can be as great as \(n\).
+Thus, a balanced BST will in the average case have operations costing
+\Thetalogn, while a badly unbalanced BST can have operations in the
+worst case costing \Thetan.
+Consider the situation where we construct a BST of \(n\) nodes
+by inserting records one at a time.
+If we are fortunate to have them arrive in an order that results in a
+balanced tree (a ``random'' order is likely to be good
+enough for this purpose), then each insertion will cost on average
+\Thetalogn, for a total cost of \Thetanlogn.
+However, if the records are inserted in order of increasing value,
+then the resulting tree will be a chain of height \(n\).
+The cost of insertion in this case will be
+\(\sum_{i=1}^{n} i = \Thetantwo\).\index{summation}
+
+Traversing a BST costs \Thetan\ regardless of the shape of
+the tree.\index{traversal!binary tree}
+Each node is visited exactly once, and each child pointer
+is followed exactly once.
+
+\ifthenelse{\boolean{cpp}}
+{Below are two example traversals.
+The first is member \Cref{clearhelp}, which returns the nodes of the
+BST to the freelist.
+Because the children of a node must be freed before
+the node itself, this is a postorder traversal.
+
+\xproghere{BSTclear.book}
+
+The next example is \Cref{printhelp}, which performs an
+inorder traversal on the BST to print the node values in ascending
+order.
+Note that \Cref{printhelp} indents each line to indicate the depth of
+the corresponding node in the tree.
+Thus we pass in the current level of the tree in \Cref{level}, and
+increment this value each time that we make a recursive call.
+
+\xproghere{BSTprint.book}}{}
+
+\ifthenelse{\boolean{java}}
+{Below is an example traversal, named \Cref{printhelp}.
+It performs an inorder traversal on the BST to print the node values
+in ascending order.
+
+\xproghere{BSTprint.book}}{}
+
+While the BST is simple to implement and efficient when the tree is
+balanced, the possibility of its being unbalanced is a serious
+liability.
+There are techniques for organizing a BST to guarantee good performance.
+Two examples are the AVL tree and the splay tree of
+Section~\ref{BalancedTree}.\index{splay tree}
+Other search trees\index{search trees} are guaranteed to remain
+balanced, such as the \TTtree\ of
+Section~\ref{TTTree}.\index{two-three@\TTtree}
+\index{bst@BST|)}
+
+\section{Heaps and Priority Queues}
+\label{HeapSec}
+
+\index{heap|(}
+There are many situations, both in real life and in computing
+applications, where we wish to choose the next ``most important''
+from a collection of people, tasks, or objects.
+For example, doctors in a hospital emergency room often choose to see
+next the ``most critical'' patient rather than the one who arrived
+first.
+When scheduling programs for execution in a multitasking
+operating system,\index{operating system} at any given moment there
+might be several programs (usually called \defit{jobs}) ready to run.
+The next job selected is the one with the highest \defit{priority}.
+Priority is indicated by a particular value associated with the job
+(and might change while the job remains in the wait list).
+
+When a collection of objects is organized by importance or priority,
+we call this a \defit{priority queue}.
+A normal queue data structure will not implement a priority queue
+efficiently because search for the element with highest priority will
+take \Thetan\ time.
+A list, whether sorted or not, will also require \Thetan\ time for
+either insertion or removal.
+A BST that organizes records by priority could be used, with the total 
+of \(n\) inserts and \(n\) remove operations
+requiring \Thetanlogn\ time in the average case.
+However, there is always the possibility that the BST will become
+unbalanced, leading to bad performance.
+Instead, we would like to find a data structure that is guaranteed to
+have good performance for this special application.
+
+This section presents the \defit{heap}\footnote{The term ``heap'' is
+also sometimes used to refer to a memory pool.
+See Section~\ref{MemMan}.}
+data structure.
+A heap is defined by two properties.
+First, it is a complete binary tree,\index{binary tree!complete}
+so heaps are nearly always implemented using
+the array representation for complete binary trees presented
+in Section~\ref{Complete}.
+Second, the values stored in a heap are
+\defit{partially ordered}.\index{heap!partial ordering property}
+This means that there is a relationship between the value stored at
+any node and the values of its children.
+There are two variants of the heap, depending on the definition of
+this relationship.
+
+A \defit{max-heap} has the property that every node stores a value
+that is \emph{greater} than or equal to the value of either of its
+children.\index{heap!max-heap}
+Because the root has a value greater than or equal to its children,
+which in turn have values greater than or equal to their children, the
+root stores the maximum of all values in the tree.
+
+A \defit{min-heap} has the property that every node stores a value
+that is \emph{less}
+than or equal to that of its children.\index{heap!min-heap}
+Because the root has a value less than or equal to its children, which
+in turn have values less than or equal to their children, the root
+stores the minimum of all values in the tree.
+
+Note that there is no necessary relationship between the value of a
+node and that of its sibling in either the min-heap or the max-heap.
+For example, it is possible that the values for all nodes in the left
+subtree of the root are greater than the values for every node of the
+right subtree.
+We can contrast BSTs and heaps by the strength of their ordering
+relationships.
+A BST defines a total order\index{total order} on its nodes in that,
+given the positions for any two nodes in the tree, the one to the
+``left'' (equivalently, the one appearing earlier in an inorder
+traversal) has a smaller key value than the one to the ``right.''
+In contrast, a heap implements a partial order.\index{partial order}
+Given their positions, we can determine the relative order for the key
+values of two nodes in the heap \emph{only} if one is a descendant of
+the other.
+
+Min-heaps and max-heaps both have their uses.
+For example, the Heapsort of
+Section~\ref{Heapsort}\index{heapsort@Heapsort} uses the max-heap,
+while the Replacement Selection algorithm of Section~\ref{RepSelSec}
+uses a min-heap.\index{replacement selection}
+The examples in the rest of this section will use a max-heap.
+
+Be careful not to confuse the logical representation of a heap
+with its physical implementation by means of the array-based complete
+binary tree.
+The two are not synonymous because the logical view of the heap is
+actually a tree structure, while the typical physical implementation
+uses an array.\index{data structure!physical vs. logical form}
+
+\begin{figure}
+\xprogfig{Heap1.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{A heap implementation}
+{An implementation for the heap.}{HeapClass}
+\vspace{-\smallskipamount}
+\end{figure}
+
+\begin{figure}
+\xprogfig{Heap2.book}
+\vspace{-\smallskipamount}
+\ifthenelse{\boolean{java}}{\vspace{-\bigskipamount}}{}
+\captcont
+\ifthenelse{\boolean{cpp}}{\vspace{-\medskipamount}}{}
+\end{figure}
+
+Figure~\ref{HeapClass} shows an implementation for
+heaps.\ifthenelse{\boolean{cpp}}
+{The class is a template with two parameters.
+\Cref{E} defines the type for the data elements stored in the heap, 
+while \Cref{Comp} is the comparison class for comparing two elements.
+This class can implement either a min-heap or a max-heap by changing
+the definition for \Cref{Comp}.
+\Cref{Comp} defines method \Cref{prior}, a binary Boolean function
+that returns true if the first parameter should come before the second
+in the heap.}{}
+\ifthenelse{\boolean{java}}
+{The class is a generic with one type parameter, \Cref{E},
+which defines the type for the data elements stored in the heap.
+\Cref{E} must extend the \Cref{Comparable} interface,
+and so we can use the \Cref{compareTo} method for comparing records in
+the heap.}{}
+
+This class definition makes two concessions to the fact that an
+array-based implementation is used.
+First, heap nodes are indicated by their logical position within the
+heap rather than by a pointer to the node.
+In practice, the logical heap position corresponds to the identically
+numbered physical position in the array.
+Second, the constructor takes as input a pointer to the array to be
+used.
+This approach provides the greatest flexibility for using the heap
+because all data values can be loaded into the array directly
+by the client.
+The advantage of this comes during the heap construction phase,
+as explained below.
+The constructor also takes an integer parameter indicating the initial
+size of the heap (based on the number of elements initially loaded
+into the array) and a second integer parameter indicating the maximum
+size allowed for the heap (the size of the array).
+
+Method \Cref{heapsize} returns the current size of the heap.
+\Cref{H.isLeaf(pos)} returns \TRUE\ if position
+\Cref{pos} is a leaf in heap \Cref{H}, and \FALSE\ otherwise.
+Members \Cref{leftchild}, \Cref{rightchild}, and \Cref{parent} return
+the position (actually, the array index) for the left child, right
+child, and parent of the position passed, respectively.
+
+\index{heap!building|(}
+One way to build a heap is to insert the elements one at a time.
+Method \Cref{insert} will insert a new element \svar{V} into
+the heap.\index{heap!insert}
+You might expect the heap insertion process to be similar to the
+insert function for a BST, starting at the root and working down
+through the heap.
+However, this approach is not likely to work because the heap must
+maintain the shape of a complete binary tree.
+Equivalently, if the heap takes up the first
+\(n\)~positions of its array prior to the call to \Cref{insert}, it must
+take up the first \(n+1\) positions after.
+To~accomplish this, \Cref{insert} first places \svar{V} at
+position~\(n\) of the array.
+Of course, \svar{V}~is unlikely to be in the correct position.
+To~move \svar{V} to the right place, it is compared to its parent's
+value.
+If the value of \svar{V} is less than or equal to the value of its
+parent, then it is in the correct place and the insert routine is
+finished.
+If the value of \svar{V} is greater than that of its parent, then the
+two elements swap positions.
+From here, the process of comparing \svar{V} to its (current) parent
+continues until \svar{V} reaches its correct position.
+
+Since the heap is a complete binary tree, its height is guaranteed to
+be the minimum possible.
+In particular, a heap containing \(n\) nodes will have a height of
+\Thetalogn.
+Intuitively, we can see that this must be true because each level that
+we add will slightly more than double the number of nodes in the tree
+(the \(i\)th level has \(2^i\) nodes, and the sum of the first \(i\)
+levels is \(2^{i+1}-1\)).
+Starting at 1, we can double only \(\log n\) times to reach a value
+of~\(n\).
+To be precise, the height of a heap with \(n\) nodes is
+\(\lceil\log (n+1)\rceil.\)
+
+\index{heap!insert}
+Each call to \Cref{insert} takes \Thetalogn\ time in the worst case,
+because the value being inserted can move at most the distance from the
+bottom of the tree to the top of the tree.
+Thus, to insert \(n\) values into the heap, if we insert them 
+one at a time, will take \Thetanlogn\ time in the worst case.
+
+If all \(n\) values are available at the beginning of the building
+process, we can build the heap faster than just
+inserting the values into the heap one by one.
+Consider Figure~\ref{HeapBuild}(a), which shows one series of
+exchanges that could be used to build the heap.
+All exchanges are between a node and one of its children.
+The heap is formed as a result of this exchange process.
+The array for the right-hand tree of Figure~\ref{HeapBuild}(a)
+would appear as follows:
+\vspace{-\medskipamount}
+
+\begin{center}
+\sffamily
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\rule{0pt}{12pt}7&4&6&1&2&3&5\\
+\hline
+\end{tabular}
+\end{center}
+\vspace{-\smallskipamount}
+
+\begin{figure}
+\pdffig{HeapBld}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Two series of exchanges to build a heap}
+{Two series of exchanges to build a max-heap.
+(a) This heap is built by a series of nine exchanges in the order
+(4-2), (4-1), (2-1), (5-2), (5-4), (6-3), (6-5), (7-5), (7-6).
+(b) This heap is built by a series of four exchanges in the order
+(5-2), (7-3), (7-1), (6-1).}{HeapBuild}
+\bigskip
+\end{figure}
+
+Figure~\ref{HeapBuild}(b) shows an alternate series of exchanges
+that also forms a heap, but much more efficiently.
+The equivalent array representation would be
+\vspace{-\medskipamount}
+
+\begin{center}
+\sffamily
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\rule{0pt}{12pt}7&5&6&4&2&1&3\\
+\hline
+\end{tabular}
+\end{center}
+\vspace{-\smallskipamount}
+
+\noindent From this example, it is clear that the heap for any given
+set of numbers is not unique, and we see that some rearrangements of
+the input values require fewer exchanges than others to build the
+heap.
+So, how do we pick the best rearrangement?
+
+One good algorithm stems from induction.\index{proof!induction}
+Suppose that the left and right subtrees of the root are already
+heaps, and \svar{R} is the name of the element at the root.
+This situation is illustrated by Figure~\ref{HeapInduct}.
+In this case there are two possibilities.
+(1)~\svar{R}~has a value greater than or equal to its two children.
+In this case, construction is complete.
+(2)~\svar{R}~has a value less than one or both of its children.
+In this case, \svar{R}~should be exchanged with the child that has
+greater value.
+The result will be a heap, except that \svar{R}
+might still be less than one or both of its (new) children.
+In this case, we simply continue the process of ``pushing down''
+\svar{R} until it reaches a level where it is greater than its
+children, or is a leaf node.
+This process is implemented by the private method
+\Cref{siftdown}.\index{heap!siftdown}
+The siftdown operation is illustrated by Figure~\ref{SiftPic}.
+
+\begin{figure}
+\pdffig{HeapInd}
+\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{An example of heap building}
+{Final stage in the heap-building algorithm.
+Both subtrees of node \svar{R} are heaps.
+All that remains is to push \svar{R} down to its proper level in the
+heap.}{HeapInduct}
+\end{figure}
+
+\begin{figure}
+\pdffig{SiftPic}
+
+\capt{4.5in}{The siftdown operation}
+{The siftdown operation.\index{heap!siftdown}
+The subtrees of the root are assumed to be heaps.
+(a)~The partially completed heap.
+(b)~Values~1 and~7 are swapped.
+(c)~Values~1 and~6 are swapped to form the final heap.}{SiftPic}
+\medskip
+\end{figure}
+
+This approach assumes that the subtrees are already heaps,
+suggesting that a complete algorithm can be obtained by visiting
+the nodes in some order such that the children of a node are
+visited \emph{before} the node itself.
+One simple way to do this is simply to work from the high index of the 
+array to the low index.
+Actually, the build process need not visit the leaf nodes
+(they can never move down because they are already at the bottom), so
+the building algorithm can start in the middle of the array, with the
+first internal node.
+The exchanges shown in Figure~\ref{HeapBuild}(b) result from this
+process.
+Method \Cref{buildHeap} implements the building algorithm.
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+What is the cost of \Cref{buildHeap}?
+Clearly it is the sum of the costs for the calls to
+\Cref{siftdown}.\index{heap!siftdown}
+Each \Cref{siftdown} operation can cost at most the number of levels
+it takes for the node being sifted to reach the bottom of the tree.
+In any complete tree, approximately half of the nodes are leaves
+and so cannot be moved downward at all.
+One quarter of the nodes are one level above the leaves, and so their
+elements can move down at most one level.
+At each step up the tree we get half the number of nodes as were at
+the previous level, and an additional height of one.
+The maximum sum of total distances that elements can go is
+therefore\index{summation}
+\[\sum_{i=1}^{\log n} (i-1)\frac{n}{2^i}
+= \frac{n}{2}\sum_{i=1}^{\log n} \frac{i-1}{2^{i-1}}.\]
+\noindent From Equation~\ref{IHalvesSum} we know that this summation
+has a closed-form solution of approximately~2,
+so this algorithm takes \Thetan\ time in the worst case.
+This is far better than building the heap one element at a time, which
+would cost \Thetanlogn\ in the worst case.
+It is also faster than the \Thetanlogn\ average-case time and
+\Thetantwo\ worst-case time required to build the
+BST.\index{heap!building|)}
+
+Removing\index{heap!remove} the maximum (root) value from a heap
+containing \(n\) elements requires that we maintain the complete binary
+tree shape, and that the remaining \(n-1\)~node values conform to the
+heap property.
+We can maintain the proper shape by moving the element in the last
+position in the heap (the current last element in the array) to the
+root position.
+We now consider the heap to be one element smaller.
+Unfortunately, the new root value is probably
+\emph{not} the maximum value in the new heap.
+This problem is easily solved by using \Cref{siftdown} to reorder the
+heap.\index{heap!siftdown}
+Because the heap is \(\log n\) levels deep, the cost of deleting the
+maximum element is \Thetalogn\ in the average and worst cases.
+
+The heap is a natural implementation for the priority queue discussed
+at the beginning of this section.
+Jobs can be added to the heap (using their priority value as the
+ordering key) when needed.
+Method \Cref{removemax} can be called whenever a new job is to be
+executed.
+
+\index{heap!remove}
+Some applications of priority queues require the ability to change the
+priority of an object already stored in the queue.
+This might require that the object's position in the heap representation
+be updated.
+Unfortunately, a max-heap is not efficient when searching for an
+arbitrary value; it is only good for finding the maximum value.
+However, if we already know the index for an object within the heap,
+it is a simple matter to update its priority (including changing its
+position to maintain the heap property) or remove it.
+The \Cref{remove} method takes as input the position of the
+node to be removed from the heap.
+A typical implementation for priority queues requiring updating of
+priorities will need to use an auxiliary data structure that supports
+efficient search for objects (such as a BST).
+Records in the auxiliary data structure will store
+the object's heap index, so that the object can be
+deleted from the heap and reinserted with its new priority
+(see Project~\ref{BinaryTree}.\ref{HeapProject}).
+Sections~\ref{SSSP} and~\ref{PrimsSec} present applications for a
+priority queue with priority updating.
+\index{heap!remove}
+\index{heap|)}
+
+\section{Huffman Coding Trees}
+\label{Huffman}
+
+\index{huffman coding tree@Huffman coding tree|(}
+\index{text compression|(}
+The space/time tradeoff principle\index{tradeoff!space/time principle}
+from Section~\ref{SpaceBounds} states that one can often gain an
+improvement in space requirements in exchange for a penalty in running
+time.
+There are many situations where this is a desirable tradeoff.
+A typical example is storing files on disk.
+If the files are not actively used, the owner might wish to
+compress them to save space.
+Later, they can be uncompressed for use, which costs some time,
+but only once.
+
+We often represent a set of items in a computer program
+by assigning a unique code to each item.
+For example, the standard ASCII coding scheme assigns a unique
+eight-bit value to each character.
+It takes a certain minimum number of bits to provide unique codes for
+each character.
+For example, it takes \(\lceil\log 128\rceil\)
+or seven bits to provide the 128~unique codes needed to represent the
+128~symbols of the ASCII character set.\footnote{The ASCII standard
+is eight bits, not seven, even though there are only 128 characters
+represented.
+The eighth bit is used either to check for transmission errors, or to
+support ``extended'' ASCII codes with an additional 128 characters.}
+
+The requirement for \(\lceil\log n\rceil\) bits to represent \(n\)
+unique code values assumes that all codes will be the same length,
+as are ASCII codes.
+This is called a \defit{fixed-length} coding scheme.
+If all characters were used equally often, then a fixed-length coding
+scheme is the most space efficient method.
+However, you are probably aware that not all characters are used
+equally often in many applications.
+For example, the various letters in an English language document have
+greatly different frequencies of use.
+
+Figure~\ref{Freq} shows the relative frequencies of the letters of the
+alphabet.
+From this table we can see that the letter `E' appears about 60 times
+more often than the letter `Z.'
+In normal ASCII, the words ``DEED'' and ``MUCK'' require the same
+amount of space (four bytes).
+It would seem that words such as ``DEED,'' which are composed of
+relatively common letters, should be storable in less space than words
+such as ``MUCK,'' which are composed of relatively uncommon letters.
+
+\begin{mytable}
+\begin{center}
+\begin{tabular}{c|c||c|c}
+\multicolumn{1}{c}{\textbf{Letter}} &
+\multicolumn{1}{|c||}{\textbf{Frequency}} &
+\multicolumn{1}{c}{\textbf{Letter}} &
+\multicolumn{1}{|c}{\textbf{Frequency}}\\
+\hline
+A & 77 & N & 67\\
+B & 17 & O & 67\\
+C & 32 & P & 20\\
+D & 42 & Q &  5\\
+E &120 & R & 59\\
+F & 24 & S & 67\\
+G & 17 & T & 85\\
+H & 50 & U & 37\\
+I & 76 & V & 12\\
+J &  4 & W & 22\\
+K &  7 & X &  4\\
+L & 42 & Y & 22\\
+M & 24 & Z &  2\\
+\end{tabular}
+\end{center}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Frequencies for the 26 letters of the alphabet}
+{Relative frequencies for the 26 letters of the alphabet as they
+appear in a selected set of English documents.
+``Frequency'' represents the expected frequency of occurrence per
+1000~letters, ignoring case.}{Freq}
+\medskip
+\end{mytable}
+
+If some characters are used more frequently than others, is
+it possible to take advantage of this fact and somehow assign them
+shorter codes?
+The price could be that other characters require longer codes, but
+this might be worthwhile if such characters appear rarely enough.
+This concept is at the heart of file compression techniques in common
+use today.
+The next section presents one such approach to assigning
+\defit{variable-length} codes, called Huffman coding.
+While it is not commonly used in its simplest form for file
+compression (there are better methods), Huffman coding gives
+the flavor of such coding schemes.
+One motivation for studying Huffman coding is because it provides our
+first opportunity to see a type of tree structure referred to as a
+\defit{search trie}.\index{trie}
+
+\subsection{Building Huffman Coding Trees}
+\label{HuffBuildSec}
+
+Huffman coding assigns codes to characters such that the length of the
+code depends on the relative frequency or \defit{weight} of the
+corresponding character.
+Thus, it is a variable-length code.
+If the estimated frequencies for letters match
+the actual frequency found in an encoded message, then the
+length of that message will typically be less than if a fixed-length
+code had been used.
+The Huffman code for each letter is derived from a
+full\index{binary tree!full}
+binary tree called the \defit{Huffman coding tree}, or simply the
+\defit{Huffman tree}.
+Each leaf of the Huffman tree corresponds to a letter, and we define
+the weight of the leaf node to be the weight (frequency) of its
+associated letter.
+The goal is to build a tree with the
+\defit{minimum external path weight}.
+Define the \defit{weighted path length} of a leaf to be
+its weight times its depth.
+The binary tree with minimum external path weight is the one with the
+minimum sum of weighted path lengths for the given set of leaves.
+A letter with high weight should have low depth, so that it
+will count the least against the total path length.
+As a result, another letter might be pushed deeper in the tree if it has
+less weight.
+
+The process of building the Huffman tree for \(n\) letters is quite
+simple.
+First, create a collection of \(n\) initial Huffman trees, each of
+which is a single leaf node containing one of the letters.
+Put the \(n\) partial trees onto a
+priority queue\index{priority queue}
+organized by weight (frequency).\index{list}
+Next, remove the first two trees (the ones with lowest weight) from
+the priority queue.
+Join these two trees together to create a new tree whose root has the
+two trees as children, and whose weight is the sum of the weights of
+the two trees.
+Put this new tree back into the priority queue.
+This process is repeated until all of the partial Huffman trees have
+been combined into one.
+
+\begin{mytable}
+\begin{center}
+\begin{tabular}{|l|cccccccc|}
+\hline
+\rule{0pt}{11pt}Letter      &  C & D & E & K & L & M & U & Z\\
+\rule{0pt}{11pt}Frequency   & 32 & 42 & 120 & 7 & 42 & 24 & 37 & 2\\
+\hline
+\end{tabular}
+\end{center}
+\capt{4.5in}{The relative frequencies for eight selected letters}
+{The relative frequencies for eight selected letters.}{FreqExamp}
+\end{mytable}
+
+\begin{figure}
+\pdffig{HuffTree}
+\capt{4.5in}{Building a Huffman tree}
+{The first five steps of the building process for a sample Huffman
+tree.}{HuffTree}
+\end{figure}
+
+\begin{example}
+Figure~\ref{HuffTree} illustrates part of the Huffman tree
+construction process for the eight letters of Figure~\ref{FreqExamp}.
+Ranking D and L arbitrarily by alphabetical order, 
+the letters are ordered by frequency as
+
+\medskip
+\begin{center}
+\begin{tabular}{|l|cccccccc|}
+\hline
+\rule{0pt}{11pt}Letter    & Z & K &  M &  C &  U &  D &  L &   E\\
+\rule{0pt}{11pt}Frequency & 2 & 7 & 24 & 32 & 37 & 42 & 42 & 120\\
+\hline
+\end{tabular}
+\end{center}
+
+\medskip
+Because the first two letters on the list are~Z and~K, they are
+selected to be the first trees joined
+together.\footnote{For clarity, the examples for building Huffman
+trees show a sorted list to keep the letters ordered by frequency.
+But a real implementation would use a heap to implement the priority
+queue for efficiency.}
+They become the children of a root node with weight~9.
+Thus, a tree whose root has weight~9 is placed back on the list, where
+it takes up the first position.
+The next step is to take values~9 and~24 off the list (corresponding
+to the partial tree with two leaf nodes built in the last step, and
+the partial tree storing the letter~M, respectively) and join them
+together.
+The resulting root node has weight~33, and so this tree is placed
+back into the list.
+Its priority will be between the trees with values~32 (for letter~C)
+and~37 (for letter~U).
+This process continues until a tree whose root has weight~306 is
+built.
+This tree is shown in Figure~\ref{HuffCode}.
+\end{example}
+
+\begin{figure}
+\pdffig{HuffCode}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}
+{A Huffman tree for the letters of Figure~\ref{FreqExamp}}
+{A Huffman tree for the letters of Figure~\ref{FreqExamp}.}
+{HuffCode}
+\smallskip
+\end{figure}
+
+\begin{figure}
+\xprogfig{HuffBaseNode.book}
+
+\medskip
+\xprogfig{HuffLeafNode.book}
+
+\medskip
+\xprogfig{HuffInternalNode.book}
+
+\vspace{-\medskipamount}
+\capt{4.5in}{Implementation for Huffman tree nodes}
+{Implementation for Huffman tree nodes.
+Internal nodes and leaf nodes are represented by separate classes,
+each derived from an abstract base class.}{HuffNode}
+\end{figure}
+
+Figure~\ref{HuffNode} shows an implementation for Huffman tree nodes.
+This implementation is similar to the \Cref{VarBinNode} implementation
+of Figure~\ref{VarNodeI}.
+There is an abstract base class, named \Cref{HuffNode}, and two
+subclasses, named \Cref{LeafNode} and \Cref{IntlNode}.
+This implementation reflects the fact that leaf and internal nodes
+contain distinctly different information.
+
+\begin{figure}
+\xprogfig{HuffTree.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}{Class declarations for the Huffman tree}
+{Class declarations for the Huffman tree.}{HuffClass}
+\end{figure}
+
+Figure~\ref{HuffClass} shows the implementation
+for the Huffman tree.
+Figure~\ref{HuffBuild} shows the \Lang\ code for the tree-building
+process. 
+
+Huffman tree building is an example of a
+\defit{greedy algorithm}.\index{greedy algorithm}
+At each step, the algorithm makes a ``greedy'' decision to merge
+the two subtrees with least weight.
+This makes the algorithm simple, but does it give the desired result?
+This section concludes with a proof that the Huffman tree
+indeed gives the most efficient arrangement for the set of letters.
+The proof requires the following lemma.
+
+\begin{figure}
+\xprogfig{Huffbld.book}
+
+\bigskip
+\capt{4.5in}{Implementation for Huffman tree construction}
+{Implementation for the Huffman tree construction function.
+\Cref{buildHuff} takes as input \Cref{fl}, the min-heap
+of partial Huffman trees, which initially are single leaf nodes as
+shown in Step~1 of Figure~\ref{HuffTree}.
+The body of function \Cref{buildTree} consists mainly of a
+\Cfor\ loop.
+On each iteration of the \Cfor\ loop, the first two partial trees are
+taken off the heap and placed in variables \Cref{temp1} and
+\Cref{temp2}.
+A tree is created (\Cref{temp3}) such that the left and right subtrees 
+are \Cref{temp1} and \Cref{temp2}, respectively.
+Finally, \Cref{temp3} is returned to \Cref{fl}.}{HuffBuild}
+\bigskip
+\end{figure}
+
+\begin{lemma}
+For any Huffman tree built by function \Cref{buildHuff} containing at
+least two letters, the two letters with least frequency are stored in
+siblings nodes whose depth is at least as deep as any other leaf nodes
+in the tree.
+\end{lemma}
+
+\begin{proof}
+Call the two letters with least frequency \(l_1\) and \(l_2\).
+They must be siblings because \Cref{buildHuff}
+selects them in the first step of the construction process.
+Assume that \(l_1\) and \(l_2\) are not the deepest nodes in the tree.
+In~this case, the Huffman tree must either look as shown in
+Figure~\ref{HuffProof}, or in some sense be symmetrical to this.
+For this situation to occur, the parent of \(l_1\) and \(l_2\),
+labeled \svar{V}, must have greater weight than the node
+labeled~\svar{X}.
+Otherwise, function \Cref{buildHuff} would have selected node
+\svar{V} in place of node \svar{X} as the child of node \svar{U}.
+However, this is impossible because \(l_1\) and \(l_2\) are the letters
+with least frequency.
+\end{proof}
+
+\begin{figure}
+\pdffig{HProof}
+
+\capt{4.5in}{An impossible Huffman tree}
+{An impossible Huffman tree, showing the situation where the two nodes 
+with least weight, \(l_1\) and \(l_2\), are not the deepest nodes in
+the tree.
+Triangles represent subtrees.}{HuffProof}
+\bigskip
+\end{figure}
+
+\begin{theorem}
+Function \Cref{buildHuff} builds the Huffman tree with the minimum
+external path weight for the given set of letters.
+\end{theorem}
+
+\begin{proof}
+\index{proof!induction|(}
+The proof is by induction on \(n\), the number of letters.
+
+\begin{itemize}
+
+\item
+{\bf Base Case}: For \(n = 2\), the Huffman tree must have the
+minimum external path weight because there are only two possible trees,
+each with identical weighted path lengths for the two leaves.
+
+\item
+{\bf Induction Hypothesis}: Assume that any tree created by
+\Cref{buildHuff} that contains \(n-1\) leaves has minimum external path
+length.
+
+\item
+{\bf Induction Step}: Given a Huffman tree \cvar{T} built by
+\Cref{buildHuff} with \(n\) leaves,
+\(n \geq 2\), suppose that \(w_1 \leq w_2 \leq \cdots \leq w_n\) where
+\(w_1\) to \(w_n\) are the weights of the letters.
+Call~\svar{V} the parent of the letters with frequencies~\(w_1\)
+and~\(w_2\).
+From the lemma, we know that the leaf nodes containing the letters
+with frequencies~\(w_1\) and~\(w_2\) are as deep as any nodes
+in~\cvar{T}.
+If any other leaf nodes in the tree were deeper, we could reduce their 
+weighted path length by swapping them with \(w_1\) or \(w_2\).
+But the lemma tells us that no such deeper nodes exist.
+Call \(\cvar{T}'\) the Huffman tree that is identical to \cvar{T} except
+that node \svar{V} is replaced with a leaf node \(\svar{V}\,'\) whose
+weight is \(w_1 + w_2\).
+By the induction hypothesis, \(\cvar{T}'\) has minimum external path
+length.
+Returning the children to \(\svar{V}\,'\) restores tree \cvar{T}, which
+must also have minimum external path length.
+\end{itemize}
+
+Thus by mathematical induction, function \Cref{buildHuff} creates the
+Huffman tree with minimum external path length.
+\index{proof!induction|)}
+\end{proof}
+
+\subsection{Assigning and Using Huffman Codes}
+
+Once the Huffman tree has been constructed, it is an easy
+matter to assign codes to individual letters.
+Beginning at the root, we assign either a `0' or a `1' to each edge in
+the tree.
+`0' is assigned to edges connecting a node with its left child,
+and `1' to edges connecting a node with its right child.
+This process is illustrated by  Figure~\ref{HuffCode}.
+The Huffman code for a letter is simply a binary number determined by
+the path from the root to the leaf corresponding to that letter.
+Thus, the code for E is `0' because the path
+from the root to the leaf node for~E takes a single left branch.
+The code for K is `111101' because the path to the node for~K
+takes four right branches, then a left, and finally one last right.
+Figure~\ref{TheCodes} lists the codes for all eight letters.
+
+\begin{mytable}
+\begin{center}
+\begin{tabular}{c|c|l|c}
+\multicolumn{1}{c}{\textbf{Letter}} &
+\multicolumn{1}{|c}{\textbf{Freq}} &
+\multicolumn{1}{|c}{\textbf{Code}}  &
+\multicolumn{1}{|c}{\textbf{Bits}}\\
+\hline
+C & 32 & 1110 & 4\\
+D & 42 & 101 & 3\\
+E & 120 & 0 & 1\\
+K & 7 & 111101 & 6\\
+L & 42 & 110 & 3\\
+M & 24 & 11111 & 5\\
+U & 37 & 100 & 3\\
+Z & 2 & 111100 & 6\\
+\end{tabular}
+\end{center}
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+
+\capt{4.5in}
+{The Huffman codes for the letters of Figure~\protect\ref{FreqExamp}}
+{The Huffman codes for the letters of Figure~\protect\ref{FreqExamp}.}
+{TheCodes}
+\vspace{-\medskipamount}
+\end{mytable}
+
+Given codes for the letters, it is a simple matter to
+use these codes to encode a text message.
+We simply replace each letter in the string with its binary code.
+A lookup table can be used for this purpose.
+
+\begin{example}
+Using the code generated by our example Huffman tree, the word
+``DEED'' is represented by the bit string ``10100101''
+and the word ``MUCK'' is represented by the bit string
+``111111001110111101.''
+\end{example}
+
+Decoding the message is done by looking at the bits in the coded
+string from left to right until a letter is decoded.
+This can be done by using the Huffman tree in a reverse process
+from that used to generate the codes.
+Decoding a bit string begins at the root of the tree.
+We take branches depending on the bit value --- left for `0' and right
+for `1' --- until reaching a leaf node.
+This leaf contains the first character in the message.
+We then process the next bit in the code restarting at the root
+to begin the next character.
+
+\begin{example}
+To decode the bit string ``1011001110111101'' we begin at
+the root of the tree and take a right branch for the first bit which
+is~`1.'
+Because the next bit is a `0' we take a left branch.
+We then take another right branch (for the third bit~`1'), arriving at
+the leaf node corresponding to the letter~D.
+Thus, the first letter of the coded word is~D.
+We then begin again at the root of the tree to
+process the fourth bit, which is a~`1.'
+Taking a right branch, then two left branches (for the next two bits
+which are~`0'), we reach the leaf node corresponding to the letter~U.
+Thus, the second letter is~U.
+In similar manner we complete the decoding process to find that the
+last two letters are~C and~K, spelling the word ``DUCK.''
+\end{example}
+
+\index{huffman coding tree@Huffman coding tree!prefix property|(}
+A set of codes is said to meet
+the \defit{prefix property} if no code in the set is the prefix
+of another.
+The prefix property guarantees that there will be no ambiguity
+in how a bit string is decoded.
+In other words, once we reach the last bit of a code during the
+decoding process, we know which letter it is the code for.
+Huffman codes certainly have the prefix property because any prefix
+for a code would correspond to an internal node, while all codes
+correspond to leaf nodes.
+For example, the code for M is `11111.'
+Taking five right branches in the Huffman tree of
+Figure~\ref{HuffCode} brings us to the leaf node containing~M.
+We can be sure that no letter can have code `111' because this
+corresponds to an internal node of the tree, and the tree-building
+process places letters only at the leaf nodes.
+\index{huffman coding tree@Huffman coding tree!prefix property|)}
+
+How efficient is Huffman coding?
+In theory, it is an optimal coding method whenever the true
+frequencies are known, and the frequency of a letter is independent of
+the context of that letter in the message.
+In practice, the frequencies of letters in an English text document do
+change depending on context.
+For example, while E is the most commonly used letter of the
+alphabet in English documents, T~is more common as the first letter
+of a word.
+This is why most commercial compression utilities do not use Huffman
+coding as their primary coding method, but instead use techniques that
+take advantage of the context for the letters.
+
+Another factor that affects the compression efficiency of Huffman
+coding is the relative frequencies of the letters.
+Some frequency patterns will save no space as compared to fixed-length
+codes; others can result in great compression.
+In general, Huffman coding does better when there is
+large variation in the frequencies of letters.
+In the particular case of the frequencies shown in
+Figure~\ref{TheCodes},
+we can determine the expected savings from Huffman coding if the
+actual frequencies of a coded message match the expected frequencies.
+
+\begin{example}
+Because the sum of the frequencies in
+Figure~\ref{TheCodes} is 306 and E has frequency~120, we expect it to
+appear 120~times in a message containing 306~letters.
+An actual message might or might not meet this expectation.
+Letters D, L, and U have code lengths of three, and together are
+expected to appear 121 times in 306 letters.
+Letter C has a code length of four, and is expected to appear 32
+times in 306 letters.
+Letter M has a code length of five, and is expected to appear 24
+times in 306 letters.
+Finally, letters K and Z have code lengths of six, and
+together are expected to appear only 9 times in 306 letters.
+The average expected cost per character is simply the sum of the cost
+for each character (\(c_i\)) times the probability of its occurring
+(\(p_i\)), or
+\[c_1 p_1 + c_2 p_2 + \cdots + c_n p_n.\]
+\noindent This can be reorganized as
+\[\frac{c_1 f_1 + c_2 f_2 + \cdots + c_n f_n}{f_T}\]
+\noindent where \(f_i\) is the (relative) frequency of letter \(i\) and
+\(f_T\) is the total for all letter frequencies.
+For this set of frequencies, the expected cost per letter is
+\[ [(1 \times 120) + (3 \times 121) + (4 \times 32) +
+    (5 \times 24) + (6 \times 9)]/306 = 785/306 \approx 2.57 \]
+A fixed-length code for these eight characters would require
+\(\log 8 = 3\) bits per letter as opposed to about 2.57 bits per
+letter for Huffman coding.
+Thus, Huffman coding is expected to save about 14\% for this set of
+letters.
+\end{example}
+
+Huffman coding for all ASCII symbols should do
+better than this.
+The letters of Figure~\ref{TheCodes} are atypical in that there are
+too many common letters compared to the number of rare letters.
+Huffman coding for all 26 letters would yield an expected cost of 4.29
+bits per letter.
+The equivalent fixed-length code would require about five bits.
+This is somewhat unfair to fixed-length coding because there is
+actually room for 32 codes in five bits, but only 26 letters.
+More generally, Huffman coding of a typical text file will save around
+40\% over ASCII coding if we charge ASCII coding at eight bits per
+character.
+Huffman coding for a binary file (such as a compiled executable) would
+have a very different set of distribution frequencies and so would
+have a different space savings.
+Most commercial compression programs use two or three
+coding schemes to adjust to different types of files.
+
+In the preceding example, ``DEED'' was coded in 8 bits, a saving of
+33\% over the twelve bits required from a fixed-length coding.
+However, ``MUCK'' requires 18 bits, more space than required by the
+corresponding fixed-length coding.
+The problem is that ``MUCK'' is composed of letters that are not
+expected to occur often.
+If the message does not match the expected frequencies of the
+letters, than the length of the encoding will not be as expected
+either.\index{text compression|)}
+\index{huffman coding tree@Huffman coding tree|)}
+
+\subsection{Search in Huffman Trees}
+
+When we decode a character using the Huffman coding tree, we follow a
+path through the tree dictated by the bits in the code string.
+Each `0' bit indicates a left branch while each `1' bit indicates a
+right branch.
+Now look at Figure~\ref{HuffCode} and consider this structure in terms
+of searching for a given letter (whose key value is its Huffman code).
+We see that all letters with codes beginning with '0' are stored in
+the left branch, while all letters with codes beginning with `1' are
+stored in the right branch.
+Contrast this with storing records in a BST.
+There, all records with key value less than the root value are stored
+in the left branch, while all records with key values greater than the
+root are stored in the right branch.
+
+If we view all records stored in either of these structures as
+appearing at some point on a number line representing the key space,
+we can see that the splitting behavior of these two structures is very
+different.
+The BST splits the space based on the key values as they are
+encountered when going down the tree.
+But the splits in the key space are predetermined for the Huffman
+tree.
+Search tree structures whose splitting points in the key space are
+predetermined are given the special name \defit{trie}\index{trie} to
+distinguish them from the type of search tree (like the BST) whose
+splitting points are determined by the data.
+Tries are discussed in more detail in Chapter~\ref{AdvTree}.
+
+\section{Further Reading}
+
+See Shaffer and Brown \cite{PBTree}\index{binary tree!implementation}
+for an example of a tree implementation where an internal node
+pointer field stores the value of its child instead of a pointer to
+its child when the child is a leaf node.
+
+Many techniques exist for maintaining reasonably balanced BSTs in the
+face of an unfriendly series of insert and delete
+operations.\index{bst@BST}
+One example is the AVL tree of Adelson-Velskii and Landis, which is
+discussed by Knuth \cite{KnuthV3}.
+The AVL tree\index{avl tree@AVL tree} (see Section~\ref{BalancedTree})
+is actually a BST whose insert and delete routines reorganize the tree
+structure so as to guarantee that the subtrees rooted by the children
+of any node will differ in height by at most one.
+Another example is the splay tree \cite{SplayRef}, also discussed in
+Section~\ref{BalancedTree}.\index{splay tree}
+
+See Bentley's Programming Pearl ``Thanks, Heaps''
+\cite{Heaps,BentleyMore} for a good discussion on the heap data
+structure and its uses.\index{heap}
+
+The proof of Section~\ref{HuffBuildSec} that the Huffman coding
+tree\index{huffman coding tree@Huffman coding tree}
+has minimum external path weight is from Knuth \cite{KnuthV1}.
+For more information on data compression techniques, see
+\ttl{Managing Gigabytes} by Witten, Moffat, and Bell \cite{WMB99}, and
+\ttl{Codes and Cryptography} by Dominic Welsh \cite{Welsh}.
+Tables~\ref{Freq} and \ref{FreqExamp} are derived from
+Welsh \cite{Welsh}.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Section~\ref{BinSpace} claims that a full binary tree has the highest
+number of leaf nodes among all trees with \(n\)
+internal nodes.\index{binary tree!full}
+Prove that this is true.
+
+\item
+Define the \defit{degree} of a node as the number of its non-empty
+children.
+Prove by induction that the number of degree~2 nodes in any binary
+tree is one less than the number of\index{proof!induction}
+leaves.\index{full binary tree theorem}\index{binary tree!full}
+
+% From Horowitz and Sahni
+\item
+Define the \defit{internal path length} for a tree as the sum of the
+depths of all internal nodes, while the \defit{external path length}
+is the sum of the depths of all leaf nodes in the tree.
+Prove by induction\index{proof!induction} that if tree~\cvar{T} is a full
+binary tree with \(n\) internal nodes, \(I\) is \cvar{T}'s internal path
+length, and \(E\) is \cvar{T}'s external path length, then \(E = I + 2n\)
+for \(n \geq 0\).
+
+\item
+Explain why function \Cref{preorder2} from Section~\ref{BinTravers}
+makes half as many recursive calls as function \Cref{preorder}.
+Explain why it makes twice as many accesses to left and right children.
+
+\item
+\begin{enumerate}
+
+\item
+Modify the preorder traversal of Section~\ref{BinTravers} to
+perform an inorder traversal of a binary
+tree.\index{traversal!binary tree}
+
+\item
+Modify the preorder traversal of Section~\ref{BinTravers} to
+perform a post\-order traversal of a binary
+tree.\index{traversal!binary tree}
+\end{enumerate}
+
+\item
+Write a recursive\index{recursion} function named \Cref{search} that
+takes as input the pointer to the root of a  binary tree
+(\emph{not} a BST!) and a value~\(K\), and returns \TRUE\ 
+if value~\(K\) appears in the tree and \FALSE\ otherwise.
+
+\item
+Write an algorithm that takes as input the pointer to the root of a
+binary tree and prints the node values of the tree in
+\defit{level} order.\index{traversal!binary tree}
+Level order first prints the root, then all nodes of level~1, then all
+nodes of level~2, and so on.
+\emph{Hint}: Preorder traversals make use of a stack\index{stack}
+through recursive\index{recursion} calls.
+Consider making use of another data structure
+to help implement the level-order traversal.
+
+\item
+Write a recursive function that returns the height of a binary tree.
+
+\item
+Write a recursive function that returns a count of the number of leaf
+nodes in a binary tree.
+
+\item
+Assume that a given binary tree stores integer values in its nodes.
+Write a recursive function that sums the values of all nodes in the tree.
+
+\item
+Assume that a given binary tree stores integer values in its nodes.
+Write a recursive function that traverses a binary tree, and prints
+the value of every node who's grandparent has a value that is a
+multiple of five.
+
+\item
+Write a recursive function that traverses a binary tree, and prints
+the value of every node which has at least four great-grandchildren.
+
+\item
+Compute the overhead fraction for each of the following full binary
+tree implementations.\index{overhead!binary tree}
+
+\begin{enumerate}
+
+\item
+All nodes store data, two child pointers, and a parent pointer.
+The data field requires four bytes and each pointer requires four
+bytes.
+
+\item
+All nodes store data and two child pointers.
+The data field requires sixteen bytes and each pointer requires four
+bytes.
+
+\item
+All nodes store data and a parent pointer, and internal nodes store
+two child pointers.
+The data field requires eight bytes and each pointer requires four
+bytes.
+
+\item
+Only leaf nodes store data; internal nodes store two child
+pointers.
+The data field requires eight bytes and each pointer requires four
+bytes.
+\end{enumerate}
+
+\item
+Why is the BST\index{bst@BST} Property defined so that nodes with
+values equal to the value of the root appear only in the right
+subtree, rather than allow equal-valued nodes to appear in either
+subtree?
+
+\item
+\begin{enumerate}
+\item
+Show the BST that results from inserting the values
+15, 20, 25, 18, 16, 5, and 7 (in that order).
+
+\item
+Show the enumerations for the tree of (a) that result from doing a
+preorder traversal, an inorder traversal, and a postorder traversal.
+\end{enumerate}
+
+\item
+Draw the BST that results from adding the value~5 to the BST
+shown in Figure~\ref{BSTShape}(a).\index{bst@BST}
+
+\item
+Draw the BST that results from deleting the value~7 from the BST of
+Figure~\ref{BSTShape}(b).\index{bst@BST}
+
+\item
+Write a function that prints out the node values for a BST in sorted
+order from highest to lowest.
+
+\item
+Write a recursive function named \Cref{smallcount} that, given the
+pointer to the root of a BST and a key~\(K\), returns the number of
+nodes having key values less than or equal to~\(K\).\index{bst@BST}
+Function \Cref{smallcount} should visit as few nodes in the BST as
+possible.
+
+\item
+\label{BSTRangeExer}
+Write a recursive function named \Cref{printRange} that, given the
+pointer to the root of a BST, a low key value, and a high key value,
+prints in sorted order all records whose key values fall between the
+two given keys.\index{bst@BST}
+Function \Cref{printRange}
+should visit as few nodes in the BST as possible.
+
+\item
+Write a recursive function named \Cref{checkBST} that, given the
+pointer to the root of a binary tree, will return \TRUE\ if the tree
+is a BST, and \FALSE\ if it is not.
+
+\item
+Describe a simple modification to the BST that will allow it to easily
+support finding the Kth smallest value in 
+$\Theta(\log n)$ average case time.
+Then write a pseudo-code function for finding the Kth smallest value
+in your modified BST.
+
+\item
+What are the minimum and maximum number of elements in a heap of
+height~\(h\)?\index{heap}
+
+\item
+Where in a max-heap might the smallest element reside?\index{heap}
+
+\item
+Show the max-heap that results from running \Cref{buildHeap} on the
+following values stored in an array:\index{heap}
+\[ 10\quad 5\quad 12\quad 3\quad 2\quad 1\quad 8\quad 7\quad 9\quad 4 \]
+
+\item
+\begin{enumerate}
+\item
+Show the heap that results from deleting the maximum value from the
+max-heap of Figure~\ref{HeapBuild}b.\index{heap}
+
+\item
+Show the heap that results from deleting the element with value~5 from
+the max-heap of Figure~\ref{HeapBuild}b.
+\end{enumerate}
+
+\item
+Revise the heap definition of Figure~\ref{HeapClass}\index{heap}
+to implement a min-heap.
+The member function \Cref{removemax} should be replaced by a new
+function called \Cref{removemin}.
+
+\item
+\index{huffman coding tree@Huffman coding tree|(}
+Build the Huffman coding tree and determine the codes for the
+following set of letters and
+weights:
+
+\smallskip
+\begin{center}
+\begin{tabular}{|l|cccccccccccc|}
+\hline
+\rule{0pt}{11pt}Letter      &A & B & C & D & E & F & G & H & I & J & K & L\\
+\rule{0pt}{11pt}Frequency   &2 & 3 & 5 & 7 & 11 & 13 & 17 & 19 & 23 & 31 & 37 & 41\\
+\hline
+\end{tabular}
+\end{center}
+
+\smallskip
+\noindent What is the expected length in bits of a message
+containing \(n\)~characters for this frequency distribution?
+
+\item
+What will the Huffman coding tree look like for a set of sixteen
+characters all with equal weight?
+What is the average code length for a letter in this case?
+How does this differ from the smallest possible fixed length code for
+sixteen characters?
+
+\item
+A set of characters with varying weights is assigned
+Huffman codes.
+If one of the characters is assigned code 001, then,
+
+\begin{enumerate}
+\item
+Describe all codes that \emph{cannot} have been assigned.
+
+\item
+Describe all codes that \emph{must} have been assigned.
+\end{enumerate}
+
+\item
+Assume that a sample alphabet has the following weights:
+
+\smallskip
+\begin{center}
+\begin{tabular}{|l|cccccccc|}
+\hline
+\rule{0pt}{11pt}Letter      &Q & Z &  F &  M &  T &  S &  O &  E\\
+\rule{0pt}{11pt}Frequency   &2 & 3 & 10 & 10 & 10 & 15 & 20 & 30\\
+\hline
+\end{tabular}
+\end{center}
+
+\smallskip
+\begin{enumerate}
+\item
+For this alphabet, what is the worst-case number of bits required
+by the Huffman code for a string of
+\(n\)~letters?
+What string(s) have the worst-case performance?
+
+\item
+For this alphabet, what is the best-case number of bits required by
+the Huffman code for a string of \(n\)~letters?
+What string(s) have the best-case performance?
+
+\item
+What is the average number of bits required by a character using
+the Huffman code for this alphabet?
+\end{enumerate}
+
+\item
+You must keep track of some data.
+Your options are:
+\begin{enumerate}
+\itemsep=0pt
+\item[(1)] A linked-list maintained in sorted order.
+\item[(2)] A linked-list of unsorted records.
+\item[(3)] A binary search tree.
+\item[(4)] An array-based list maintained in sorted order.
+\item[(5)] An array-based list of unsorted records.
+\end{enumerate}
+
+For each of the following scenarios, which of these choices would be
+best?
+Explain your answer.
+\begin{enumerate}
+\item
+The records are guaranteed to arrive already sorted from
+lowest to highest (i.e., whenever a record is inserted, its key value
+will always be greater than that of the last record inserted).
+A total of 1000 inserts will be interspersed with 1000 searches.
+
+\item
+The records arrive with values having a uniform random
+distribution (so the BST is likely to be well balanced).
+1,000,000 insertions are performed, followed by 10 searches.
+
+\item
+The records arrive with values having a uniform random
+distribution (so the BST is likely to be well balanced).
+1000 insertions are interspersed with 1000 searches.
+
+\item
+The records arrive with values having a uniform random
+distribution (so the BST is likely to be well balanced).
+1000 insertions are performed, followed by 1,000,000 searches.
+\end{enumerate}
+
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+Re-implement the composite design for the binary tree node class of
+Figure~\ref{VarNodeC} using a flyweight in place of \NULL\ pointers to
+empty nodes.\index{design pattern!flyweight}
+
+\item
+One way to deal with the ``problem'' of \NULL\ pointers in binary
+trees is to use that space for some other purpose.
+One example is the
+\defit{threaded} binary tree.\index{binary tree!threaded}
+Extending the node implementation of Figure~\ref{BinNodeClass},
+the threaded binary tree stores with each node two additional bit
+fields that indicate if the child pointers \Cref{lc} and \Cref{rc} are
+regular pointers to child nodes or threads.
+If \Cref{lc} is not a pointer to a non-empty child (i.e., if it would
+be \NULL\ in a regular binary tree), then it instead stores a pointer
+to the \defit{inorder predecessor} of that node.
+The inorder predecessor is the node that would be printed
+immediately before the current node in an inorder traversal.
+If \Cref{rc} is not a pointer to a child,
+then it instead stores a pointer to
+the node's \defit{inorder successor}.
+The inorder successor is the node that would be printed immediately
+after the current node in an inorder traversal.
+The main advantage of threaded binary trees is that operations such as
+inorder traversal can be implemented without using
+recursion\index{recursion} or a stack\index{stack}.
+
+Re-implement the BST as a threaded binary tree,
+and include a non-recursive version of the preorder
+traversal\index{bst@BST}
+
+\item
+\label{CityBSTEx}
+Implement a city database using a BST to store the database records.
+Each database record contains the name of the city (a string of
+arbitrary length) and the coordinates of the city expressed as integer
+\(x\)- and \(y\)-coordinates.\index{city database}
+The BST should be organized by city name.
+Your database should allow records to be inserted, deleted by name or
+coordinate, and searched by name or coordinate.
+Another operation that should be supported is to print
+all records within a given distance of a specified point.
+Collect running-time statistics for each operation.
+Which operations can be implemented reasonably efficiently (i.e., in
+\Thetalogn\ time in the average case) using a BST?
+Can the database system be made more efficient by using one or more
+additional BSTs to organize the records by location?
+
+\item
+Create a binary tree ADT that includes generic traversal methods that
+take a visitor, as described in Section~\ref{BinTravers}.
+Write functions \Cref{count} and \Cref{BSTcheck} of
+Section~\ref{BinTravers} as visitors to be used with the generic
+traversal method.
+
+\item
+\label{HeapProject}
+Implement a priority queue\index{priority queue} class based on the
+max-heap class implementation of Figure~\ref{HeapClass}.\index{heap}
+The following methods should be supported for manipulating the
+priority queue:
+
+\begin{progenvexer}
+void enqueue(int ObjectID, int priority);\\
+int dequeue();\\
+void changeweight(int ObjectID, int newPriority);
+\end{progenvexer}
+
+\noindent
+Method \Cref{enqueue} inserts a new object into the priority queue
+with ID number \Cref{ObjectID} and priority
+\Cref{priority}.
+Method \Cref{dequeue} removes the object with highest priority from
+the priority queue and returns its object ID.
+Method \Cref{changeweight} changes the priority of the object with
+ID number \Cref{ObjectID} to be \Cref{newPriority}.
+The type for \Cref{E} should be a class that stores the
+object ID and the priority for that object.
+You will need a mechanism for finding the position of the desired
+object within the heap.
+Use an array, storing the object with \Cref{ObjectID} \(i\) in
+position \(i\).
+(Be sure in your testing to keep the \Cref{ObjectID}s within the
+array bounds.)
+You must also modify the heap implementation to store the
+object's position in the auxiliary array so that updates to
+objects in the heap can be updated as well in the array.
+
+\item
+The Huffman coding tree function \Cref{buildHuff} of
+Figure~\ref{HuffBuild} manipulates a sorted list.
+This could result in a \Thetantwo\ algorithm, because placing an
+intermediate Huffman tree on the list could take \Thetan\ time.
+Revise this algorithm to use a priority queue\index{priority queue}
+based on a min-heap instead of a
+list.\index{huffman coding tree@Huffman coding tree|)}
+
+\item
+\label{HuffFileEx}
+\index{huffman coding tree@Huffman coding tree|(}
+Complete the implementation of the Huffman coding tree, building on
+the code presented in Section~\ref{Huffman}.
+Include a function to compute and store in a table the codes for each
+letter, and functions to encode and decode messages.
+This project can be further extended to support file compression.
+To~do so requires adding two steps:
+(1) Read through the input file to generate actual frequencies for all
+letters in the file; and
+(2) store a representation for the Huffman tree at the beginning of
+the encoded output file to be used by the decoding function.
+If you have trouble with devising such a representation, see
+Section~\ref{DFExpr}.
+\index{huffman coding tree@Huffman coding tree|)}
+
+\end{projects}
+\index{binary tree|)}

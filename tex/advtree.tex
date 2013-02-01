@@ -1,0 +1,1668 @@
+% advtree.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\chapter{Advanced Tree Structures}
+\label{AdvTree}
+\def\CHHEAD{Chap.\ \thechapter\ Advanced Tree Structures}    % Head title -- even pages
+
+This chapter introduces several tree structures
+designed for use in specialized applications.
+The trie of Section~\ref{Trie} is commonly used to store\index{trie}
+and retrieve strings.
+It also serves to illustrate the concept of a key space decomposition.
+The AVL tree\index{avl tree@AVL tree} and splay tree\index{splay tree}
+of Section~\ref{BalancedTree} are variants on the BST\index{bst@BST}.
+They are examples of self-balancing search trees
+and have guaranteed good performance regardless of the insertion
+order for records.
+An introduction to several spatial data structures used to organize
+point data by \XYcoords\ is presented in
+Section~\ref{Spatial}.\index{spatial data structure}
+
+Descriptions of the fundamental operations are given for each data
+structure.
+One purpose for this chapter is to provide opportunities for
+class programming projects, so detailed implementations are left
+to the reader.
+
+\section{Tries}
+\label{Trie}
+
+\index{trie|(}
+Recall that the shape of a BST is determined by the order in which its
+data records are inserted.
+One permutation of the records might yield a balanced tree while
+another might yield an unbalanced tree, with the extreme case becoming
+the shape of a linked list.\index{list!linked}
+The reason is that the value of the key stored in the root node
+splits the key range into two parts: those key values less than the
+root's key value, and those key values greater than the root's key
+value.
+Depending on the relationship between the root node's key value and
+the distribution of the key values for the other records in the the
+tree, the resulting BST\index{bst@BST} might be balanced or
+unbalanced.
+Thus, the BST is an example of a data structure whose organization is
+based on an
+\defit{object space decomposition},\index{decomposition!object space}
+so called because the decomposition of the key range is driven by the
+objects (i.e., the key values of the data records) stored in the tree.
+
+The alternative to object space decomposition is to predefine the
+splitting position within the key range for each node in the tree.
+In other words, the root could be predefined to split the
+key range into two equal halves, regardless of the particular values
+or order of insertion for the data records.
+Those records with keys in the lower half of the
+key range will be stored in the left subtree, while those records
+with keys in the upper half of the key range will be stored in the
+right subtree.
+While such a decomposition rule will not necessarily result in a
+balanced tree (the tree will be unbalanced if the records are not
+well distributed within the key range), at least the shape of the tree
+will not depend on the order of key insertion.
+Furthermore, the depth of the tree will be limited by the resolution
+of the key range; that is, the depth of the tree can never be greater
+than the number of bits required to store a key value.
+For example, if the keys are integers in the range 0 to
+1023, then the resolution for the key is ten bits.
+Thus, two keys can be identical only until the tenth bit.
+In the worst case, two keys will follow the same path
+in the tree only until the tenth branch.
+As a result, the tree will never be more than ten levels deep.
+In contrast, a BST containing \(n\) records could be as much as
+\(n\) levels deep.
+
+Splitting based on predetermined subdivisions of the key range is
+called \defit{key space decomposition}.\index{decomposition!key space}
+In computer graphics, the technique is known
+as\index{computer graphics}
+\defit{image space} decomposition,\index{decomposition!image space}
+and this term is sometimes used to describe the process for data
+structures as well.
+A data structure based on key space decomposition is called
+a \defit{trie}.
+Folklore has it that ``trie'' comes from ``retrieval.''
+Unfortunately, that would imply that the word is pronounced ``tree,''
+which would lead to confusion with regular use of the word ``tree.''
+``Trie'' is actually pronounced as ``try.''
+
+Like the \BPtree,\index{btree@\Btree!bplustree@\BPtree}
+a trie stores data records only in leaf nodes.
+Internal nodes serve as placeholders to direct the search process.
+but since the split points are predetermined, internal nodes need not
+store ``traffic-directing'' key values.
+Figure~\ref{TrieExamp} illustrates the trie concept.
+Upper and lower bounds must be imposed on the key values
+so that we can compute the middle of the key range.
+Because the largest value inserted in this example is~120, a range from
+0~to~127 is assumed, as~128 is the smallest power of two
+greater than~120.
+The binary value of the key determines whether to select the left or
+right branch at any given point during the search.
+The most significant bit determines the branch direction at the root.
+Figure~\ref{TrieExamp} shows a \defit{binary trie}, so called because
+in this example the trie structure is based on the value of the key
+interpreted as a binary number, which results in a binary
+tree.\index{trie!binary}
+
+The Huffman coding\index{huffman coding tree@Huffman coding tree}
+tree of Section~\ref{Huffman} is another example
+of a binary trie.
+All data values in the Huffman tree are at the leaves, and
+each branch splits the range of possible letter codes in half.
+The Huffman codes are actually reconstructed from the letter positions
+within the trie.
+
+\begin{figure}
+\pdffig{BinTrie}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{A binary trie}
+{The binary trie for the collection of values
+2, 7, 24, 31, 37, 40, 42, 120.
+All data values are stored in the leaf nodes.
+Edges are labeled with the value of the bit used to determine the
+branching direction of each node.
+The binary form of the key value determines the path to the record,
+assuming that each key is represented as a 7-bit value representing a
+number in the range~0 to~127.}{TrieExamp}
+\bigskip
+\end{figure}
+
+These are examples of binary tries, but tries can be built
+with any branching factor.
+Normally the branching factor is determined by the alphabet used.
+For binary numbers, the alphabet is \{0,~1\} and a binary trie
+results.
+Other alphabets lead to other branching factors.
+
+\begin{figure}
+\pdffig{AlphTrie}
+\vspace{1pt}
+\capt{4.5in}{Two variations on the alphabet trie representation}
+{Two variations on the alphabet trie representation for a set of ten
+words.
+(a)~Each node contains a set of links corresponding to single letters,
+and each letter in the set of words has a corresponding link.
+``\$''~is used to indicate the end of a word.
+Internal nodes direct the search and also spell out the word one
+letter per link.
+The word need not be stored explicitly.
+``\$'' is needed to recognize the existence of words that are prefixes 
+to other words, such as `ant' in this example.
+(b)~Here the trie extends only far enough to discriminate between the
+words.
+Leaf nodes of the trie each store a complete word; internal nodes
+merely direct the search.}{TrieDict}
+\bigskip
+\end{figure}
+
+One application for tries is to store a dictionary of words.
+Such a trie will be referred to as an
+\defit{alphabet trie}.\index{trie!alphabet}
+For simplicity, our examples will ignore case in letters.
+We add a special character (\$) to the 26 standard English letters.
+The \$ character is used to represent the end of a string.
+Thus, the branching factor for each node is (up to)~27.
+Once constructed, the alphabet trie is used to determine if a given
+word is in the dictionary.\index{dictionary}
+Consider searching for a word in the alphabet trie of
+Figure~\ref{TrieDict}.
+The first letter of the search word determines which branch to take
+from the root, the second letter determines which branch to take at
+the next level, and so on.
+Only the letters that lead to a word are shown as branches.
+In~Figure~\ref{TrieDict}(b) the leaf nodes of the trie store a copy of
+the actual words, while in Figure~\ref{TrieDict}(a) the word is built
+up from the letters associated with each branch.
+
+One way to implement a node of the alphabet trie is as an
+array of 27 pointers indexed by letter.
+Because most nodes have branches to only a small fraction of the
+possible letters in the alphabet, an alternate implementation is to
+use a linked list of pointers to the child nodes, as in
+Figure~\ref{ChildList}.
+
+The depth of a leaf node in the alphabet trie of
+Figure~\ref{TrieDict}(b) has little to do with
+the number of nodes in the trie, or even with the length of the
+corresponding string.
+Rather, a node's depth depends on the number of characters
+required to distinguish this node's word from any other.
+For example, if the words ``anteater'' and ``antelope''
+are both stored in the trie, it is not until the fifth letter that
+the two words can be distinguished.
+Thus, these words must be stored at least as deep as level five.
+In general, the limiting factor on the depth of nodes in the alphabet
+trie is the length of the words stored.
+
+Poor balance and clumping can result when certain prefixes are heavily
+used.
+For example, an alphabet trie storing the common words in the English
+language would have many words in the ``th''
+branch of the tree, but none in the ``zq'' branch.
+
+Any multiway branching trie can be replaced with a binary
+trie by replacing the original trie's alphabet with an equivalent
+binary code.
+Alternatively, we can use the techniques of Section~\ref{DynamicLR}
+for converting a general tree to a binary tree without modifying the
+alphabet.
+
+\index{trie!patricia@PATRICIA|(}
+The trie implementations illustrated by Figures~\ref{TrieExamp}
+and~\ref{TrieDict} are potentially quite inefficient as certain key
+sets might lead to a large number of nodes with only a single child.
+A variant on trie implementation is known as
+PATRICIA, which stands for ``Practical Algorithm To Retrieve
+Information Coded In Alphanumeric.''
+In the case of a binary alphabet, a PATRICIA trie (referred to
+hereafter as a PAT trie) is a full binary tree
+that stores data records in the leaf nodes.
+Internal nodes store only the position within the key's bit pattern
+that is used to decide on the next branching point.
+In this way, internal nodes with single children (equivalently, bit
+positions within the key that do not distinguish any of the keys
+within the current subtree) are eliminated.
+A PAT trie corresponding to the values of Figure~\ref{TrieExamp}
+is shown in Figure~\ref{PATtree}.
+
+\begin{figure}
+\pdffig{PATtree}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{A PATRICIA trie}
+{The PAT trie for the collection of values
+2, 7, 24, 32, 37, 40, 42, 120.
+Contrast this with the binary trie of Figure~\ref{TrieExamp}.
+In the PAT trie, all data values are stored in the leaf nodes, while
+internal nodes store the bit position used to determine the branching
+decision, assuming that each key is represented as a 7-bit value
+representing a number in the range~0 to~127.
+Some of the branches in this PAT trie have been labeled to indicate
+the binary representation for all values in that subtree.
+For example, all values in the left subtree of the node
+labeled~0 must have value 0xxxxxx (where x means that bit can be
+either a~0 or a~1).
+All nodes in the right subtree of the node labeled~3 must have value
+0101xxx.
+However, we can skip branching on bit~2 for this subtree because all
+values currently stored have a value of 0 for that bit.}{PATtree}
+\bigskip
+\end{figure}
+
+\begin{example}
+When searching for the value~7 (0000111 in binary) in
+the PAT trie of Figure~\ref{PATtree},
+the root node indicates that bit position~0 (the leftmost bit) is
+checked first.
+Because the 0th bit for value~7 is~0, take the left branch.
+At level~1, branch depending on the value of bit~1, which again
+is~0.
+At level~2, branch depending on the value of bit~2, which again
+is~0.
+At level~3, the index stored in the node is~4.
+This means that bit~4 of the key is checked next.
+(The value of bit~3 is irrelevant, because all values stored in that
+subtree have the same value at bit position 3.)
+Thus, the single branch that extends from the equivalent node in
+Figure~\ref{TrieExamp} is just skipped.
+For key value~7, bit~4 has value~1, so the rightmost branch is taken.
+Because this leads to a leaf node, the search key is compared against
+the key stored in that node.
+If they match, then the desired record has been found.
+\end{example}
+
+Note that during the search process, only a single bit of the search
+key is compared at each internal node.
+This is significant, because the search key could be quite large.
+Search in the PAT trie requires only a single full-key comparison,
+which takes place once a leaf node has been reached.
+
+\begin{example}
+Consider the situation where we need to store a library of DNA
+sequences.
+A DNA sequence is a series of letters, usually many thousands of
+characters long, with the string coming from an alphabet of only four
+letters that stand for the four amino acids making up a DNA strand.
+Similar DNA sequences might have long sections of their string that are
+identical.
+The PAT trie would avoid making multiple full key comparisons when
+searching for a specific sequence.
+\end{example}
+\index{trie!patricia@PATRICIA|)}
+\index{trie|)}
+
+\section{Balanced Trees}
+\label{BalancedTree}
+
+\index{bst@BST|(}
+We have noted several times that the BST has a high risk of
+becoming unbalanced, resulting in excessively expensive search and
+update operations.
+One solution to this problem is to adopt another search
+tree\index{search trees}
+structure such as the \TTtree\index{two-three@\TTtree}
+or the binary trie.
+An alternative is to modify the BST access functions in some way to
+guarantee that the tree performs well.
+This is an appealing concept, and it works well for heaps,
+whose access functions maintain the heap in the shape of a complete
+binary tree.
+Unfortunately, requiring that the BST always be in the shape of a
+complete binary tree requires excessive modification to the tree
+during update, as discussed in Section~\ref{TreeIndex}.
+
+If we are willing to weaken the balance requirements, we can come up
+with alternative update routines that perform well both in terms of
+cost for the update and in balance for the resulting tree structure.
+The AVL tree\index{avl tree@AVL tree} works in this way, using
+insertion and deletion routines
+altered from those of the BST to ensure that, for every node, the
+depths of the left and right subtrees differ by at most one.
+The AVL tree is described in Section~\ref{AVLsec}.
+
+A different approach to improving the performance of the BST is to
+not require that the tree always be balanced, but rather to expend
+some effort toward making the BST more balanced every time it
+is accessed.
+This is a little like the idea of path compression used by the
+UNION/FIND algorithm presented in Section~\ref{ParentPointer}.
+One example of such a compromise is called the \defit{splay tree}.
+The splay tree\index{splay tree} is described in Section~\ref{Splaysec}.
+
+\subsection{The AVL Tree}
+\label{AVLsec}
+
+\index{avl tree@AVL tree|(}
+The AVL tree (named for its inventors Adelson-Velskii and Landis)
+should be viewed as a BST with the following additional property:
+For every node, the heights of its left and right subtrees differ by
+at most 1.
+As long as the tree maintains this property, if the tree contains
+\(n\) nodes, then it has a depth of at most \Ologn.
+As a result, search for any node will cost \Ologn,
+and if the updates can be done in time proportional to the depth of
+the node inserted or deleted, then updates will also cost \Ologn, even 
+in the worst case.
+
+The key to making the AVL tree work is to alter the insert and delete
+routines so as to maintain the balance property.
+Of course, to be practical, we must be able to implement the revised
+update routines in \Thetalogn\ time.
+
+\begin{figure}
+\pdffig{AVLins}
+\vspace{-\bigskipamount}
+\capt{4.5in}{An insertion that violates the AVL tree balance property}
+{Example of an insert operation that violates the AVL tree balance
+property.
+Prior to the insert operation, all nodes of the tree are balanced
+(i.e., the depths of the left and right subtrees for every node differ
+by at most one).
+After inserting the node with value~5, the nodes with values~7 and~24
+are no longer balanced.}{AVLinsert}
+\bigskip
+\end{figure}
+
+Consider what happens when we insert a node with key value~5,
+as shown in Figure~\ref{AVLinsert}.
+The tree on the left meets the AVL tree balance requirements.
+After the insertion, two nodes no longer meet the requirements.
+Because the original tree met the balance requirement, nodes in the
+new tree can only be unbalanced by a difference of at most 2 in the
+subtrees.
+For the bottommost unbalanced node, call it \svar{S}, there are 4 cases:
+
+\begin{enumerate}
+\item The extra node is in the left child of the left child of \svar{S}.
+\item The extra node is in the right child of the left child of \svar{S}.
+\item The extra node is in the left child of the right child of \svar{S}.
+\item The extra node is in the right child of the right child of \svar{S}.
+\end{enumerate}
+
+\noindent Cases 1 and 4 are symmetrical, as are cases 2 and 3.
+Note also that the unbalanced nodes must be on the path from
+the root to the newly inserted node.
+
+Our problem now is how to balance the tree in \Ologn\ time.
+It turns out that we can do this using a series of local operations
+known as \defit{rotations}.
+Cases 1 and 4 can be fixed using a \defit{single rotation}, as shown in
+Figure~\ref{AVLsingle}.
+Cases 2 and 3 can be fixed using a \defit{double rotation}, as shown
+in Figure~\ref{AVLdouble}.
+
+\begin{figure}
+\pdffig{AVLSingRot}
+\vspace{-\smallskipamount}
+\capt{4.5in}{AVL tree single rotation}
+{A single rotation in an AVL tree.
+This operation occurs when the excess node (in subtree~\svar{A}) is in
+the left child of the left child of the unbalanced node
+labeled~\svar{S}.
+By rearranging the nodes as shown, we preserve the BST property, as
+well as re-balance the tree to preserve the AVL tree balance
+property.
+The case where the excess node is in the right child of the
+right child of the unbalanced node is handled in the same
+way.}{AVLsingle}
+\medskip
+\end{figure}
+
+\begin{figure}
+\pdffig{AVLDblRot}
+\vspace{-\smallskipamount}
+\capt{4.5in}{AVL tree single rotation}
+{A double rotation in an AVL tree.
+This operation occurs when the excess node (in subtree~\svar{B}) is in
+the right child of the left child of the unbalanced node
+labeled~\svar{S}.
+By rearranging the nodes as shown, we preserve the BST property, as
+well as re-balance the tree to preserve the AVL tree balance
+property.
+The case where the excess node is in the left child of the
+right child of \svar{S} is handled in the same way.}{AVLdouble}
+\bigskip
+\end{figure}
+
+The AVL tree insert algorithm begins with a normal BST insert.
+Then as the recursion unwinds up the tree, we perform the appropriate
+rotation on any node that is found to be unbalanced.
+Deletion is similar; however, consideration for unbalanced nodes must
+begin at the level of the \Cref{deletemin} operation.
+
+\begin{example}
+In Figure~\ref{AVLinsert} (b), the bottom-most unbalanced node has
+val\-ue~7.
+The excess node (with value 5) is in the right subtree of the left
+child of~7, so we have an example of Case~2.
+This requires a double rotation to fix.
+After the rotation, 5 becomes the left child of 24, 2 becomes the left
+child of 5, and 7 becomes the right child of 5.
+\end{example}
+\index{avl tree@AVL tree|)}
+
+\subsection{The Splay Tree}
+\label{Splaysec}
+
+\index{splay tree|(}
+Like the AVL\index{avl tree@AVL tree} tree, the splay tree is not
+actually a distinct data structure, but rather reimplements the BST
+insert, delete, and search methods to improve the performance of a
+BST.
+The goal of these revised methods is to provide guarantees on the time
+required by a series of operations, thereby avoiding the worst-case
+linear time behavior of standard BST operations.
+No single operation in the splay tree is guaranteed to be efficient.
+Instead, the splay tree access rules guarantee that a series of
+$m$~operations will take O($m \log n$) time for a tree of $n$~nodes
+whenever $m \geq n$.
+Thus, a single insert or search operation could take \On\ time.
+However, $m$~such operations are guaranteed to require a total
+of $O(m \log n)$ time, for an average cost of
+\Ologn\ per access operation.
+This is a desirable performance guarantee for any search-tree
+structure.\index{search trees}
+
+Unlike the AVL\index{avl tree@AVL tree} tree, the splay
+tree is not guaranteed to be height balanced.
+What is guaranteed is that the total cost of the entire series of
+accesses will be cheap.
+Ultimately, it is the cost of the series of operations that matters,
+not whether the tree is balanced.
+Maintaining balance is really done only for the sake of reaching this
+time efficiency goal.
+
+The splay tree access functions operate in a manner reminiscent of
+the move-to-front rule for self-organizing lists
+from\index{list!self-organizing}
+Section~\ref{SelfOrg}, and of the path compression technique for
+managing
+parent-pointer\index{general tree!parent pointer implementation}
+trees from Section~\ref{ParentPointer}.
+These access functions tend to make the tree more balanced, but an
+individual access will not necessarily result in a more balanced tree.
+
+Whenever a node~\svar{S} is accessed (e.g., when \svar{S} is
+inserted, deleted, or is the goal of a search), the splay tree
+performs a process called \defit{splaying}.
+Splaying moves \svar{S} to the root of the BST.
+When \svar{S} is being deleted, splaying
+moves the parent of \svar{S} to the root.
+As in the AVL\index{avl tree@AVL tree} tree, a splay of node~\svar{S}
+consists of a series of
+\defit{rotations}.
+A rotation moves \svar{S} higher in the tree
+by adjusting its position with respect to its parent and grandparent.
+A side effect of the rotations is a tendency to balance the tree.
+There are three types of rotation.
+
+A \defit{single rotation} is performed only if \svar{S}
+is a child of the root node.
+The single rotation is illustrated by Figure~\ref{SingProm}.
+It basically switches \svar{S} with its parent in a way that
+retains the BST property.
+While Figure~\ref{SingProm} is slightly different from
+Figure~\ref{AVLsingle}, in fact the splay tree single rotation is
+identical to the AVL\index{avl tree@AVL tree} tree single rotation.
+
+\begin{figure}
+\pdffig{SingRot}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{Splay tree single rotation}
+{Splay tree single rotation.
+This rotation takes place only when the node being splayed is a
+child of the root.
+Here, node \svar{S} is promoted to the root, rotating with
+node~\svar{P}.
+Because the value of \svar{S} is less than the value of~\svar{P},
+\svar{P}~must become \svar{S}'s right child.
+The positions of subtrees~\svar{A}, \svar{B},~and~\svar{C} are altered
+as appropriate to maintain the BST property, but the contents of these
+subtrees remains unchanged.
+(a)~The original tree with \svar{P} as the parent.
+(b)~The tree after a rotation takes place.
+Performing a single rotation a second time will return the tree to its
+original shape.
+Equivalently, if (b) is the initial configuration of the tree
+(i.e., \svar{S} is at the root and \svar{P} is its right child),
+then (a) shows the result of a single rotation to splay \svar{P} to
+the root.}{SingProm}
+\bigskip
+\end{figure}
+
+Unlike the AVL tree, the splay tree requires two types of
+double rotation.
+Double rotations involve \svar{S}, its parent (call it~\svar{P}),
+and \svar{S}'s grandparent (call it~\svar{G}).
+The effect of a double rotation is to move \svar{S} up two levels in
+the tree.
+
+The first double rotation is called a \defit{zigzag rotation}.
+It takes place when either of the following two conditions are met:
+
+\begin{enumerate}
+\item
+\svar{S} is the left child of \svar{P}, and \svar{P} is the right
+child of~\svar{G}.
+
+\item
+\svar{S} is the right child of~\svar{P}, and \svar{P} is the left
+child of~\svar{G}.
+\end{enumerate}
+
+\noindent In other words, a zigzag rotation is used when \svar{G},
+\svar{P}, and \svar{S} form a zigzag.
+The zigzag rotation is illustrated by Figure~\ref{Zigzag}.
+
+\begin{figure}
+\pdffig{ZigZag}
+\vspace{-\medskipamount}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Splay tree zigzag rotation}
+{Splay tree zigzag rotation.
+(a)~The original tree with \svar{S}, \svar{P}, and~\svar{G} in
+zigzag formation.
+(b)~The tree after the rotation takes place.
+The positions of subtrees \svar{A}, \svar{B}, \svar{C}, and~\svar{D}
+are altered as appropriate to maintain the BST property.}{Zigzag}
+\bigskip
+\end{figure}
+
+The other double rotation is known as a \defit{zigzig} rotation.
+A zigzig rotation takes place when either of the following two
+conditions are met:
+
+\begin{enumerate}
+\item
+\svar{S} is the left child of \svar{P}, which is in turn the left
+child of \svar{G}.
+
+\item
+\svar{S} is the right child of \svar{P}, which is in turn the right
+child of~\svar{G}.
+\end{enumerate}
+
+\noindent Thus, a zigzig rotation takes place in those
+situations where a zigzag rotation is not appropriate.
+The zigzig rotation is illustrated by Figure~\ref{Zigzig}.
+While Figure~\ref{Zigzig} appears somewhat different from
+Figure~\ref{AVLdouble}, in fact the zigzig rotation is identical to
+the AVL tree double rotation.
+
+\begin{figure}
+\pdffig{ZigZig}
+\vspace{-\medskipamount}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Splay tree zigzig rotation}
+{Splay tree zigzig rotation.
+(a)~The original tree with \svar{S}, \svar{P}, and~\svar{G} in
+zigzig formation.
+(b)~The tree after the rotation takes place.
+The positions of subtrees \svar{A}, \svar{B}, \svar{C}, and~\svar{D}
+are altered as appropriate to maintain the BST property.}{Zigzig}
+\bigskip
+\end{figure}
+
+Note that zigzag rotations tend to make the tree more balanced,
+because they bring subtrees~\svar{B} and~\svar{C} up one level while
+moving subtree~\svar{D} down one level.
+The result is often a reduction of the tree's height by one.
+Zigzig promotions and single rotations do not typically reduce the
+height of the tree; they merely bring the newly accessed record toward
+the root.
+
+Splaying node \svar{S} involves a series of double rotations until
+\svar{S} reaches either the root or the child of the root.
+Then, if necessary, a single rotation makes \svar{S} the root.
+This process tends to re-balance the tree.
+Regardless of balance, splaying will make frequently accessed nodes
+stay near the top of the tree, resulting in reduced access cost.
+Proof that the splay tree meets the guarantee of
+O($m \log n$) is beyond the scope of this book.
+Such a proof can be found in the references in Section~\ref{TreeRead}.
+
+\begin{example}
+Consider a search for
+value~89 in the splay tree of Figure~\ref{SplayEx}(a).
+The splay tree's search operation is identical to searching in
+a BST.
+However, once the value has been found, it is splayed to the root.
+Three rotations are required in this example.
+The first is a zigzig rotation, whose result is shown in
+Figure~\ref{SplayEx}(b).
+The second is a zigzag rotation, whose result is shown in
+Figure~\ref{SplayEx}(c).
+The final step is a single rotation resulting in the tree of
+Figure~\ref{SplayEx}(d).
+Notice that the splaying process has made the tree shallower.
+\end{example}
+
+\begin{figure}
+\pdffig{SplayEx}
+\vspace{1pt}
+\capt{4.5in}{Example of search in a splay tree}
+{Example of splaying after performing a search in a splay tree.
+After finding the node with key value~89, that node is splayed to the
+root by performing three rotations.
+(a)~The original splay tree.
+(b)~The result of performing a zigzig rotation on the node with
+key value~89 in the tree of (a).
+(c)~The result of performing a zigzag rotation on the node with
+key value~89 in the tree of (b).
+(d)~The result of performing a single rotation on the node with
+key value~89 in the tree of (c).
+If the search had been for 91, the search would have been unsuccessful
+with the node storing key value~89 being that last one visited.
+In that case, the same splay operations would take place.}{SplayEx}
+\end{figure}
+\index{splay tree|)}
+\index{bst@BST|)}
+
+\section{Spatial Data Structures}
+\label{Spatial}
+
+All\index{spatial data structure|(}
+of the search trees\index{search trees} discussed so far ---
+BSTs, AVL trees, splay trees, \TTtrees, \Btrees, and tries ---
+are designed for searching on a one-dimensional key.
+A typical example is an integer key, whose one-dimensional range
+can be visualized as a number line.
+These various tree structures can be viewed as dividing this
+one-dimensional number line into pieces.
+
+Some databases require support for multiple keys.
+In other words, records can be searched for using any one of several
+key fields, such as name or ID number.
+Typically, each such key has its own one-dimensional index,
+and any given search query searches one of these independent
+indices as appropriate.
+
+A~multidimensional\index{search!multi-dimensional}
+search key presents a rather different concept.
+Imagine that we have a database of city records, where
+each city has a name and an \XYcoord.
+A~BST or splay tree provides good performance for searches on city
+name, which is a one-dimensional key.
+Separate BSTs could be used to index the $x$-~and $y$-coordinates.
+This would allow us to insert and delete cities, and locate them by
+name or by one coordinate.
+However, search on one of the two coordinates is not a natural way to
+view search in a two-dimensional space.
+Another option is to combine the \XYcoords\ into a single
+key, say by concatenating the two coordinates, and
+index cities by the resulting key in a BST.
+That would allow search by coordinate, but would not allow for
+efficient two-dimensional \defit{range queries} such as searching for
+all cities within a given distance of a specified point.
+The problem is that the BST only works well for one-dimensional keys,
+while a coordinate is a two-dimensional key where neither dimension
+is more important than the other.
+
+Multidimensional range queries are the defining feature
+of a \defit{spatial} \defit{application}. %% HACK
+Because a coordinate gives a position in space, it is called
+a \defit{spatial attribute}.
+To implement spatial applications efficiently requires the use of
+\defit{spatial data structures}.
+Spatial data structures store data objects organized by position and
+are an important class of data structures used in geographic
+information systems, computer graphics, robotics, and many other
+fields.\index{computer graphics}
+
+This section presents two spatial data structures for storing
+point data in two or more dimensions.
+They are the \defit{\KDtree}\index{k-d tree} and the
+\defit{\PRquad}.\index{pr quadtree@\PRquad}
+The \KDtree\ is a natural extension of the BST to
+multiple dimensions.\index{bst@BST}
+It is a binary tree whose splitting decisions alternate among the
+key dimensions.
+Like the BST, the \KDtree\ uses object space decomposition.
+The \PRquad\ uses key space decomposition and so is a form of trie.
+It is a binary tree only for one-dimensional keys (in which case it
+is a trie with a binary alphabet).
+For $d$~dimensions it has $2^d$ branches.
+Thus, in two dimensions, the \PRquad\ has four branches (hence the
+name ``quadtree''), splitting space into four equal-sized
+quadrants at each branch.
+Section~\ref{OtherSpat} briefly mentions two other variations on
+these data structures, the \defit{bintree} and the
+\defit{point quadtree}.
+These four structures cover all four combinations of object versus key
+space decomposition on the one hand, and multi-level binary versus
+\(2^d\)-way branching on the other.
+Section~\ref{OtherSpatial} briefly discusses spatial data structures
+for storing other types of spatial data.
+
+\subsection{The K-D Tree}
+
+\index{k-d tree|(}
+The \KDtree\ is a modification to the BST that allows for efficient
+processing of multidimensional keys.\index{bst@BST}
+The \KDtree\ differs from the BST in that each level of the \KDtree\
+makes branching decisions based on a particular search key associated
+with that level, called the \defit{discriminator}.
+In principle, the \KDtree\ could be used to unify key searching across
+any arbitrary set of keys such as name and zipcode.
+But in practice, it is nearly always used to support search on
+multidimensional coordinates, such as locations in 2D or 3D space.
+We define the discriminator at level~$i$ to be $i \bmod k$ for
+$k$~dimensions.
+For example, assume that we store data organized by \XYcoords.
+In this case, $k$~is~2 (there are two coordinates), with the
+$x$-coordinate field arbitrarily designated key~0, and the
+$y$-coordinate field designated key~1.
+At~each level, the discriminator alternates between $x$ and~$y$.
+Thus, a node~\svar{N} at level~0 (the root) would have in its left
+subtree only nodes whose $x$~values are less than~$\svar{N}_x$
+(because $x$ is search key~0, and $0 \bmod 2 = 0$).
+The right subtree would contain nodes whose $x$~values are greater
+than~$\svar{N}_x$.
+A node~\svar{M} at level~1 would have in its left subtree only nodes
+whose $y$~values are less than $\svar{M}_y$.
+There is no restriction on the relative values of $\svar{M}_x$ and the
+$x$~values of \svar{M}'s descendants, because branching decisions made
+at \svar{M} are based solely on the $y$~coordinate.
+Figure~\ref{kdExamp} shows an example of how a collection of
+two-dimensional points would be stored in a \KDtree.
+
+\begin{figure}
+\pdffig{KDtree}
+\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+\capt{4.5in}{Example of a \KDtree}
+{Example of a \KDtree.
+(a)~The \KDtree\ decomposition for a $128 \times 128$-unit region
+containing seven data points.
+(b)~The \KDtree\ for the region of~(a).}{kdExamp}
+\smallskip
+\end{figure}
+
+In Figure~\ref{kdExamp} the region containing the points
+is (arbitrarily) restricted to a $128 \times 128$ square, and
+each internal node splits the search space.
+Each split is shown by a line, vertical for nodes with
+$x$~discriminators and horizontal for nodes with $y$~discriminators.
+The root node splits the space into two parts;
+its children further subdivide the space into smaller parts.
+The children's split lines do not cross the root's split line.
+Thus, each node in the \KDtree\ helps to decompose the space into
+rectangles that show the extent of where nodes can fall in the
+various subtrees.
+
+Searching a \KDtree\ for the record with a specified \XYcoord\
+is like searching a BST, except that each level of the
+\KDtree\ is associated with a particular discriminator.
+
+\begin{example}
+Consider searching the \KDtree\ for a
+record located at $\svar{P} = (69,~50)$.
+First compare~\svar{P} with the point stored at
+the root (record~\svar{A} in Figure~\ref{kdExamp}).
+If~\svar{P} matches the location
+of~\svar{A}, then the search is successful.
+In this example the positions do not match (\svar{A}'s~location
+(40,~45) is not the same as (69,~50)), so the search must continue.
+The $x$~value of \svar{A} is compared with that of \svar{P} to
+determine in which direction to branch.
+Because $\svar{A}_x$'s value of 40 is less than \svar{P}'s $x$~value
+of~69, we branch to the right subtree (all cities with $x$~value
+greater than or equal to 40 are in the right subtree).
+$\svar{A}_y$ does not affect the decision on which way to
+branch at this level.
+At the second level, \svar{P}~does not match record~\svar{C}'s position,
+so another branch must be taken.
+However, at this level we branch based on the relative $y$ values of
+point~\svar{P} and record~\svar{C} (because $1 \bmod 2 = 1$, which
+corresponds to the $y$-coordinate).
+Because $\svar{C}_y$'s value of 10 is less than $\svar{P}_y$'s value
+of~50, we branch to the right.
+At this point, \svar{P}~is compared against the position of~\svar{D}.
+A match is made and the search is successful.
+\end{example}
+
+If the search process reaches a \NULL\ pointer, then
+that point is not contained in the tree.
+Here is a \KDtree\ search implementation,
+equivalent to the \Cref{findhelp} function of the BST class.
+\Cref{KD} class private member \Cref{D} stores the key's
+dimension.
+
+\xproghere{KDfind.book}
+
+Inserting a new node into the \KDtree\ is similar to
+BST insertion.
+The \KDtree\ search procedure is followed until a \NULL\ pointer is
+found, indicating the proper place to insert the new node.
+
+\begin{example}
+Inserting a record at location (10,~50) in the
+\KDtree\ of Figure~\ref{kdExamp} first requires a search to the node
+containing record~\svar{B}.
+At this point, the new record is inserted into \svar{B}'s left
+subtree.
+\end{example}
+
+Deleting a node from a \KDtree\ is similar to deleting from a BST,
+but slightly harder.
+As with deleting from a BST, the first step is to find the node
+(call it~\svar{N}) to be deleted.
+It is then necessary to find a descendant of \svar{N} which can be
+used to replace \svar{N} in the tree.
+If~\svar{N} has no children, then \svar{N} is replaced with a
+\NULL\ pointer.
+Note that if \svar{N} has one child that in turn has children, we
+cannot simply assign \svar{N}'s parent to point to \svar{N}'s child as
+would be done in the BST.
+To do so would change the level of all nodes in the subtree, and thus
+the discriminator used for a search would also change.
+The result is that the subtree would no longer be a \KDtree\ because a
+node's children might now violate the BST property for that
+discriminator.
+
+Similar to BST deletion, the record stored in \svar{N}~should
+be replaced either by the record in \svar{N}'s right subtree with the
+least value of \svar{N}'s discriminator, or by the record in
+\svar{N}'s left subtree with the greatest value for this discriminator.
+Assume that \svar{N} was at an odd level and
+therefore $y$ is the discriminator.
+\svar{N}~could then be replaced by the record in its right subtree
+with the least $y$ value (call it $\svar{Y}_{\rm min}$).
+The problem is that $\svar{Y}_{\rm min}$ is not necessarily the
+leftmost node, as it would be in the BST.
+A modified search procedure to find the least $y$~value in the left
+subtree must be used to find it instead.
+The implementation for \Cref{findmin} is shown in Figure~\ref{kdfindmin}.
+A recursive call to the delete routine will then remove
+$\svar{Y}_{\rm min}$ from the tree.
+Finally, $\svar{Y}_{\rm min}$'s record is substituted for the
+record in node~\svar{N}.
+
+\begin{figure}
+\xprogfig{KDfindmin.book}
+\vspace{-\medskipamount}
+\capt{4.5in}{\KDtree\ \Cref{findmin} method}
+{The \KDtree\ \Cref{findmin} method.
+On levels using the minimum value's discriminator, branching is to the
+left.
+On other levels, both children's subtrees must be visited.
+Helper function \Cref{min} takes two nodes and a discriminator as
+input, and returns the node with the smaller value in that
+discriminator.}{kdfindmin}
+
+\bigskip
+\end{figure}
+
+Note that we can replace the node to be deleted with the least-valued
+node from the right subtree only if the right subtree exists.
+If it does not, then a suitable replacement must be found in the left
+subtree.
+Unfortunately, it is not satisfactory to replace \svar{N}'s~record
+with the record having the greatest value for the discriminator in the
+left subtree, because this new value might be duplicated.
+If so, then we would have equal values for the discriminator in
+\svar{N}'s left subtree, which violates the ordering rules for the
+\KDtree.
+Fortunately, there is a simple solution to the problem.
+We first move the left subtree of node~\svar{N} to become the
+right subtree (i.e., we simply swap the values of \svar{N}'s left and
+right child pointers).
+At this point, we proceed with the normal deletion process, replacing
+the record of \svar{N} to be deleted with the record containing
+the \emph{least} value of the discriminator from what is now
+\svar{N}'s right subtree.
+
+Assume that we want to print out a list of all records that are within
+a certain distance~$d$ of a given point~\svar{P}.
+We will use Euclidean distance, that is, point~\svar{P} is defined to
+be within distance~$d$ of point~\svar{N} if\footnote{A more efficient
+computation is \((\svar{P}_x - \svar{N}_x)^2 +
+(\svar{P}_y - \svar{N}_y)^2 \leq d^2\).
+This avoids performing a square root function.}
+\[\sqrt{(\svar{P}_x - \svar{N}_x)^2 + (\svar{P}_y - \svar{N}_y)^2}
+\leq d.\]
+
+If the search process reaches a node whose key value for the
+discriminator is more than $d$~above the corresponding value in the
+search key, then it is not possible that any record in the right
+subtree can be within distance~$d$ of the search key because all key
+values in that dimension are always too great.
+Similarly, if the current node's key value in the discriminator
+is $d$ less than that for the search key value, then no record in the
+left subtree can be within the radius.
+In~such cases, the subtree in question need not be searched,
+potentially saving much time.
+In the average case, the number of nodes that must be visited during a
+range query is linear on the number of data records that fall within
+the query circle.
+
+\begin{figure}
+\pdffig{InCirc}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Euclidean distance checking}
+{Function \Cref{InCircle} must check the Euclidean distance between a
+record and the query point.
+It is possible for a record~\svar{A} to have $x$-~and $y$-coordinates
+each within the query distance of the query point~\svar{C}, yet have
+\svar{A} itself lie outside the query circle.}{InCirc}
+\bigskip
+\end{figure}
+
+\begin{example}
+We will now find all cities in the \KDtree\ of Figure~\ref{kdSearch}
+within 25~units of the point (25,~65).\index{city database}
+The search begins with the root node, which contains record~\svar{A}.
+Because (40,~45) is exactly 25~units from the search point, it will be
+reported.
+The search procedure then determines which branches of the tree to
+take.
+The search circle extends to both the left and the right of \svar{A}'s
+(vertical) dividing line, so both branches of the tree must be searched.
+The left subtree is processed first.
+Here, record~\svar{B} is checked and found to fall within the search
+circle.
+Because the node storing \svar{B} has no children, processing of the
+left subtree is complete.
+Processing of \svar{A}'s right subtree now begins.
+The coordinates of record~\svar{C} are checked and found not to fall
+within the circle.
+Thus, it should not be reported.
+However, it is possible that cities within \svar{C}'s subtrees could
+fall within the search circle even if \svar{C} does not.
+As \svar{C} is at level~1, the discriminator at this level is the
+$y$-coordinate.
+Because  $65-25 > 10$, no record in \svar{C}'s left subtree (i.e.,
+records above \svar{C}) could possibly be in the search circle.
+Thus, \svar{C}'s left subtree (if it had one) need not be searched.
+However, cities in \svar{C}'s right subtree could fall within the
+circle.
+Thus, search proceeds to the node containing record~\svar{D}.
+Again, \svar{D}~is outside the search circle.
+Because $25+25 < 69$, no record in \svar{D}'s right subtree could be
+within the search circle.
+Thus, only \svar{D}'s left subtree need be searched.
+This leads to comparing record~\svar{E}'s coordinates against the search
+circle.
+Record~\svar{E} falls outside the search circle, and processing is
+complete.
+So we see that we only search subtrees whose rectangles fall within
+the search circle.
+\end{example}
+
+\begin{figure}
+\pdffig{KDtree2}
+\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+\capt{4.5in}{Example of searching in a \KDtree}
+{Searching in the \KDtree of Figure~\ref{kdExamp}.
+(a)~The \KDtree\ decomposition for a $128 \times 128$-unit region
+containing seven data points.
+(b)~The \KDtree\ for the region of (a).}{kdSearch}
+\smallskip
+\end{figure}
+
+Figure~\ref{kdregion} shows an implementation for the region search
+method.
+When a node is visited, function \Cref{InCircle} is used to check the
+Euclidean distance between the node's record and the query point.
+It is not enough to simply check that the differences between the
+$x$-~and $y$-coordinates are each less than the query distances because the
+the record could still be outside the search circle, as illustrated by
+Figure~\ref{InCirc}.
+
+\begin{figure}
+\xprogfig{KDrshelp.book}
+\vspace{-\medskipamount}
+\capt{4.5in}{\KDtree\ region search method}
+{The \KDtree\ region search method.}{kdregion}
+\end{figure}
+\index{k-d tree|)}
+
+\subsection{The \PRquad}
+
+\index{pr quadtree@\PRquad|(}
+In the Point-Region Quadtree (hereafter referred to as the \PRquad)
+each node either has exactly four children or is a leaf.
+That is, the \PRquad\ is a full four-way branching
+(4-ary) tree in shape.\index{kary@\Kary\ tree}
+The \PRquad\ represents a collection of data points in two dimensions
+by decomposing the region containing the data points
+into four equal quadrants, subquadrants, and so on, until no leaf node
+contains more than a single point.
+In other words, if a region contains zero or one data points, then it
+is represented by a \PRquad\ consisting of a single leaf node.
+If the region contains more than a single data point, then the region
+is split into four equal quadrants.
+The corresponding \PRquad\ then contains an internal node and four
+subtrees, each subtree representing a single quadrant of the region,
+which might in turn be split into subquadrants.
+Each internal node of a \PRquad\ represents a single split
+of the two-dimensional region.
+The four quadrants of the region (or equivalently, the corresponding
+subtrees) are designated (in order) NW, NE, SW, and~SE.
+Each quadrant containing more than a single point would
+in turn be recursively divided into subquadrants until each leaf of
+the corresponding \PRquad\ contains at most one point.
+
+For example, consider the region of Figure~\ref{PRExamp}(a)
+and the corresponding \PRquad\ in Figure~\ref{PRExamp}(b).
+The decomposition process demands a fixed key range.
+In this example, the region is assumed to be of size
+$128 \times 128$.
+Note that the internal nodes of the \PRquad\ are used solely to
+indicate decomposition of the region; internal nodes do not store data
+records.
+Because the decomposition lines are predetermined (i.e, key-space
+decomposition is used), the \PRquad\ is a trie.
+
+\begin{figure}
+\pdffig{PRexamp}
+\vspace{-\medskipamount}
+\vspace{-\smallskipamount}
+\capt{4.5in}{\PRquad\ example}
+{Example of a \PRquad.
+(a)~A map of data points.
+We define the region to be square with origin at the upper-left-hand
+corner and sides of length~128.
+(b)~The \PRquad\ for the points in~(a).
+(a)~also shows the block decomposition imposed by the \PRquad\ for
+this region.}{PRExamp}
+\bigskip
+\end{figure}
+
+Search for a record matching point~\svar{Q} in the \PRquad\ is
+straightforward.
+Beginning at the root, we continuously branch to the quadrant that
+contains \svar{Q} until our search reaches a leaf node.
+If~the root is a leaf, then just check to see if the node's data
+record matches point~\svar{Q}.
+If~the root is an internal node, proceed to the child that contains
+the search coordinate.
+For example, the~NW quadrant of Figure~\ref{PRExamp} contains points
+whose $x$ and $y$~values each fall in the range 0 to~63.
+The NE~quadrant contains points whose $x$~value falls in the range 64
+to~127, and whose $y$~value falls in the range 0 to~63.
+If the root's child is a leaf node, then that child is checked to see
+if \svar{Q} has been found.
+If the child is another internal node, the search process continues
+through the tree until a leaf node is found.
+If this leaf node stores a record whose position matches \svar{Q} then
+the query is successful; otherwise \svar{Q} is not in the tree.
+
+Inserting record~\svar{P} into the \PRquad\ is performed by first
+locating the leaf node that contains the location of~\svar{P}.
+If this leaf node is empty, then \svar{P} is stored at this
+leaf.
+If the leaf already contains \svar{P} (or a record with \svar{P}'s
+coordinates), then a duplicate record should be reported.
+If the leaf node already contains another record, then the node
+must be repeatedly decomposed until the existing record and \svar{P}
+fall into different leaf nodes.
+Figure~\ref{PRinsert} shows an example of such an insertion.
+
+\begin{figure}
+\pdffig{PRinsert}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{\PRquad\ insertion example}
+{\PRquad\ insertion example.
+(a)~The initial \PRquad\ containing two data points.
+(b)~The result of inserting point~\svar{C}.
+The block containing~\svar{A} must be decomposed into four sub-blocks.
+Points~\svar{A} and \svar{C} would still be in the same block if only
+one subdivision takes place, so a second decomposition is required to
+separate them.}{PRinsert}
+\bigskip
+\end{figure}
+
+Deleting a record~\svar{P} is performed by first locating the
+node~\svar{N} of the \PRquad\ that contains~\svar{P}. 
+Node~\svar{N} is then changed to be empty.
+The next step is to look at~\svar{N}'s three siblings.
+\svar{N}~and its siblings must be merged together to form a single
+node~$\svar{N}\,'$ if only one point is contained among them.
+This merging process continues until some level is reached at which
+at least two points are contained in the subtrees represented by
+node~$\svar{N}\,'$ and its siblings.
+For example, if point~\svar{C} is to be deleted from the \PRquad\
+representing Figure~\ref{PRinsert}(b), the resulting node must be
+merged with its siblings, and that larger node again merged with its
+siblings to restore the \PRquad\ to the decomposition of
+Figure~\ref{PRinsert}(a).
+
+Region search is easily performed with the \PRquad.
+To locate all points within radius~$r$ of query
+point~\svar{Q}, begin at the root.
+If the root is an empty leaf node, then no data points are found.
+If the root is a leaf containing a data record, then the location of
+the data point is examined to determine if it falls within the 
+circle.
+If the root is an internal node, then the process is performed
+recursively, but \emph{only} on those subtrees containing some part of
+the search circle.\index{pr quadtree@\PRquad|)}
+
+\index{object-oriented programming!class hierarchy|(}
+Let us now consider how the structure of the \PRquad\ affects the
+design of its node representation.
+The \PRquad\ is actually a trie (as defined in Section~\ref{Trie}).
+Decomposition takes place at the mid-points for internal nodes,
+regardless of where the data points actually fall.
+The placement of the data points does determine \emph{whether} a
+decomposition for a node takes place, but not \emph{where} the
+decomposition for the node takes place.
+Internal nodes of the \PRquad\ are quite different from leaf nodes, in
+that internal nodes have children (leaf nodes do not) and leaf nodes
+have data fields (internal nodes do not).
+Thus, it is likely to be beneficial to represent internal nodes
+differently from leaf nodes.
+Finally, there is the fact that approximately half of the leaf nodes
+will contain no data field.
+
+Another issue to consider is: How does a routine traversing the
+\PRquad\ get the coordinates for the square represented by the current 
+\PRquad\ node?
+One possibility is to store with each node its spatial description
+(such as upper-left corner and width).
+However, this will take a lot of space --- perhaps as much as the
+space needed for the data records, depending on what information is
+being stored.
+
+Another possibility is to pass in the coordinates when the recursive
+call is made.
+For example, consider the search process.
+Initially, the search visits the root node of the tree, which has
+origin at (0, 0), and whose width is the full size of the space being 
+covered.
+When the appropriate child is visited, it is a simple matter for the
+search routine to determine the origin for the child, and the width of 
+the square is simply half that of the parent.
+Not only does passing in the size and position information for a node
+save considerable space, but avoiding storing such information
+in the nodes enables a good design choice for
+empty leaf nodes, as discussed next.
+
+How should we represent empty leaf nodes?
+On average, half of the leaf nodes in a \PRquad\ are empty
+(i.e., do not store a data point). 
+One implementation option is to use a \NULL\ pointer in internal
+nodes to represent empty nodes.
+This will solve the problem of excessive space requirements.
+There is an unfortunate side effect that using a \NULL\ pointer requires
+the \PRquad\ processing methods to understand this convention.
+In other words, you are breaking encapsulation on the node
+representation because the tree now must know things about how the
+nodes are implemented.
+This is not too horrible for this particular application, because the
+node class can be considered private to the tree class, in which case
+the node implementation is completely invisible to the outside world.
+However, it is undesirable if there is another reasonable alternative.
+
+\index{design pattern!flyweight|(}
+Fortunately, there is a good alternative.
+It is called the Flyweight design pattern.
+In the \PRquad, a flyweight is a single empty leaf node that
+is reused in all places where an empty leaf node is needed.
+You simply have \emph{all} of the internal nodes with empty leaf
+children point to the same node object.
+This node object is created once at the beginning of the program,
+and is never removed.
+The node class recognizes from the pointer value that the flyweight is
+being accessed, and acts accordingly.
+
+Note that when using the Flyweight design pattern, you \emph{cannot}
+store coordinates for the node in the node.
+This is an example of the concept of intrinsic versus extrinsic state.
+Intrinsic state for an object is state information stored in the object.
+If you stored the coordinates for a node in the node object, those
+coordinates would be intrinsic state.
+Extrinsic state is state information about an object stored elsewhere
+in the environment, such as in global variables or passed to the
+method.
+If your recursive calls that process the tree pass in the coordinates
+for the current node, then the coordinates will be extrinsic state.
+A flyweight can have in its intrinsic state \emph{only}
+information that is accurate for \emph{all} instances of the flyweight.
+Clearly coordinates do not qualify, because each empty
+leaf node has its own location.
+So, if you want to use a flyweight, you must pass in coordinates.
+
+Another design choice is: Who controls the work, the node
+class or the tree class?
+For example, on an insert operation, you could have the tree class
+control the flow down the tree, looking at (querying) the nodes to see
+their type and reacting accordingly.
+This is the approach used by the BST\index{bst@BST} implementation in
+Section~\ref{BST}.
+An alternate approach is to have the node class do the work.
+That is, you have an insert method for the nodes.
+If the node is internal, it passes the city record to the appropriate
+child (recursively).
+If the node is a flyweight, it replaces itself with a new leaf node.
+If the node is a full node, it replaces itself with a subtree.
+This is an example of the Composite design pattern, discussed in
+Section~\ref{PointerBin}.\index{design pattern!composite}
+Use of the composite design would be difficult if \NULL\ pointers are
+used to represent empty leaf nodes.
+It turns out that the \PRquad\ insert and delete methods are easier to
+implement when using the composite design.
+
+\index{design pattern!flyweight|)}
+\index{object-oriented programming!class hierarchy|)}
+
+\subsection{Other Point Data Structures}
+\label{OtherSpat}
+
+The differences between the\index{k-d tree} \KDtree\ and
+the \PRquad\ illustrate many\index{pr quadtree@\PRquad}
+of the design choices encountered when creating spatial data
+structures.
+The \KDtree\ provides an object space decomposition of the
+region, while the \PRquad\ provides a key space decomposition
+(thus, it is a trie).
+The \KDtree\ stores records at all nodes, while the
+\PRquad\ stores records only at the leaf nodes.
+Finally, the two trees have different structures.
+The \KDtree\ is a binary tree (and need not be full),
+while the \PRquad\ is a full tree with
+$2^d$ branches (in the two-dimensional case, $2^2 = 4$).
+Consider the extension of this concept to three dimensions.
+A \KDtree\ for three dimensions would alternate the discriminator
+through the $x$, $y$, and $z$~dimensions.
+The three-dimensional equivalent of the \PRquad\ would be a tree with
+$2^3$ or eight branches.
+Such a tree is called an \defit{octree}.\index{octree}
+
+We can also devise a binary trie based on a key space decomposition in
+each dimension, or a quadtree that uses the two-dimensional equivalent
+to an object space decomposition.
+The \defit{bintree}\index{bintree} is a binary trie that
+uses keyspace decomposition and alternates discriminators at each
+level in a manner similar to the \KDtree.
+The bintree for the points of Figure~\ref{kdExamp} is shown in
+Figure~\ref{Bintree}.
+Alternatively, we can use a four-way decomposition of space centered
+on the data points.
+The tree resulting from such a decomposition is called a
+\defit{point quadtree}.\index{point quadtree}
+The point quadtree for the data points of Figure~\ref{kdExamp} is
+shown in Figure~\ref{PtQuad}.
+
+\begin{figure}
+\pdffig{Bintree}
+\vspace{-\bigskipamount}
+\capt{4.5in}{A bintree for two-dimensional data}
+{An example of the bintree, a binary tree using key space
+decomposition and discriminators rotating among the dimensions.
+Compare this with the \KDtree\ of Figure~\ref{kdExamp} and the
+\PRquad\ of Figure~\ref{PRExamp}.}{Bintree}
+\bigskip
+\end{figure}
+
+\begin{figure}
+\pdffig{PtQuad}
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+\capt{4.5in}{A point quadtree for two-dimensional data}
+{An example of the point quadtree, a 4-ary tree using object space
+decomposition.
+Compare this with the \PRquad\ of Figure~\ref{kdExamp}.}{PtQuad}
+\smallskip
+\end{figure}
+
+\newpage
+
+\subsection{Other Spatial Data Structures}
+\label{OtherSpatial}
+
+This section has barely scratched the surface of the field of spatial
+data structures.
+Dozens of distinct spatial data structures have been
+invented, many with variations and alternate implementations.
+Spatial data structures exist for storing many forms of spatial data
+other than points.
+The most important distinctions between are the tree structure
+(binary or not, regular decompositions or not) and the decomposition
+rule used to decide when the data contained within a region is so
+complex that the region must be subdivided.
+
+One such spatial data structure is the Region
+Quadtree for storing images where the pixel values tend to be
+blocky, such as a map of the countries of the world.
+The region quadtree uses a four-way regular decomposition scheme
+similar to the \PRquad.
+The decomposition rule is simply to divide any node containing pixels
+of more than one color or value.
+
+Spatial data structures can also be used to store line object,
+rectangle object, or objects of arbitrary shape (such as polygons in
+two dimensions or polyhedra in three dimensions).
+A simple, yet effective, data structure for storing rectangles or
+arbitrary polygonal shapes can be derived from the \PRquad.
+Pick a threshold value \svar{c}, and subdivide any region into four
+quadrants if it contains more than \svar{c} objects.
+A special case must be dealt with when more than \svar{c} object
+intersect.
+
+Some of the most interesting developments in spatial data structures
+have to do with adapting them for disk-based applications.
+However, all such disk-based implementations boil down to storing the
+spatial data structure within some variant
+on either \Btrees\ or\index{btree@\Btree}
+hashing.\index{hashing}\index{spatial data structure|)}
+
+\section{Further Reading}
+\label{TreeRead}
+
+PATRICIA tries\index{trie!patricia@PATRICIA} and other trie
+implementations are discussed in
+\ttl{Information Retrieval: Data Structures \& Algorithms},
+Frakes and Baeza-Yates, eds. \cite{InfoRet}.
+
+See Knuth \cite{KnuthV1} for a discussion of the AVL tree.
+For further reading on splay trees,\index{splay tree}
+see ``Self-adjusting Binary Search''
+by Sleator and Tarjan \cite{SplayRef}.
+
+The world of spatial data structures is rich and rapidly
+evolving.\index{spatial data structure}
+For a good introduction, see 
+\ttl{Foundations of Multidimensional and Metric Data Structures}
+by Hanan Samet \cite{SametNew}.
+This is also the best reference for more information on the
+\PRquad.\index{pr quadtree@\PRquad}
+The \KDtree\ was invented by John Louis Bentley.\index{k-d tree}
+For further information on the \KDtree, in addition to \cite{SametNew},
+see \cite{BentleyKD}.
+For information on using a quadtree to store arbitrary polygonal
+objects, see \cite{ShafferHerb}.
+
+For a discussion on the relative space requirements for two-way versus
+multiway branching, see
+``A Generalized Comparison of Quadtree and Bintree Storage
+Requirements'' by Shaffer, Juvvadi, and Heath \cite{BinQuadSpace}.
+
+Closely related to spatial data structures are data structures for
+storing multidimensional data (which might not necessarily be spatial
+in nature).
+A popular data structure for storing such data is the R-tree,
+which was originally proposed by Guttman~\cite{Guttm84}.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Show the binary trie (as illustrated by Figure~\ref{TrieExamp})
+for the following collection of values: 42, 12, 100, 10, 50, 31, 7,
+11, 99.\index{trie}
+
+\item
+Show the PAT trie (as illustrated by Figure~\ref{PATtree})
+for the following collection of values: 42, 12, 100, 10, 50, 31, 7,
+11, 99.\index{trie!patricia@PATRICIA}
+
+\item
+Write the insertion routine for a binary trie as shown in
+Figure~\ref{TrieExamp}.\index{trie}
+
+\item
+Write the deletion routine for a binary trie as shown in
+Figure~\ref{TrieExamp}.\index{trie}
+
+\item
+\begin{enumerate}
+\item Show the result (including appropriate rotations) of inserting
+the value 39 into the AVL tree on the left in Figure~\ref{AVLinsert}.
+\item Show the result (including appropriate rotations) of inserting
+the value 300 into the AVL tree on the left in Figure~\ref{AVLinsert}.
+\item Show the result (including appropriate rotations) of inserting
+the value 50 into the AVL tree on the left in Figure~\ref{AVLinsert}.
+\item Show the result (including appropriate rotations) of inserting
+the value 1 into the AVL tree on the left in Figure~\ref{AVLinsert}.
+\end{enumerate}
+
+\item
+Show the splay tree that results from searching for value~75 in the
+splay tree of Figure~\ref{SplayEx}(d).\index{splay tree}
+
+\item
+Show the splay tree that results from searching for value~18 in the
+splay tree of Figure~\ref{SplayEx}(d).\index{splay tree}
+
+\item
+Some applications do not permit storing two records with
+duplicate key values.
+In such a case, an attempt to insert a duplicate-keyed record into a
+tree structure such as a splay tree should result in a failure on
+insert.
+What is the appropriate action to take in a splay tree implementation
+when the insert routine is called with a duplicate-keyed record?
+
+\item
+Show the result of deleting point A from the \KDtree\ of
+Figure~\ref{kdExamp}.
+
+\item
+\begin{enumerate}
+\item
+Show the result of building a \KDtree\ from the following points
+(inserted in the order given).
+A (20, 20), B (10, 30), C (25, 50), D (35, 25), E (30, 45),
+F (30, 35), G (55, 40), H (45, 35), I (50, 30).
+\item
+Show the result of deleting point A from the tree you built in part (a).
+\end{enumerate}
+
+\item
+\begin{enumerate}
+\item Show the result of deleting F from the \PRquad\ of
+Figure~\ref{PRExamp}.
+\item Show the result of deleting records E and F from the \PRquad\ of
+Figure~\ref{PRExamp}.
+\end{enumerate}
+
+\item
+\begin{enumerate}
+\label{PRExer}
+\item
+Show the result of building a \PRquad\ from the following points
+(inserted in the order given).
+Assume the tree is representing a space of 64 by 64 units.
+A (20, 20), B (10, 30), C (25, 50), D (35, 25), E (30, 45),
+F (30, 35), G (45, 25), H (45, 30), I (50, 30).
+\item
+Show the result of deleting point C from the tree you built in part
+(a).
+\item
+Show the result of deleting point F from the resulting tree in part
+(b).
+\end{enumerate}
+
+\item
+On average, how many leaf nodes of a \PRquad\ will typically be empty?
+Explain why.
+
+\item
+When performing a region search on a \PRquad, we need only search
+those subtrees of an internal node whose corresponding square falls
+within the query circle.
+This is most easily computed by comparing the $x$ and $y$ ranges of
+the query circle against the $x$ and $y$ ranges of the square
+corresponding to the subtree.
+However, as illustrated by Figure~\ref{InCirc}, the $x$ and $y$ ranges
+might overlap without the circle actually intersecting the square.
+Write a function that accurately determines if a circle and a square
+intersect.\index{pr quadtree@\PRquad}
+
+\item
+\label{BinExer}
+\begin{enumerate}
+\item
+Show the result of building a bintree from the following points
+(inserted in the order given).
+Assume the tree is representing a space of 64 by 64 units.
+A (20, 20), B (10, 30), C (25, 50), D (35, 25), E (30, 45),
+F (30, 35), G (45, 25), H (45, 30), I (50, 30).
+\item
+Show the result of deleting point C from the tree you built in part
+(a).
+\item
+Show the result of deleting point F from the resulting tree in part
+(b).
+\end{enumerate}
+
+\item
+Compare the trees constructed for Exercises~\ref{PRExer} and
+\ref{BinExer} in terms of the number of internal nodes, full leaf
+nodes, empty leaf nodes, and total depths of the two trees.
+
+\item
+Show the result of building a point quadtree from the following points
+(inserted in the order given).
+Assume the tree is representing a space of 64 by 64 units.
+A (20, 20), B (10, 30), C (25, 50), D (35, 25), E (30, 45),
+F (31, 35), G (45, 26), H (44, 30), I (50, 30).
+
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+Use the trie data structure to devise a program to sort\index{trie}
+variable-length strings.
+The program's running time should be proportional to the total
+number of letters in all of the strings.
+Note that some strings might be very long while most are short.
+
+\item
+Define the set of \defit{suffix strings} for a string \svar{S} to be
+\svar{S}, \svar{S} without its first character, \svar{S} without its
+first two characters, and so on.\index{suffix tree}\index{trie}
+For example, the complete set of suffix strings for ``HELLO'' would be
+\[\{ \mbox{HELLO}, \mbox{ELLO}, \mbox{LLO}, \mbox{LO}, \mbox{O} \}.\]
+A \defit{suffix tree} is a PAT trie that contains all of the suffix
+strings for a given string, and associates each suffix with the
+complete string.
+The advantage of a suffix tree is that it allows a search for strings
+using ``wildcards.''
+For example, the search key ``TH*'' means to find all strings
+with ``TH'' as the first two characters.
+This can easily be done with a regular trie.
+Searching for ``*TH'' is not efficient in a regular trie, but it is
+efficient in a suffix tree.
+Implement the suffix tree for a dictionary of words or phrases, with
+support for wildcard search.
+
+\item
+Revise the BST class of Section~\ref{BST} to use the AVL tree
+rotations.\index{bst@BST}\index{avl tree@AVL tree}
+Your new implementation should not modify the original BST class
+ADT.\index{abstract data type (ADT)}
+Compare your AVL tree against an implementation of the standard BST
+over a wide variety of input data.\index{bst@BST}\index{splay tree}
+Under what conditions does the splay tree actually save time?
+
+\item
+Revise the BST class of Section~\ref{BST} to use the splay tree
+rotations.\index{bst@BST}\index{splay tree}
+Your new implementation should not modify the original BST class
+ADT.\index{abstract data type (ADT)}
+Compare your splay tree against an implementation of the standard BST
+over a wide variety of input data.\index{bst@BST}\index{splay tree}
+Under what conditions does the splay tree actually save time?
+
+\item
+Implement a city database using the
+\KDtree.\index{city database}\index{k-d tree}
+Each database record contains the name of the city (a string of
+arbitrary length) and the coordinates of the city expressed as integer
+$x$- and $y$-coordinates.
+Your database should allow records to be inserted, deleted by name or
+coordinate, and searched by name or coordinate.
+You should also support region queries, that is, a request to print
+all records within a given distance of a specified point.
+\index{city database}
+
+\item
+Implement a city database using the
+\PRquad.\index{city database}\index{pr quadtree@\PRquad}
+Each database record contains the name of the city (a string of
+arbitrary length) and the coordinates of the city expressed as integer
+$x$- and $y$-coordinates.
+Your database should allow records to be inserted, deleted by name or
+coordinate, and searched by name or coordinate.
+You should also support region queries, that is, a request to print
+all records within a given distance of a specified point.
+\index{city database}
+
+\item
+Implement and test the \PRquad, using the composite design to
+implement the insert, search, and delete operations.
+
+\item
+Implement a city database using the
+bintree.\index{city database}\index{bintree}
+Each database record contains the name of the city (a string of
+arbitrary length) and the coordinates of the city expressed as integer
+$x$- and $y$-coordinates.
+Your database should allow records to be inserted, deleted by name or
+coordinate, and searched by name or coordinate.
+You should also support region queries, that is, a request to print
+all records within a given distance of a specified point.
+\index{city database}
+
+\item
+Implement a city database using the
+point quadtree.\index{city database}\index{point quadtree}
+Each database record contains the name of the city (a string of
+arbitrary length) and the coordinates of the city expressed as integer
+$x$- and $y$-coordinates.
+Your database should allow records to be inserted, deleted by name or
+coordinate, and searched by name or coordinate.
+You should also support region queries, that is, a request to print
+all records within a given distance of a specified point.
+\index{city database}
+
+\item
+Use the \PRquad\ to implement an efficient solution
+to\index{pr quadtree@\PRquad}\index{cluster problem}
+Problem~\ref{GeneralTree}.\ref{ClusterProb}.\index{equivalence!class}
+That is, store the set of points in a \PRquad.
+For each point, the \PRquad\ is used to find those points within
+distance~\svar{D} that should be equivalenced.
+What is the asymptotic complexity of this solution?
+
+\item
+Select any two of the point representations described in this chapter
+(i.e., the \KDtree, the \PRquad, the bintree, and the point quadtree).
+Implement your two choices and compare them over a wide range of data
+sets.
+Describe which is easier to implement, which appears to be more space
+efficient, and which appears to be more time efficient.
+
+\item
+Implement a representation for a collection of (two dimensional)
+rectangles using a quadtree based on regular decomposition.
+Assume that the space being represented is a square whose width and
+height are some power of two.
+Rectangles are assumed to have integer coordinates and integer width
+and height.
+Pick some value \svar{c}, and use as a decomposition rule that a region
+is subdivided into four equal-sized regions whenever it contains more
+that \svar{c} rectangles.
+A special case occurs if all of these rectangles intersect at some
+point within the current region (because decomposing such a node would
+never reach termination).
+In this situation, the node simply stores pointers to more than
+\svar{c} rectangles.
+Try your representation on data sets of rectangles with varying values
+of \svar{c}.
+\end{projects}

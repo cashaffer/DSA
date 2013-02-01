@@ -1,0 +1,2816 @@
+% list.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\part{Fundamental Data Structures}
+\label{Core}
+\mycleardoublepage
+
+\chapter{Lists, Stacks, and Queues}
+\label{LSQ}
+\def\CHHEAD{Chap.\ \thechapter\ Lists, Stacks, and Queues}    % Head title -- even pages
+
+% Insert quote from Polya
+
+\index{list|(}
+If your program needs to store a few things --- numbers,
+payroll records, or job descriptions for example --- the simplest and
+most effective approach might be to put them in a list.
+Only when you have to organize and search through a large number of
+things do more sophisticated data structures usually become necessary.
+(We will study how to organize and search through medium amounts of
+data in Chapters~\ref{BinaryTree}, \ref{InSort}, and \ref{Search},
+and discuss how to deal with large amounts of data in
+Chapters~\ref{FileProc}--\ref{Indexing}.)
+Many applications don't require any form of search,
+and they do not require that any ordering be placed on the objects
+being stored.
+Some applications require processing in a strict chronological order,
+processing objects in the order that they arrived,
+or perhaps processing objects in the reverse of the order that they
+arrived.
+For all these situations, a simple list structure is appropriate.
+
+\index{data structure!physical vs. logical form|(}
+This chapter describes representations for lists in general,
+as well as two important list-like structures called
+the stack\index{stack} and the queue.\index{queue}
+Along with presenting these fundamental data structures, the other
+goals of the chapter are to:
+(1) Give examples of separating a logical representation in the
+form of an ADT\index{abstract data type (ADT)}
+from a physical implementation for a data structure.
+(2) Illustrate the use of asymptotic analysis in the context of
+some simple operations that you might already be familiar with.
+In this way you can begin to see how asymptotic
+analysis\index{algorithm analysis!asymptotic} works,
+without the complications that arise when analyzing more sophisticated
+algorithms and data structures.
+(3) Introduce the concept and use of dictionaries.
+\index{data structure!physical vs. logical form|)}
+
+We begin by defining an ADT for\index{abstract data type (ADT)}
+lists in Section~\ref{Lists}.\index{list!adt@ADT}
+Two implementations for the list ADT --- the array-based
+list\index{list!array-based} and the linked
+list\index{list!linked} --- are covered in
+detail and their relative merits discussed.
+Sections~\ref{Stacks} and~\ref{Queues} cover stacks and queues,
+respectively.
+Sample implementations for each of these data structures are presented.
+Section~\ref{Dictionary} presents the Dictionary ADT for storing and
+retrieving data, which sets a context for implementing search
+structures such as the Binary Search Tree of Section~\ref{BST}.
+
+\newpage
+
+\section{Lists}
+\label{Lists}
+
+We all have an intuitive understanding of what we mean by a ``list.''
+Our first step is to define precisely what is meant so that
+this intuitive understanding can eventually be converted into a
+concrete data structure and its operations.
+The most important concept related to lists is that of
+\defit{position}.
+In other words, we perceive that there is a first element in the list,
+a second element, and so on.
+We should view a list as embodying the mathematical concepts of
+a sequence, as defined in Section~\ref{SetDef}.
+
+We define a \defit{list} to be a finite, ordered
+sequence\index{sequence} of data items known as
+\defit{elements}.\index{list!element}
+``Ordered'' in this definition means that each element has a
+position in the list.
+(We will not use ``ordered'' in this context to mean that the list
+elements are sorted by value.)
+Each list element has a data type.
+In the simple list implementations discussed in this chapter, all
+elements of the list have the same data type, although there is
+no conceptual objection to lists whose elements have differing
+data types if the application requires it (see
+Section~\ref{Multilists}).\index{list!element}\index{element!homogeneity}
+The operations defined as part of the list ADT do not
+depend on the elemental data type.\index{abstract data type (ADT)}
+For example, the list ADT can be used for lists of integers, lists of
+characters, lists of payroll records, even lists of lists.
+
+A list is said to be \defit{empty} when it
+contains no elements.
+The number of elements currently stored is called the
+\defit{length} of the list.
+The beginning of the list is called the
+\defit{head}\index{list!head}, the end of the
+list is called the \defit{tail}.\index{list!tail}\index{list!terminology}
+There might or might not be some relationship between the value of an
+element and its position in the list.
+For example, \defit{sorted lists}\index{list!sorted} have
+their elements positioned in ascending order of value, while
+\defit{unsorted lists}\index{list!unsorted} have no
+particular relationship between element values and positions.
+This section will consider only unsorted lists.
+Chapters~\ref{InSort} and~\ref{Search} treat the problems of how
+to create and search sorted lists efficiently.
+
+When presenting the contents of a list, we use the same notation
+as was introduced for sequences in Section~\ref{SetDef}.
+To be consistent with \Lang\ array indexing, the first position
+on the list is denoted as 0.
+Thus, if there are \(n\) elements in the list, they are given
+positions 0 through \(n-1\) as\index{list!notation}
+\(\langle a_0,\ a_1,\ ...,\ a_{n-1}\rangle \).
+The subscript indicates an element's
+position\index{list!current position} within the list.
+Using this notation, the empty list would appear as
+\(\langle \rangle\). 
+
+\index{list!adt@ADT|(}
+\index{abstract data type (ADT)|(}
+Before selecting a list implementation, a program designer should
+first consider what basic operations the implementation must support.
+Our common intuition about lists tells us that a list should be able
+to grow and shrink in size as we insert and remove
+elements.\index{list!basic operations}
+We should be able to insert and remove elements from anywhere in
+the list.\index{list!insert}\index{list!remove}
+We should be able to gain access to any element's value,
+either to read it or to change it.
+We must be able to create and clear (or reinitialize)
+lists.\index{list!initialization}
+It is also convenient to access the next or previous
+element from the ``current'' one.
+
+\index{object-oriented programming!class}
+The next step is to define the ADT for a list object in terms of a set
+of operations on that object.
+We will use the \Lang\ notation of 
+an\ifthenelse{\boolean{cpp}}{abstract class}{}
+\ifthenelse{\boolean{java}}{interface}{}
+to formally define the list ADT.
+\ifthenelse{\boolean{cpp}}
+{An abstract class is one whose member functions are all declared to be
+``pure virtual'' as indicated by the ``\Cref{=0}'' notation at the
+end of the member function declarations.
+Class}{}
+\ifthenelse{\boolean{java}}{Interface}{}
+\Cref{List} defines the member functions that any list
+implementation inheriting from it must support, along with their
+parameters and return types.\index{inheritance}
+We increase the flexibility of the list ADT by writing it as a
+\Lang\ \Gen.
+
+True to the notion of an ADT, 
+an\ifthenelse{\boolean{cpp}}{abstract class}{}
+\ifthenelse{\boolean{java}}{interface}{}
+does not specify how operations are implemented.
+Two complete implementations are presented later in this section,
+both of which use the same list ADT to define their operations,
+but they are  considerably different in approaches and in their
+space/time tradeoffs.\index{tradeoff!space/time principle}
+
+Figure~\ref{ListDef} presents our list ADT.
+Class \Cref{List} is
+a \ifthenelse{\boolean{cpp}}{template\index{templates}}{}
+\ifthenelse{\boolean{java}}{generic\index{generics}}{}
+of one parameter, named \Cref{E} for ``element''.
+\Cref{E} serves as a placeholder for
+whatever element type the user would like to store in a list.
+The comments given in Figure~\ref{ListDef} describe precisely what
+each member function is intended to do.
+However, some explanation of the basic design is in order.
+Given that we wish to support the concept of a sequence, with access
+to any position in the list, the need for many of the member
+functions such as \Cref{insert} and \Cref{moveToPos} is clear.
+The key design decision embodied in this ADT is support for the
+concept of a \defit{current position}.\index{list!current position}
+For example, member \Cref{moveToStart} sets
+the current position to be the first element on the list, while
+methods \Cref{next} and \Cref{prev} move the current position
+to the next and previous elements, respectively.
+The intention is that any implementation for this ADT support the
+concept of a current position.
+The current position is where any action such as insertion or deletion
+will take place.
+
+\begin{figure}
+\xprogfig{List.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{ADT for a list}
+{The ADT for a list.}{ListDef}
+\end{figure}
+
+Since insertions take place at the current position, and since we want
+to be able to insert to the front or the back of the list as well as
+anywhere in between, there are actually \(n+1\) possible ``current
+positions'' when there are \(n\) elements in the list.
+
+It is helpful to modify our list display notation to show the position
+of the current element.
+I will use a vertical bar, such as
+\(\langle 20,\ 23\ |\ 12,\ 15\rangle\)
+to indicate the list of four elements,
+with the current position being to the right of the bar at element~12.
+Given this configuration, calling \Cref{insert} with value 10
+will change the list to be \(\langle 20,\ 23\ |\ 10,\ 12,\ 15\rangle\).
+
+If you examine Figure~\ref{ListDef}, you should find that the list
+member functions provided allow you to build a list with elements in
+any desired order, and to access any desired position in the list.
+You might notice that the \Cref{clear} method is not
+necessary, in that it could be implemented by means of the other
+member functions in the same asymptotic time.
+It is included merely for convenience.
+
+Method \Cref{getValue} returns a \pointref\ to the current element.
+It is considered a violation of \Cref{getValue}'s preconditions to ask
+for the value of a non-existent element
+(i.e., there must be something to the right of the vertical bar).
+In our concrete list implementations, assertions are
+used to enforce such preconditions.
+In a commercial implementation, such violations would be best
+implemented by the \Lang\ exception mechanism.
+
+A list can be iterated through as shown
+in the following code fragment.
+
+\xproghere{listiter.book}
+
+\noindent In this example, each element of the list in turn is stored
+in \Cref{it}, and passed to the \Cref{doSomething} function.
+The loop terminates when the current position reaches the end of the
+list.
+
+\ifthenelse{\boolean{cpp}}
+{The declaration for abstract class \Cref{List} also makes private the
+class copy constructor and an overloading for the assignment operator.
+This protects the class from accidentally being copied.
+This is done in part to simplify the example code used in this book.
+A full-featured list implementation would likely support copying and
+assigning list objects.}{}
+
+The list class declaration presented here is just one of
+many possible interpretations for lists.
+Figure~\ref{ListDef} provides most of the operations that one
+naturally expects to perform on lists and serves to illustrate the
+issues relevant to implementing the list data structure.
+As an example of using the list ADT, we can create a function to
+return \TRUE\ if there is an occurrence of a given integer in the
+list, and \FALSE\ otherwise.
+The \Cref{find} method needs no knowledge about the specific list
+implementation, just the list ADT.
+
+\xproghere{listfind.book}
+
+While this implementation for \Cref{find} could be written as a
+\Gen\ with respect to the element type, it would still be
+limited in its ability to handle different data types stored on the
+list.
+In particular, it only works when the description for the object being
+searched for (\Cref{k} in the function) is of the same type as the
+objects themselves,
+and that can meaningfully be compared when using the \Cref{==}
+comparison operator.
+A more typical situation is that we are searching for a record that
+contains a key field who's value matches \Cref{k}.
+Similar functions to find and return a composite element based on a
+key value can be created using the list implementation, but to do so
+requires some agreement between the list ADT and the \Cref{find}
+function on the concept of a key, and on how keys may be compared.
+This topic will be discussed in Section~\ref{Dictionary}.
+\index{abstract data type (ADT)|)}
+\index{list!adt@ADT|)}
+
+\subsection{Array-Based List Implementation}
+\label{ArrayList}
+
+\index{list!array-based|(}
+There are two standard approaches to implementing lists, the
+\defit{array-based} list, and the \defit{linked}
+list.\index{list!linked}
+This section discusses the array-based approach.
+The linked list is presented in Section~\ref{LinkedList}.
+Time and space efficiency comparisons for the two are discussed in
+Section~\ref{CompareLists}.
+
+Figure~\ref{ArrayListDef} shows
+the array-based list implementation,
+named \Cref{AList}.
+\Cref{AList} inherits\index{inheritance}
+from abstract class \Cref{List}
+and so must implement all of the member functions of \Cref{List}.
+
+\begin{figure}
+\xprogfig{AList1.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}{Array-based list class declaration}
+{An array-based list implementation.}
+{ArrayListDef}
+\end{figure}
+
+\begin{figure}
+\xprogfig{AList2.book}
+
+\vspace{-\smallskipamount}
+\captcont
+\vspace{-\bigskipamount}
+\end{figure}
+
+\index{list!initialization}
+Class \Cref{AList}'s private portion contains the data members for
+the array-based list.
+These include \Cref{listArray}, the array which holds the list
+elements.
+Because \Cref{listArray} must be allocated at some fixed size,
+the size of the array must be known when the list object is created.
+Note that an optional parameter is declared for the \Cref{AList}
+constructor.
+With this parameter, the user can indicate the maximum
+number of elements permitted in the list.
+\ifthenelse{\boolean{cpp}}
+{The phrase ``\Cref{=defaultSize}'' indicates that the parameter is
+optional.}{}
+If no parameter is given, then it takes the value
+\Cref{defaultSize}, which is assumed to be a suitably defined
+constant value.
+\index{list!initialization}
+
+Because each list can have a differently sized array, each list must
+remember its maximum permitted size.
+Data member \Cref{maxSize} serves this purpose.
+At any given time the list actually holds some number
+of elements that can be less than the maximum allowed by the array.
+This value is stored in \Cref{listSize}.
+Data member \Cref{curr} stores the current position.
+Because \Cref{listArray}, \Cref{maxSize}, \Cref{listSize}, and 
+\Cref{curr} are all declared to be \Cref{private}, they may only
+be accessed by methods of Class \Cref{AList}.
+
+Class \Cref{AList} stores the list elements in the first
+\Cref{listSize} contiguous array positions.
+Array positions correspond to list positions.
+In other words, the element at position~\(i\) in the list is stored
+at array cell~\(i\).
+The head of the list is always at position~0.
+This makes random access to any element in the list quite easy.
+Given some position in the list, the value of the element
+in that position can be accessed directly.
+Thus, access to any element using the
+\Cref{moveToPos} method followed by the \Cref{getValue} method takes
+\Thetaone\ time.
+
+Because the array-based list implementation is defined to store list
+elements in contiguous cells of the array, the
+\Cref{insert},\index{list!insert}
+\Cref{append}\index{list!append}, and \Cref{remove}\index{list!remove}
+methods must maintain this property.
+Inserting or removing elements at the tail of the list
+is easy, so the \Cref{append} operation takes \Thetaone\ time.
+But if we wish to insert an element at the head of the list,
+all elements currently in the list must shift one position toward the
+tail to make room, as illustrated by Figure~\ref{ShiftList}.
+This process takes \Thetan\ time if there are \(n\) elements already in
+the list.
+If we wish to insert at position \(i\) within a list of \(n\)
+elements, then \(n - i\) elements must shift toward the tail.
+Removing an element from the head\index{list!head} of the list is
+similar in that all remaining elements  must shift toward
+the head by one position to fill in the gap.
+To remove the element at position \(i\), \(n - i - 1\) elements must
+shift toward the head.
+In the average case, insertion or removal requires moving half
+of the elements, which is \Thetan.
+
+\begin{figure}
+\index{list!insert}
+\pdffig{ShiftLis}
+\smallskip
+
+\capt{4.5in}{Inserting an element into an array-based list}
+{Inserting an element at the head of an array-based list requires
+shifting all existing elements in the array by one position
+toward the tail.
+(a)~A list containing five elements before inserting an element with
+value~23.
+(b)~The list after shifting all existing elements one position to the
+right.
+(c)~The list after 23 has been inserted in array position~0.
+Shading indicates the unused part of the array.}{ShiftList}
+\bigskip
+\end{figure}
+
+Most of the other member functions for Class \Cref{AList} simply
+access the current list element or move the current position.
+Such operations all require \Thetaone\ time.
+Aside from \Cref{insert} and \Cref{remove},
+the only other operations that might require more than
+constant time are the constructor, the destructor, and \Cref{clear}.
+These three member functions each make use of the system
+free-store\ifthenelse{\boolean{cpp}}{operators \Cref{new} and \Cref{delete}.}{}
+\ifthenelse{\boolean{java}}{operation \Cref{new}.}{}
+As discussed further in Section~\ref{freelist}, system free-store
+operations can be expensive.
+\ifthenelse{\boolean{cpp}}
+{In particular, the cost to delete \Cref{listArray} depends in part on
+the type of elements it stores, and whether the \Cref{delete} operator
+must call a destructor on each one.}{}
+\index{list!array-based|)}
+
+\subsection{Linked Lists}
+\label{LinkedList}
+
+The\index{list!linked|(}
+second traditional approach to implementing lists makes use of
+pointers and is usually called a \defit{linked list}.
+The linked list uses
+\defit{dynamic memory allocation},\index{dynamic memory allocation}
+that is, it allocates memory for new list elements as needed.
+
+\index{list!node|(}
+\index{list!link class|(}
+A linked list is made up of a series of objects, called the
+\defit{nodes} of the list.
+Because a list node is a distinct object (as opposed to simply a cell
+in an array), it is good practice to make a separate list node class.
+An additional benefit to creating a list node class is that
+it can be reused by the linked implementations for the stack and
+queue data structures presented later in this chapter.
+Figure~\ref{LinkImpl} shows the implementation for
+list nodes, called the \Cref{Link} class.
+Objects in the \Cref{Link} class contain an \Cref{element} field to
+store the element value, and a \Cref{next} field to store a pointer to
+the next node on the list.
+The list built from such nodes is called a
+\defit{singly linked list},\index{list!singly linked}
+or a \defit{one-way list},\index{one-way list} because each list node
+has a single pointer to the next node on the list.
+
+The \Cref{Link} class is quite simple.
+There are two forms for its constructor, one with
+an initial element value and one without.
+\ifthenelse{\boolean{cpp}}
+{Because the \Cref{Link} class is also used by the
+stack\index{stack} and queue\index{queue} implementations presented
+later, its data members are made public.
+While technically this is breaking encapsulation, in practice the
+\Cref{Link} class should be implemented as a private class of the
+linked list (or stack or queue) implementation, and thus not visible
+to the rest of the program.}{}
+\ifthenelse{\boolean{java}}
+{Member functions allow the link user to get or set the \Cref{element}
+and \Cref{link} fields.}{}
+\index{list!link class|)}
+
+\begin{figure}
+\xprogfig{Link.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{A simple singly linked list node implementation}
+{A simple singly linked list node implementation.}{LinkImpl}
+\end{figure}
+
+Figure~\ref{BadList}(a) shows a graphical depiction for a linked list
+storing four integers.
+The value stored in a pointer variable is indicated by an arrow
+``pointing'' to something.
+\Lang\ uses the special symbol \NULL\ for a\index{null pointer}
+pointer value that points nowhere, such as for the last list node's
+\Cref{next} field.
+A \NULL\ pointer is indicated graphically by a diagonal slash
+through a pointer variable's box.
+The vertical line between the nodes labeled 23 and 12 in
+Figure~\ref{BadList}(a) indicates the current position
+(immediately to the right of this line).
+
+\begin{figure}
+\pdffig{BadList}
+\capt{4.5in}
+{Linked list implementation: \Cref{curr} points to current node}
+{Illustration of a faulty linked-list implementation where
+\Cref{curr}\index{list!current position} points directly to the
+current node.
+(a)~Linked list prior to inserting element with value~10.
+(b)~Desired effect of inserting element with
+value~10.\index{list!insert}}
+{BadList}
+\bigskip
+\end{figure}
+
+The list's first node is accessed from a pointer named
+\Cref{head}.
+To speed access to the end of the list, and to allow the
+\Cref{append} method to be performed in
+constant time, a pointer named \Cref{tail} is also kept to the last
+link of the list.
+The position of the current element is indicated by another pointer,
+named \Cref{curr}.
+Finally, because there is no simple way to compute the length of the
+list simply from these three pointers, the list length must be stored
+explicitly, and updated by every operation that modifies the list size.
+The value \Cref{cnt} stores the length of the list.
+
+\ifthenelse{\boolean{cpp}}
+{Class \Cref{LList} also includes private helper methods
+\Cref{init} and \Cref{removeall}.
+They are used by \Cref{LList}'s constructor, destructor,
+and \Cref{clear} methods.}{}
+
+Note that \Cref{LList}'s constructor maintains the optional parameter
+for minimum list size introduced for Class \Cref{AList}.
+This is done simply to keep the calls to the constructor
+the same for both variants.
+Because the linked list class does not need to declare a fixed-size
+array when the list is created, this parameter is unnecessary for
+linked lists.
+It is ignored by the implementation.
+
+A key design decision for the linked list implementation is how to
+represent the current position.
+The most reasonable choices appear to be a pointer to the current
+element.
+But there is a big advantage to making \Cref{curr} point to the
+element preceding the current element.
+
+\index{list!current position|(}
+Figure~\ref{BadList}(a) shows the list's
+\Cref{curr} pointer pointing to the current element.
+The vertical line between the nodes containing 23 and 12 indicates the
+logical position of the current element.
+Consider what happens if we wish to insert a new node with value 10
+into the list.
+The result should be as shown in Figure~\ref{BadList}(b).
+However, there is a problem.
+To ``splice'' the list node containing the new element
+into the list, the list node storing 23 must have its
+\Cref{next} pointer changed to point to the new node.
+Unfortunately, there is no convenient access to the node preceding
+the one pointed to by \Cref{curr}.
+
+There is an easy solution to this problem.
+If we set \Cref{curr} to point directly to the preceding element,
+there is no difficulty in adding a new element after \Cref{curr}.
+Figure~\ref{GoodList} shows how the list looks when pointer variable
+\Cref{curr} is set to point to the node preceding the physical
+current node.
+See Exercise~\ref{LSQ}.\ref{FenceExer} for further discussion of why
+making \Cref{curr} point directly to the current element fails.
+\index{list!current position|)}
+
+\begin{figure}
+\pdffig{GoodList}
+
+\capt{4.5in}{Insertion using a header node}
+{Insertion\index{list!insert}
+using a header node, with \Cref{curr} pointing one node head of the
+current element.
+(a)~Linked list before insertion.
+The current node contains~12.
+(b)~Linked list after inserting the node containing~10.}
+{GoodList}
+\medskip
+\end{figure}
+
+We encounter a number of potential special cases when the list is
+empty, or when the current position is at an end of the list.
+In particular, when the list is empty we have no element for
+\Cref{head}, \Cref{tail}, and \Cref{curr} to point to.
+Implementing special cases for \Cref{insert} and \Cref{remove}
+increases code complexity, making it harder to understand,
+and thus increases the chance of introducing a programming bug.
+
+These special cases can be eliminated by implementing
+linked lists with an additional \defit{header node}\index{list!head}
+as the first node of the list.
+This header node is a link node like any other, but its value is
+ignored and it is not considered to be an actual element of the list.
+The header node saves coding effort because we no longer need to
+consider special cases for empty lists or when the current position is
+at one end of the list.
+The cost of this simplification is the space for the header node.
+However, there are space savings due to smaller code size,
+because statements to handle the special cases are omitted.
+In practice, this reduction in code size typically saves more space
+than that required for the header node, depending on the number of
+lists created.
+Figure~\ref{InitList} shows the state of an initialized or empty list
+when using a header node.
+
+\begin{figure}
+\pdffig{InitList}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{Initial\index{list!initialization}
+state of a linked list when using a header node}
+{Initial state of a linked list when using a header node.}{InitList}
+\vspace{-\smallskipamount}
+\end{figure}
+
+Figure~\ref{LinkListDef} shows the definition
+for the linked list class, named \Cref{LList}.
+Class \Cref{LList} inherits\index{inheritance}
+from the abstract list class and
+thus must implement all of Class \Cref{List}'s member functions.
+
+\begin{figure}
+\xprogfig{LList1.book}
+\vspace{-\medskipamount}
+\capt{4.5in}
+{Linked list class declaration}
+{A linked list implementation.}{LinkListDef}
+\end{figure}
+\index{list!node|)}
+
+\begin{figure}
+\xprogfig{LList2.book}
+\vspace{-\smallskipamount}
+\captcont
+\end{figure}
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\index{list!insert|(}
+Implementations for most member functions of the \Cref{list}
+class are straightforward.
+However, \Cref{insert} and \Cref{remove}\index{list!remove}
+should be studied carefully.
+
+Inserting a new element is a
+three-step process.\index{list!current position}
+First, the new list node is created and the new element is
+stored into it.
+Second, the \Cref{next} field of the new list node is assigned to
+point to the current node (the one \emph{after} the node that
+\Cref{curr} points to).
+Third, the \Cref{next} field of node pointed to by \Cref{curr}
+is assigned to point to the newly inserted node.
+The following line in the \Cref{insert} method of
+Figure~\ref{LinkListDef} does all three of these steps.
+
+\begin{progenv}
+\ifthenelse{\boolean{cpp}}
+{curr->next = new Link<E>(it, curr->next);}{}
+\ifthenelse{\boolean{java}}
+{curr.setNext(new Link<E>(it, curr.next()));}{}
+\end{progenv}
+
+\begin{figure}
+\index{list!insert}
+\pdffig{LinkIns}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{The linked list insertion process}
+{The linked list insertion process.
+(a)~The linked list before insertion.
+(b)~The linked list after insertion.
+\fbox{1}~marks the \Cref{element} field of the new link node.
+\fbox{2}~marks the \Cref{next} field of the new link node, which
+is set to point to what used to be the current node
+(the node with value~12).
+\fbox{3}~marks the \Cref{next} field of the node preceding the current
+position.
+It used to point to the node containing~12; now it points to the new
+node containing~10.}{LinkInsert}
+\bigskip
+\end{figure}
+
+\noindent Operator \Cref{new} creates the new link node
+and calls the \Cref{Link} class constructor,
+which takes two parameters.
+The first is the element.
+The second is the value to be placed in the list node's \Cref{next} field,
+in this
+case\ifthenelse{\boolean{cpp}}{``\Cref{curr->next}.''}{}
+\ifthenelse{\boolean{java}}{``\Cref{curr.next}.''}{}
+\ifthenelse{\boolean{java}}
+{Method \Cref{setNext} does the assignment to \Cref{curr}'s
+\Cref{next} field.}{}
+Figure~\ref{LinkInsert} illustrates this three-step process.
+Once the new node is added, \Cref{tail} is pushed forward if the new
+element was added to the end of the list.
+Insertion requires \Thetaone\ time.
+\index{list!insert|)}
+
+\index{list!remove}
+Removing a node from the linked list requires only that
+the appropriate pointer be redirected around the node to be deleted.
+The following lines from the \Cref{remove} method of
+Figure~\ref{LinkListDef} do precisely this.
+\medskip
+
+\begin{progenv}
+\ifthenelse{\boolean{cpp}}{
+Link<E>* ltemp = curr->next;\ \ \     // Remember link node\\
+curr->next = curr->next->next;     // Remove from list\\
+}{}
+\ifthenelse{\boolean{java}}{
+E it = curr.next().element();\ \ \ \ \     // Remember value\\
+curr.setNext(curr.next().next());  // Remove from list\\
+}{}
+\end{progenv}
+\ifthenelse{\boolean{cpp}}
+{We must be careful not to ``lose'' the memory for the
+deleted link node.
+So, temporary pointer \Cref{ltemp} is first assigned to point to the
+node being removed.
+A call to \Cref{delete} is later used to return the old node to free
+storage.}{}
+\ifthenelse{\boolean{java}}
+{Memory for the link will eventually be reclaimed by the
+garbage collector.\index{garbage collection}}{}
+Figure~\ref{LinkRemove} illustrates the \Cref{remove}
+method.\ifthenelse{\boolean{cpp}}
+{Assuming that the free-store \Cref{delete} operator requires constant
+time, removing}{}
+\ifthenelse{\boolean{java}}{Removing}{}
+an element requires \Thetaone\ time.\index{list!remove}
+
+\begin{figure}
+\index{list!remove}
+\pdffig{LinkRem}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{The linked list removal process}
+{The linked list removal process.
+(a)~The linked list before removing the node with value~10.
+(b)~The linked list after removal.
+\fbox{1}~marks the list node being removed.
+\Cref{it} is set to point to the element.
+\fbox{2}~marks the \Cref{next} field of the preceding list node,
+which is set to point to the node following the one being deleted.}
+{LinkRemove}
+\bigskip
+\end{figure}
+
+Method \Cref{next} simply moves
+\Cref{curr}\index{list!current position} 
+one position toward the tail of the list, which takes \Thetaone\ time.
+Method \Cref{prev} moves \Cref{curr}
+one position toward the head of the list, but its implementation is
+more difficult.
+In a singly linked list, there is no pointer to the previous node.
+Thus, the only alternative is to march down the list from the
+beginning until we reach the current node (being sure always to
+remember the node before it, because that is what we really want).
+This takes \Thetan\ time in the average and worst cases.
+Implementation of method \Cref{moveToPos} is
+similar in that finding the \(i\)th~position requires marching down
+\(i\)~positions from the head of the list, taking \Thetai\ time.
+
+Implementations for the remaining operations each require
+\Thetaone\ time.
+\index{list!linked|)}
+
+\subsubsection{Freelists}
+\label{freelist}
+
+\index{free store|(}
+The\index{list!freelist|(}\ifthenelse{\boolean{cpp}}
+{\Lang\ free-store management operators
+\Cref{new} and \Cref{delete}\index{delete@\Cref{delete}} are}{}
+\ifthenelse{\boolean{java}}{\Cref{new} operator is}{}
+relatively expensive to use.\index{new@\Cref{new}|(} 
+\ifthenelse{\boolean{java}}{Garbage collection is also expensive.}{}
+Section~\ref{MemMan} discusses how general-purpose memory managers
+are implemented.
+The expense comes from the fact that free-store routines must be
+capable of handling requests to and from free store with no particular
+pattern, as well as memory requests of vastly different sizes.
+\ifthenelse{\boolean{java}}{This, combined with
+unpredictable freeing of space by the garbage collector,}{}
+\ifthenelse{\boolean{cpp}}{This}{}makes
+them inefficient compared to what might be implemented for more
+controlled patterns of memory access.
+
+List nodes are created and deleted in a linked list implementation in
+a way that allows the \Cref{Link} class programmer
+to provide simple but efficient memory management routines.
+Instead of making repeated calls to
+\Cref{new}\ifthenelse{\boolean{cpp}}{ and \Cref{delete}}{},
+the \Cref{Link} class can handle its own \defit{freelist}.
+A freelist holds those list nodes that are not currently being used.
+When a node is deleted from a linked list, it is placed at the
+head of the free\-list.
+When a new element is to be added to a linked list, the freelist
+is checked to see if a list node is available.
+If so, the node is taken from the freelist.
+If the freelist is empty, the standard \Cref{new} operator must then
+be called.
+
+Freelists are particularly useful for linked lists that periodically
+grow and then shrink.
+The freelist will never grow larger than the largest size yet reached
+by the linked list.
+Requests for new nodes (after the list has shrunk) can be handled by
+the freelist.
+Another good opportunity to use a freelist occurs when a program uses
+multiple lists.
+So long as they do not all grow and shrink together, the free list can
+let link nodes move between the lists.
+
+\ifthenelse{\boolean{cpp}}
+{One approach to implementing freelists would be to create two new
+operators to use instead of the standard free-store routines
+\Cref{new} and \Cref{delete}.
+This requires that the user's code, such as the linked list class
+implementation of Figure~\ref{LinkListDef}, be modified to call
+these freelist operators.
+A second approach is to use
+\Lang\ \defit{operator overloading}\index{operator overloading}
+to replace the meaning of
+\Cref{new} and \Cref{delete} when operating on \Cref{Link} class
+objects.
+In this way, programs that use the \Cref{LList} class need not be
+modified at all to take advantage of a freelist.
+Whether the \Cref{Link} class is implemented with free\-lists, or
+relies on the regular free-store mechanism, is entirely hidden from
+the list class user.}{}
+\ifthenelse{\boolean{java}}
+{In the implementation shown here, the link class is augmented with
+methods \Cref{get} and \Cref{release}.}{}
+Figure~\ref{Freelist} shows the reimplementation for the \Cref{Link}
+class\ifthenelse{\boolean{cpp}}
+{with freelist methods overloading the standard free-store operators.}{}
+\ifthenelse{\boolean{java}}{to support these methods.}{}
+Note how simple they are, because they need only remove and add an
+element to the front of the freelist, respectively.
+\ifthenelse{\boolean{cpp}}
+{The freelist versions of \Cref{new} and \Cref{delete}}{}
+\ifthenelse{\boolean{java}}
+{The freelist methods \Cref{get} and \Cref{release}}{}
+both run in
+\Thetaone\ time, except in the case where the freelist is exhausted
+and the \Cref{new} operation must be called.
+\ifthenelse{\boolean{java}}{Figure~\ref{FreeMembers} shows the
+necessary modifications to members of the linked list class to make
+use of the freelist version of the link class.}{}
+\ifthenelse{\boolean{cpp}}
+{On my computer, a call to the overloaded \Cref{new} and \Cref{delete}
+operators requires about one tenth of the time required by the system
+free-store operators.}{}
+
+\begin{figure}
+\xprogfig{Flink.book}
+
+\ifthenelse{\boolean{cpp}}{\bigskip}{}
+
+\capt{4.5in}{Implementation for the \Cref{Link} class with a freelist}
+{Implementation for the \Cref{Link} class with a freelist.
+\ifthenelse{\boolean{cpp}}
+{Note that the redefinition for \Cref{new} refers to \Cref{::new} on
+the third line.
+This indicates that the standard \Lang\ \Cref{new} operator is used,
+rather than the redefined \Cref{new} operator.
+If the colons had not been used, then the \Cref{Link} class \Cref{new}
+operator would be called, setting up an infinite
+recursion.\index{recursion}}{}
+The \Cref{static} declaration for member \Cref{freelist} means that
+all \Cref{Link} class objects share the same freelist pointer variable
+instead of each object storing its own copy.}{Freelist}
+\vspace{\bigskipamount}
+\end{figure}
+
+\ifthenelse{\boolean{java}}
+{\begin{figure}
+\xprogfig{Flist.book}
+\vspace{-\medskipamount}
+\capt{4.5in}{Linked-list class members using freelist}
+{Linked-list class members that are modified to use the freelist
+version of the link class in Figure~\ref{Freelist}.}{FreeMembers}
+\vspace{1pt}
+\end{figure}}{}
+
+\ifthenelse{\boolean{cpp}}
+{There is an additional efficiency gain to be had from a freelist
+implementation.
+The implementation of Figure~\ref{Freelist} makes a separate call to
+the system \Cref{new} operator for each link node requested whenever
+the freelist is empty.
+These link nodes tend to be small --- only a few bytes more than the
+size of the \Cref{element} field.
+If at some point in time the program requires thousands of active
+link nodes, these will have been created by many calls to the system
+version of \Cref{new}.
+An alternative is to allocate many link nodes in a single call to
+the system version of \Cref{new}, anticipating that if the freelist is
+exhausted now, more nodes will be needed soon.
+It is faster to make one call to \Cref{new} to get space for 100
+\Cref{link} nodes, and then load all 100 onto the freelist at once,
+rather than to make 100 separate calls to \Cref{new}.
+The following statement will assign \Cref{ptr} to point to an array
+of 100 link nodes.
+
+\begin{progenv}
+ptr = ::new Link[100];
+\end{progenv}
+
+\noindent The implementation for the \Cref{new} operator in the
+\Cref{link} class could then place each of these 100 nodes onto the
+freelist.
+\index{delete@\Cref{delete}}}{}
+
+\index{new@\Cref{new}|)}
+\index{free store|)}
+
+The \Cref{freelist} variable declaration uses the keyword
+\Cref{static}.
+This creates a single variable shared among all instances of the
+\Cref{Link} nodes.
+\ifthenelse{\boolean{java}}
+{In this way, a single freelist shared by all \Cref{Link} nodes.}{}
+\ifthenelse{\boolean{cpp}}
+{We want only a single freelist for all \Cref{Link} nodes of a given
+type.
+A program might create multiple lists.
+If they are all of the same type (that is, their element types are the
+same), then they can and should share the same freelist.
+This will happen with the implementation of Figure~\ref{Freelist}.
+If lists are created that have different element types, because this
+code is implemented with a \Gen, the need for different list
+implementations will be discovered by
+the compiler at compile time.
+Separate versions of the list class will be generated for each
+element type.
+Thus, each element type will also get its own separate copy of the
+\Cref{Link} class.
+And each distinct \Cref{Link} class implementation will get a separate
+freelist.}{}
+\index{list!freelist|)}
+
+
+\subsection{Comparison of List Implementations}
+\label{CompareLists}
+
+\index{list!implementations compared|(}
+\index{list!linked|(}
+\index{list!array-based|(}
+Now that you have seen two substantially different implementations for
+lists, it is natural to ask which is better.
+In particular, if you must implement a list for some task,
+which implementation should you choose?
+
+\index{list!space requirements|(}
+Array-based lists have the disadvantage that their size must be
+predetermined before the array can be allocated.
+Array-based lists cannot grow beyond their predetermined size.
+Whenever the list contains only a few elements, a
+substantial amount of space might be tied up in a largely empty array.
+Linked lists have the advantage that they only need space for the
+objects actually on the list.
+There is no limit to the number of elements on a linked list,
+as long as there is free-store memory available.
+The amount of space required by a linked list is \Thetan, while the
+space required by the array-based list implementation is \Omegan, but
+can be greater.
+
+\index{overhead|(}
+Array-based lists have the advantage that there is no wasted
+space for an individual element.
+Linked lists require that an extra pointer be added to every list
+node.
+If the element size is small, then the overhead for
+links can be a significant fraction of the total storage.
+When the array for the array-based list is completely filled, there
+is no storage overhead.
+The array-based list will then be more space efficient, by a
+constant factor, than the linked implementation.
+
+A simple formula can be used to determine whether the array-based list
+or linked list implementation will be more space efficient in a
+particular situation.
+Call~\(n\) the number of elements currently in the list,
+\svar{P}~the size of a pointer in storage units
+(typically four bytes), \svar{E}~the size of a data element in storage
+units (this could be anything, from one bit for a Boolean variable on
+up to thousands of bytes or more for complex records), and \svar{D} the 
+maximum number of list elements that can be stored in the array.
+The amount of space required for the array-based list is \(DE\),
+regardless of the number of elements actually stored in the list at
+any given time.
+The amount of space required for the linked list is \(n(P + E)\).
+The smaller of these expressions for a given value \(n\) determines the
+more space-efficient implementation for \(n\) elements.
+In general, the linked implementation requires less space than the
+array-based implementation when relatively few elements are in the
+list.
+Conversely, the array-based implementation becomes more space
+efficient when the array is close to full.
+Using the equation, we can solve for \(n\) to determine the
+break-even point beyond which the array-based implementation is more
+space efficient in any particular situation.
+This occurs when
+\[n > DE/(P + E).\]
+\noindent If \(P = E\), then the break-even point is at \(D/2\).
+This would happen if the element field is either a four-byte
+\Cref{int} value or a pointer, and the next field is a typical
+four-byte pointer.
+That is, the array-based implementation would be more efficient (if
+the link field and the element field are the same size) whenever the
+array is more than half full.
+\index{overhead|)}
+
+As a rule of thumb, linked lists are more space efficient when
+implementing lists whose number of elements varies widely or is
+unknown.
+Array-based lists are generally more space efficient when
+the user knows in advance approximately how large the list will
+become.
+\index{list!space requirements|)}
+
+Array-based lists are faster for random access by position.
+Positions can easily be adjusted forwards or backwards by
+the \Cref{next}\index{list!current position} and \Cref{prev} methods.
+These operations always take \Thetaone\ time.
+In contrast, singly linked lists have no explicit access to the
+previous element, and access by position requires that we march
+down the list from the front (or the current position) to the
+specified position.
+Both of these operations require \Thetan\ time in the average and
+worst cases, if we assume that each position on the list is equally
+likely to be accessed on any call to \Cref{prev} or \Cref{moveToPos}.
+
+Given a pointer to a suitable location in the list,
+the \Cref{insert}\index{list!insert} and
+\Cref{remove}\index{list!remove} methods for linked lists
+require only \Thetaone\ time.
+Array-based lists must shift the remainder of the list up or down
+within the array.
+This requires \Thetan\ time in the average and worst cases.
+For many applications, the time to insert and delete elements
+dominates all other operations.
+For this reason, linked lists are often preferred to array-based
+lists.
+
+When implementing the array-based list, an implementor could
+allow the size of the array to grow and shrink depending on the number 
+of elements that are actually stored.
+This data structure is known as a
+\defit{dynamic array}.\index{array!dynamic}\index{vector}
+Both the \LangJava\ and \LangCPP/STL \Cref{Vector} classes implement a
+dynamic array.
+Dynamic arrays allow the programmer to get around the limitation on
+the standard array that its size cannot be changed once the array has
+been created.
+This also means that space need not be allocated to the dynamic array
+until it is to be used.
+The disadvantage of this approach is that it takes time to deal
+with space adjustments on the array.
+Each time the array grows in size, its contents must be copied.
+A good implementation of the dynamic array will grow and shrink
+the array in such a way as to keep the overall cost for a series of
+insert/delete operations relatively inexpensive, even though an
+occasional insert/delete operation might be expensive.
+A simple rule of thumb is to double the size of the array when it
+becomes full, and to cut the array size in half when it becomes one
+quarter full.
+To analyze the overall cost of dynamic array operations over time,
+we need to use a technique known as
+\defit{amortized analysis}\index{amortized analysis},
+which is discussed in Section~\ref{AmortAnal}.
+\index{list!array-based|)}
+\index{list!linked|)}
+\index{list!implementations compared|)}
+
+\subsection{Element Implementations}
+
+\index{list!element|(}
+\index{element!implementation|(}
+List users must decide whether they wish to store a copy of any given
+element on each list that contains it.
+For small elements such as an integer, this makes sense.
+If the elements are payroll records, it might be desirable for
+the list node to store a \pointref\ to the record rather than store a
+copy of the record itself.
+This change would allow multiple list nodes (or other data structures) 
+to point to the same record, rather than make repeated copies of the
+record.
+Not only might this save space, but it also means that a modification
+to an element's value is automatically reflected at all locations
+where it is referenced.
+The disadvantage of storing a pointer to each element is that the
+pointer requires space of its own.
+If elements are never duplicated, then this additional space
+adds unnecessary overhead.
+\ifthenelse{\boolean{java}}
+{\Lang\ most naturally stores references to objects, meaning that only
+a single copy of an object such as a payroll record will be
+maintained, even if it is on multiple lists.}{}
+\ifthenelse{\boolean{cpp}}{
+
+The \Lang\ implementations for lists presented in this section give the
+user of the list the choice of whether to store copies of
+elements or pointers to elements.
+The user can declare \Cref{E} to be, for
+example, a pointer to a payroll record.
+In this case, multiple lists can point to the same copy of the
+record.
+On the other hand, if the user declares \Cref{E} to be
+the record itself, then a new copy of the record will be made
+when it is inserted into the list.}{}
+
+Whether it is more advantageous to use \pointrefs\ to shared elements
+or separate copies depends on the intended application.
+In general, the larger the elements and the more they are duplicated,
+the more likely that \pointrefs\ to shared elements is the
+better approach.
+
+A second issue faced by implementors of a list class (or any other
+data structure that stores a collection of user-defined data elements)
+is whether the elements stored are all required to be of the same type.
+This is known as \defit{homogeneity} in a data
+structure.\index{element!homogeneity}
+In some applications, the user would like to define the class of the
+data element that is stored on a given list, and then never permit
+objects of a different class to be stored on that same list.
+In other applications, the user would like to permit the objects
+stored on a single list to be of differing types.
+
+For the list implementations presented in this section,
+the compiler requires that all objects stored on the list be of the
+same type.
+\ifthenelse{\boolean{cpp}}
+{In fact, because the lists are implemented using
+templates,\index{template} a new class 
+is created by the compiler for each data type.
+For implementors who wish to minimize the number of classes created by 
+the compiler, the lists can all store a \Cref{void*} pointer, with the 
+user performing the necessary casting to and from the actual object
+type for each element.
+However, this approach requires that the user do his or her own type
+checking, either to enforce homogeneity or to differentiate between
+the various object types.
+
+}{}
+Besides \Lang\ \Gens,
+there are other techniques that implementors of a
+list class can use to ensure that the element type for a given list
+remains fixed,
+while still permitting different lists to store different element
+types.
+One approach is to store an object of the appropriate type in the
+header node of the list (perhaps an object of the appropriate type is
+supplied as a parameter to the list constructor), and then check that
+all insert operations on that list use the same element type.
+
+The third issue that users of the list implementations must face is
+primarily of concern when programming in languages that do not support
+automatic garbage collection.
+That is
+how to deal with the memory of the objects stored on the list
+when the list is deleted or the \Cref{clear} method is called.
+The list destructor and the \Cref{clear} method are
+problematic in that there is a potential that they will
+be\ifthenelse{\boolean{cpp}}
+{misused, thus causing a memory leak.
+The type of the element stored determines whether there is a potential
+for trouble here.
+If the elements are of a simple type such as an \Cref{int}, then there
+is no need to delete the elements explicitly.
+If the elements are of a user-defined class, then their own destructor
+will be called.
+However, what if the list elements are pointers to objects?
+Then deleting}{}
+\ifthenelse{\boolean{java}}{misused. Deleting}{}
+\Cref{listArray} in the array-based implementation,
+or deleting a link node in the linked list implementation,
+might remove the only reference to an object, leaving its memory space
+inaccessible.
+Unfortunately, there is no way for the list implementation to know
+whether a given object is pointed to in another part of the program or
+not.
+Thus, the user of the list must be responsible for
+deleting these objects when that is appropriate.
+\index{element!implementation|)}
+\index{list!element|)}
+
+\subsection{Doubly Linked Lists}
+\label{DblList}
+
+The\index{list!doubly linked|(} singly linked
+list\index{list!singly linked} 
+presented in Section~\ref{LinkedList} allows
+for direct access from a list node only to the next node in the list.
+A \defit{doubly linked list} allows convenient access from a list node
+to the next node and also to the preceding node on the list.
+The doubly linked list node accomplishes this in the obvious way by
+storing two pointers: one to the node following it (as in the singly
+linked list), and a second pointer to the node preceding it.
+The most common reason to use a doubly linked list is
+because it is easier to implement than a singly linked list.
+While the code for the doubly linked implementation is a little longer
+than for the singly linked version, it tends to be a bit more
+``obvious'' in its intention, and so easier to implement and debug.
+Figure~\ref{DblListFig} illustrates the doubly linked list concept.
+Whether a list implementation is doubly or singly linked should
+be hidden from the \Cref{List} class user.\index{list!singly linked}
+
+Like our singly linked list implementation, the doubly linked list
+implementation makes use of a header node.
+We also add a tailer node to the end of the list.
+The tailer is similar to the header, in that it is a node that
+contains no value, and it always exists.
+When the doubly linked list is initialized, the header and tailer
+nodes are created.
+Data member \Cref{head} points to the header node, and \Cref{tail}
+points to the tailer node.
+The purpose of these nodes is to simplify the \Cref{insert},
+\Cref{append}, and \Cref{remove} methods by eliminating all need for
+special-case code when the list is empty, or when we insert at the
+head or tail of the list.
+
+For singly linked lists we set \Cref{curr} to point to the node
+preceding the node that contained the actual current element, due to
+lack of access to the previous node during insertion and deletion.
+Since we do have access to the previous node in a doubly linked list,
+this is no longer necessary.
+We could set \Cref{curr} to point directly to the node containing the
+current element.
+However, I have chosen to keep the same convention for the \Cref{curr}
+pointer as we set up for singly linked lists, purely for the sake of
+consistency.
+
+\begin{figure}
+\pdffig{DblListF}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{A doubly linked list}{A doubly linked list.}{DblListFig}
+\end{figure}
+
+\begin{figure}
+\xprogfig{DLink.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Doubly linked list node implementation}
+{Doubly\index{list!node} linked list node implementation with
+a freelist.}{DblLink}
+\smallskip
+\end{figure}
+
+Figure~\ref{DblLink} shows the complete implementation for a
+\Cref{Link} class to be used with doubly linked lists.\index{list!node}
+This code is a little longer than that for the singly linked list node
+implementation since
+the doubly linked list nodes have an extra data member.
+
+Figure~\ref{DblListImpl} shows the implementation for the
+\Cref{insert}\index{list!insert}, \Cref{append},\index{list!append}
+\Cref{remove},\index{list!remove} and \Cref{prev} doubly
+linked list methods.
+The class declaration and the remaining member functions for the
+doubly linked list class are nearly identical to the singly linked
+list version.
+
+\begin{figure}
+\xprogfig{Dlist.book}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Doubly linked list methods}
+{Implementations for doubly linked list \Cref{insert},
+\Cref{append}, \Cref{remove}, and \Cref{prev} methods.}
+{DblListImpl}
+\vspace{-\medskipamount}
+\end{figure}
+
+\index{list!insert|(}
+The \Cref{insert} method is especially simple for our doubly linked
+list implementation, because most of the work is done by the node's
+constructor.
+Figure~\ref{DblListInsert} shows the list before and after
+insertion of a node with value 10.
+
+\begin{figure}
+\index{list!insert}
+\pdffig{DblListI}
+\vspace{-\medskipamount}
+\capt{4.5in}{Doubly linked list insertion}
+{Insertion for doubly linked lists.
+The labels \fbox{1}\,, \fbox{2}\,, and \fbox{3} correspond to
+assignments done by the linked list node constructor.
+\fbox{4}~marks the assignment to \Cref{curr->next}.
+\fbox{5}~marks the assignment to the \Cref{prev} pointer
+of the node following the newly inserted node.}{DblListInsert}
+\bigskip
+\end{figure}
+
+The three parameters to the \Cref{new}\index{new@\Cref{new}}
+operator allow the list node
+class constructor to set the \Cref{element}, \Cref{prev}, and
+\Cref{next} fields, respectively, for the new link node.
+The \Cref{new} operator returns a pointer to the newly created node.
+The nodes to either side have their pointers updated to point to the
+newly created node.
+The existence of the header and tailer nodes mean that there are no
+special cases to worry about when inserting into an empty list.
+\index{list!insert|)}
+
+\index{list!append}
+The \Cref{append} method is also simple.
+Again, the \Cref{Link} class constructor sets the \Cref{element},
+\Cref{prev}, and \Cref{next} fields of the node when the \Cref{new}
+operator is executed.\index{new@\Cref{new}}\index{list!append}
+
+\begin{figure}
+\index{list!remove}
+\pdffig{DblListD}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Doubly linked list removal}
+{Doubly linked list removal.
+Element \Cref{it} stores the element of the node being removed.
+Then the nodes to either side have their pointers adjusted.}
+{DblListRemove}
+\bigskip
+\end{figure}
+
+Method \Cref{remove}\index{list!remove} (illustrated by
+Figure~\ref{DblListRemove})
+is straightforward, though the code is somewhat longer.
+First, the variable \Cref{it} is assigned the value being removed.
+Note that we must separate the element, which is returned to the
+caller, from the link object.
+The following lines then adjust the list.
+\medskip
+
+\ifthenelse{\boolean{cpp}}
+{\begin{progenv}
+Link<E>* ltemp = curr->next; \ \    // Remember link node\\
+curr->next->next->prev = curr;\\
+curr->next = curr->next->next;      // Remove from list\\
+delete ltemp; \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ // Reclaim space\\
+\end{progenv}}{}
+\ifthenelse{\boolean{java}}
+{\begin{progenv}
+E it = curr.next().element(); \ \ \ \  // Remember value\\
+curr.next().next().setPrev(curr);\\
+curr.setNext(curr.next().next());  // Remove from list\\
+\end{progenv}}{}
+
+\ifthenelse{\boolean{cpp}}
+{The first line sets a temporary pointer to the node being removed.}{}
+\ifthenelse{\boolean{java}}
+{The first line stores the value of the node being removed.}{}
+The second line makes the next node's \Cref{prev} pointer point to the
+left of the node being removed.
+Finally, the \Cref{next} field of the node preceding the one being
+deleted is adjusted.
+The final steps of method \Cref{remove} are to update the
+list\ifthenelse{\boolean{cpp}}{length, return the deleted node to free store,}{}
+\ifthenelse{\boolean{java}}{length}{}
+and return the value of the deleted element.\index{list!remove}
+
+\index{list!doubly linked!space|(}
+The only disadvantage of the doubly linked list as compared to the
+singly linked list is the additional space used.
+The doubly linked list requires two pointers per node, and so in the
+implementation presented it requires twice as much overhead as
+the singly linked list.
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\begin{example}
+\label{DblSUM}
+
+There is a space-saving technique that can be employed to eliminate
+the additional space requirement, though it will complicate the
+implementation and be somewhat slower.
+Thus, this is an example of a
+space/time tradeoff.\index{tradeoff!space/time principle}
+It is based on observing that, if we store the sum of two values, then
+we can get either value back by subtracting the other.
+That is, if we store \(a + b\) in variable \(c\), then
+\(b = c - a\) and \(a = c - b\).
+Of course, to recover one of the values out of the stored summation,
+the other value must be supplied.
+A pointer to the first node in the list, along with the value of one
+of its two link fields, will allow access to all of the remaining
+nodes of the list in order.
+This is because the pointer to the node must be the same as the value
+of the following node's \Cref{prev} pointer, as well as the previous
+node's \Cref{next} pointer.
+It is possible to move down the list breaking apart the
+summed link fields as though you were opening a zipper.
+Details for implementing this variation are left as an exercise.
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+The principle behind this technique is worth remembering, as it
+has many applications.
+The following code fragment will
+swap the contents of two variables without using a temporary variable
+(at the cost of three arithmetic operations).
+\vspace{-\smallskipamount}
+
+\xprogexamp{ch4p1.book}
+
+A similar effect can be had by using the exclusive-or operator.
+This fact is widely used in computer graphics.
+A region of the computer screen can be highlighted by
+XORing the outline of a box around it.
+XORing the box outline a second time restores the original
+contents of the screen.
+\end{example}
+\index{list!doubly linked!space|)}
+\index{list!doubly linked|)}
+
+\section{Stacks}
+\label{Stacks}
+
+\index{stack|(}
+The \defit{stack} is a list-like structure\index{list}
+in which elements may be inserted or removed from only one end.
+While this restriction makes stacks less flexible than lists,
+it also makes stacks both efficient (for those operations they can do)
+and easy to implement.
+Many applications require only the limited form of
+insert\index{stack!insert} and remove\index{stack!remove} operations
+that stacks provide.
+In such cases, it is more efficient to use the simpler stack data
+structure rather than the generic list.
+For example, the freelist of Section~\ref{freelist} is really a
+stack.\index{freelist}
+
+Despite their restrictions, stacks have many uses.
+Thus, a special vocabulary for stacks has developed.
+Accountants used stacks long before the invention
+of the computer.\index{accounting}
+They called the stack a ``LIFO'' list\index{lifo list@LIFO list},
+which stands for ``Last-In, First-Out.'' 
+Note that one implication of the LIFO policy is that stacks
+remove elements in reverse order of their arrival.
+
+The accessible element of the stack is called
+the \defit{top} element.\index{stack!top}\index{stack!terminology}
+Elements are not said to be inserted, they are
+\defit{pushed}\index{stack!insert}\index{stack!push} onto the stack.
+When removed, an element is said to be
+\defit{popped}\index{stack!remove}\index{stack!pop} from the stack.
+Figure~\ref{StackADT} shows a sample stack ADT.
+
+\begin{figure}
+\xprogfig{Stack.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{The stack ADT}
+{The stack ADT.}{StackADT}
+\vspace{-\smallskipamount}
+\end{figure}
+
+As with lists, there are many variations on stack implementation.
+The two approaches presented here are \defit{array-based} and
+\defit{linked stacks}, 
+which are analogous to array-based and linked lists, respectively.
+
+\subsection{Array-Based Stacks}
+
+\index{stack!array-based|(}
+Figure~\ref{AStackDef} shows a complete implementation for
+the array-based stack class.
+As with the array-based list\index{list!array-based} implementation,
+\Cref{listArray} must be declared of fixed size when the stack is
+created.
+In the stack constructor\index{stack!constructor}, \Cref{size} serves
+to indicate this size.
+Method \Cref{top}\index{stack!top} acts somewhat like a current
+position value (because the ``current'' position is always at the top
+of the stack), as well as indicating the number of elements
+currently in the stack.
+
+
+\begin{figure}
+\xprogfig{AStack.book}
+\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+\capt{4.5in}{Array-based stack class implementation}
+{Array-based stack class implementation.}{AStackDef}
+\vspace{-\smallskipamount}
+\end{figure}
+
+The\index{stack!top|(} array-based stack implementation is essentially
+a simplified version of the array-based list.
+The only important design decision to be made is which end of the
+array should represent the top of the stack.
+One choice is to make the top be at position~0 in the array.
+In terms of list functions, all \Cref{insert} and \Cref{remove}
+operations would then be on the element in position~0.
+This implementation is inefficient, because now every
+\Cref{push}\index{stack!push} or \Cref{pop}\index{stack!pop}
+operation will require that all elements currently in the stack be
+shifted one position in the array, for a cost of \Thetan\ if there
+are $n$~elements.
+The other choice is have the top element be at position~$n-1$ when
+there are $n$~elements in the stack.
+In other words, as elements are pushed onto the stack, they are
+appended to the tail of the list.
+Method \Cref{pop} removes the tail element.
+In this case, the cost for each \Cref{push} or \Cref{pop} operation
+is only \Thetaone.
+
+For the implementation of Figure~\ref{AStackDef},
+\Cref{top} is defined to be the array index of the
+first free position in the stack.
+Thus, an empty stack has \Cref{top} set to~0, the first available
+free position in the array.
+(Alternatively, \Cref{top} could have been defined to be
+the index for the top element in the stack, rather than the
+first free position.
+If this had been done, the empty list would initialize \Cref{top}
+as~$-1$.)
+Methods \Cref{push}\index{stack!push} and \Cref{pop}\index{stack!pop}
+simply place an element into, or remove an element from, the array
+position indicated by \Cref{top}.
+Because \Cref{top} is assumed to be at the first free position,
+\Cref{push} first inserts its value into the top position and then
+increments \Cref{top}, while \Cref{pop} first decrements \Cref{top}
+and then removes the top element.
+\index{stack!top|)}
+\index{stack!array-based|)}
+
+\newpage
+
+\subsection{Linked Stacks}
+
+\begin{figure}
+\xprogfig{LStack.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Linked stack class implementation}
+{Linked stack class implementation.}{LStackDef}
+\ifthenelse{\boolean{java}}{\vspace{-\medskipamount}}{}
+\end{figure}
+
+The\index{stack!linked} linked stack implementation is quite simple.
+The freelist\index{freelist} of Section~\ref{freelist} is an example
+of a linked stack.
+Elements are inserted and removed only from the head of the list.
+A header node is not used because no special-case code is required
+for lists of zero or one elements.\index{header node}
+Figure~\ref{LStackDef} shows the complete linked stack
+implementation.
+The only data member is \Cref{top}\index{stack!top}, a pointer to the
+first (top) link node of the stack.
+Method \Cref{push}\index{stack!push} first modifies the \Cref{next}
+field of the newly created link node to point to the top of the
+stack and then sets \Cref{top}\index{stack!top} to point to the new
+link node.
+Method \Cref{pop}\index{stack!pop} is also quite simple.
+Variable \Cref{temp} stores the top nodes' value,
+while \Cref{ltemp} links to the top node as it is removed from
+the stack.
+The stack is updated by setting \Cref{top} to point to the
+next link in the stack.
+The old top node is then returned to free store (or the freelist), and
+the element value is returned.\index{stack!linked}
+
+\subsection{Comparison of Array-Based and Linked Stacks}
+
+\index{stack!implementations compared}
+All operations for the array-based and linked stack implementations
+take constant time, so from a time efficiency perspective, neither has
+a significant advantage.
+Another basis for comparison is the total space
+required.\index{overhead!stack}
+The analysis is similar to that done for list implementations.
+The array-based stack must declare a fixed-size array initially, and
+some of that space is wasted whenever the stack is not full.
+The linked stack can shrink and grow but requires the overhead of a
+link field for every element.
+
+When multiple stacks\index{stack!two in one array} are to be
+implemented, it is possible to take advantage of the one-way growth of
+the array-based stack.
+This can be done by using a single array to store two stacks.
+One stack grows inward from each end as illustrated by
+Figure~\ref{TwoArrayStacks}, hopefully leading to less wasted space.
+However, this only works well when the space requirements of the two
+stacks are inversely correlated.
+In other words, ideally when one stack grows, the other will shrink.
+This is particularly effective when elements are taken from
+one stack and given to the other.
+If~instead both stacks grow at the same time, then the free space
+in the middle of the array will be exhausted
+quickly.\index{stack!implementations compared}
+
+\begin{figure}
+\pdffig{TwoArray}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{Two stacks implemented within a single array}
+{Two stacks implemented within in a single array, both growing toward
+the middle.}
+{TwoArrayStacks}
+\smallskip
+\end{figure}
+
+\subsection{Implementing Recursion}
+\label{ImpRecur}
+
+\index{recursion!implemented by stack|(}
+Perhaps the most common computer application that uses stacks is not
+even visible to its users.
+This is the implementation of subroutine calls in most programming
+language runtime environments.
+A subroutine call is normally implemented by placing necessary
+information about the subroutine (including the return address,
+parameters, and local variables) onto a stack.
+This information is called an
+\defit{activation record}.\index{compiler!activation record}
+Further subroutine calls add to the stack.
+Each return from a subroutine pops the top activation record
+off the stack.
+Figure~\ref{RecurStack} illustrates the implementation of
+the recursive factorial function of Section~\ref{Recurse}
+from the runtime environment's point of view.
+
+\begin{figure}
+\pdffig{RecurSta}
+\smallskip
+
+\capt{4.5in}{Implementing recursion with a stack}
+{Implementing recursion\index{recursion} with a stack.
+$\beta$ values indicate the address of the program instruction to
+return to after completing the current function call.
+On each recursive function call to \Cref{fact}
+(as implemented in Section~\ref{Recurse}), both the return
+address and the current value of \Cref{n} must be saved.
+Each return from \Cref{fact} pops the top activation record off the
+stack.
+}{RecurStack}
+\bigskip
+\end{figure}
+
+Consider what happens when we call \Cref{fact} with the value~4.
+We use \(\beta\) to indicate the address of the program instruction
+where the call to \Cref{fact} is made.
+Thus, the stack must first store the address \(\beta\), and the
+value~4 is passed to \Cref{fact}.
+Next, a recursive call to \Cref{fact} is made, this time with value~3.
+We will name the program address from which the call is
+made~\(\beta_1\).
+The address~\(\beta_1\), along with the current value for~\(n\)
+(which is~4), is saved on the stack.
+Function \Cref{fact} is invoked with input parameter~3.
+
+In similar manner, another recursive call is made with input
+parameter~2, requiring that the address from which the call is made
+(say \(\beta_2\)) and the current value for \(n\) (which is~3) are
+stored on the stack.
+A final recursive call with input parameter~1 is made, requiring that
+the stack store the calling address (say \(\beta_3\)) and current
+value (which is~2).
+
+At this point, we have reached the base case for \Cref{fact}, and so
+the recursion begins to unwind.
+Each return from \Cref{fact} involves popping the stored value for
+\(n\) from the stack, along with the return address from the function
+call.
+The return value for \Cref{fact} is multiplied by the restored value
+for \(n\), and the result is returned.
+
+Because an activation record must be created and placed onto the stack
+for each subroutine call, making subroutine calls is a relatively
+expensive operation. 
+While recursion is often used to make implementation easy and clear,
+sometimes you might want to eliminate the overhead imposed by the
+recursive function calls.
+In some cases, such as the factorial\index{factorial function}
+function of Section~\ref{Recurse},
+recursion can easily be replaced by iteration.
+\index{recursion!replaced by iteration}
+
+\begin{example}
+\label{StackFact}
+As a simple example of replacing recursion with a stack, consider the
+following non-recursive version of the factorial
+function.\index{factorial function}
+
+\vspace{-\medskipamount}
+
+\xprogexamp{sfact.book}
+
+\noindent Here, we simply push successively smaller values of $n$ onto
+the stack until the base case is reached, then repeatedly pop off the
+stored values and multiply them into the result.
+\end{example}
+
+An iterative form of the factorial function is both
+simpler and faster than the version shown in Example~\ref{StackFact}.
+But it is not always possible to replace recursion with iteration.
+Recursion, or some imitation of it, is necessary when implementing
+algorithms that require multiple branching such as in the Towers of
+Hanoi\index{towers of hanoi@Towers of Hanoi} algorithm, or when
+traversing\index{traversal!binary tree} a binary tree.
+The Mergesort\index{mergesort@Mergesort} and
+Quicksort\index{quicksort@Quicksort} algorithms of
+Chapter~\ref{InSort} are also examples in which recursion is required.
+Fortunately, it is always possible to imitate recursion with a stack.
+Let us now turn to a non-recursive version of the Towers of
+Hanoi function, which cannot be done iteratively.
+
+\begin{example}
+The \Cref{TOH} function shown in Figure~\ref{TOH}
+makes two recursive calls: one to move $n-1$ rings off the bottom
+ring, and another to move these $n-1$ rings back to the goal pole.
+We can eliminate the recursion by using a stack to store a
+representation of the three operations that \Cref{TOH} must perform:
+two recursive calls and a move operation.
+To do so, we must first come up with a representation of the various
+operations, implemented as a class whose objects will be stored on the
+stack.
+
+Figure~\ref{TOHstack} shows such a class.
+We first define an enumerated type called \Cref{TOHop}, with two
+values MOVE and TOH, to indicate calls to the \Cref{move} function and
+recursive calls to \Cref{TOH}, respectively.
+Class \Cref{TOHobj} stores five values: an operation field (indicating
+either a move or a new TOH operation), the number of rings, and the
+three poles.
+Note that the move operation actually needs only to store information
+about two poles.
+Thus, there are two constructors: one to store the state when
+imitating a recursive call, and one to store the state for a move
+operation.
+
+\begin{figure}
+\xprogfig{operation.book}
+
+\xprogfig{TOHobj.book}
+\bigskip
+
+\xprogfig{TOHstack.book}
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Stack-based Towers of Hanoi}
+{Stack-based implementation for Towers of Hanoi.}{TOHstack}
+\smallskip
+\end{figure}
+
+An array-based stack is used because we know that the stack
+will need to store exactly $2n+1$ elements.
+The new version of \Cref{TOH} begins by placing on the stack a
+description of the initial problem for $n$ rings.
+The rest of the function is simply a \Cref{while} loop that pops the
+stack and executes the appropriate operation.
+In the case of a \Cref{TOH} operation (for $n>0$), we store on the
+stack representations for the three operations executed by the
+recursive version.
+However, these operations must be placed on the stack in reverse
+order, so that they will be popped off in the correct order.
+\end{example}
+
+Recursive algorithms lend themselves to
+efficient implementation with a stack when the amount of
+information needed to describe a sub-problem is small.
+For example, Section~\ref{QuickSort} discusses a
+stack-based implementation for Quicksort.
+\index{recursion!implemented by stack|)}
+\index{stack|)}
+
+\section{Queues}
+\label{Queues}
+
+\index{queue|(}
+Like the stack, the \defit{queue} is a list-like structure that
+provides restricted access to its elements.\index{queue!terminology}
+Queue elements may only be inserted at the back (called an
+\defit{enqueue}\index{queue!enqueue} operation) and removed from the
+front (called a \defit{dequeue}\index{queue!dequeue} operation).
+Queues operate like standing in line at a movie theater ticket
+counter.\footnote{In Britain, a line of people is called a
+``queue,'' and getting into
+line to wait for service is called ``queuing up.''}
+If nobody cheats, then newcomers go to the back of the line.
+The person at the front of the line is the next to be served.
+Thus, queues release their elements in order of arrival.
+Accountants have used queues since long before the
+existence of computers.\index{accounting}
+They call a queue a ``FIFO'' list, which stands for ``First-In,
+First-Out.''\index{fifo list@FIFO list}
+Figure~\ref{QueueADT} shows a sample queue ADT.
+This section presents two implementations for queues:
+the array-based queue and the linked queue.
+
+\begin{figure}
+\xprogfig{Queue.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{\Lang\ ADT for a queue}
+{The \Lang\ ADT for a queue.}{QueueADT}
+\end{figure}
+
+
+\subsection{Array-Based Queues}
+\label{AQueue}
+
+\index{queue!array-based|(}
+The array-based queue is somewhat tricky to implement effectively.
+A simple conversion of the array-based list implementation is not
+efficient.
+
+Assume that there are $n$ elements in the queue.
+By analogy to the array-based list implementation, we could require
+that all elements of the queue be stored in the first $n$ positions of
+the array.
+If we choose the rear element of the queue to be in position 0,
+then \Cref{dequeue}\index{queue!dequeue} operations require only
+\Thetaone\ time because the front element of the queue (the one being
+removed) is the last element in the array.
+However, \Cref{enqueue}\index{queue!enqueue} operations will require
+\Thetan\ time, because the $n$ elements currently in the queue must
+each be shifted one position in the array.
+If~instead we chose the rear element of the queue to be in
+position~$n-1$, then an \Cref{enqueue} operation is equivalent to an
+\Cref{append} operation on a list.
+This requires only \Thetaone\ time.
+But now, a \Cref{dequeue} operation requires \Thetan\ time, because
+all of the elements must be shifted down by one position to retain
+the property that the remaining $n-1$ queue elements reside in the
+first $n-1$ positions of the array.
+
+\index{queue!circular|(}
+A far more efficient implementation can be obtained by relaxing the
+requirement that all elements of the queue must be in the first
+$n$~positions of the array.
+We will still require that the queue be stored be in contiguous array
+positions, but the contents of the queue will be permitted to drift
+within the array, as illustrated by Figure~\ref{BadQueue}.
+Now, both the \Cref{enqueue} and the \Cref{dequeue} operations can be
+performed in \Thetaone\ time because no other elements in the queue
+need be moved.
+
+\begin{figure}
+\pdffig{BadQueue}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Queue elements will drift to the back of the array}
+{After repeated use, elements in the array-based queue will drift to
+the back of the array.
+(a)~The queue after the initial four numbers 20, 5, 12, and 17 have been
+inserted.
+(b)~The queue after elements~20 and 5 are deleted, following which 3,
+30, and 4 are inserted.}
+{BadQueue}
+\medskip
+\end{figure}
+
+This implementation raises a new problem.
+Assume that the front element of the queue is initially at
+position~0, and that elements are added to successively
+higher-numbered positions in the array.
+When elements are removed from the queue, the front index increases.
+Over time, the entire queue will drift toward the
+higher-numbered positions in the array.
+Once an element is inserted into the highest-numbered position
+in the array, the queue has run out of space.
+This happens despite the fact that there might be free positions at
+the low end of the array where elements have previously been removed
+from the queue.
+
+The ``drifting queue'' problem can be solved by pretending that the
+array is circular and so allow the queue to continue directly from
+the highest-numbered position in the array to the lowest-numbered
+position.
+This is easily implemented through use of the modulus operator
+(denoted by \Cref{\%} in \Lang).
+In this way, positions in the array are numbered from 0 through
+\Cref{size}$-1$, and position \Cref{size}$-1$ is defined to
+immediately precede position 0 (which is equivalent
+to position \Cref{size \% size}).
+Figure~\ref{GoodQueue} illustrates this solution.
+
+\begin{figure}
+\pdffig{GoodQ}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{The circular queue}
+{The circular queue with array positions increasing in the clockwise
+direction.
+(a)~The queue after the initial four numbers 20, 5, 12, and 17 have been
+inserted.
+(b)~The queue after elements~20 and 5 are deleted, following which 3,
+30, and 4 are inserted.}{GoodQueue}
+\bigskip
+\end{figure}
+
+\index{queue!empty vs. full|(}
+There remains one more serious, though subtle, problem to the
+array-based queue implementation.
+How can we recognize when the queue is empty or full?
+Assume that \Cref{front} stores the array index for the front element
+in the queue, and \Cref{rear} stores the array index for the rear
+element.
+If both \Cref{front} and \Cref{rear} have the same position, then
+with this scheme there must be one element in the queue.
+Thus, an empty queue would be recognized by having \Cref{rear} be
+\emph{one less} than \Cref{front} (taking into account the fact that
+the queue is circular, so position \Cref{size}$-1$ is actually
+considered to be one less than position 0).
+But what if the queue is completely full?
+In other words, what is the situation when a queue with $n$~array
+positions available contains $n$~elements?
+In this case, if the front element is in position~0, then the rear
+element is in position \Cref{size}$-1$.
+But this means that the value for \Cref{rear} is one less than the
+value for \Cref{front} when the circular nature of the queue is taken
+into account.
+In other words, the full queue is indistinguishable from the empty
+queue!
+
+You might think that the problem is in the assumption about
+\Cref{front} and \Cref{rear} being defined to store the array indices
+of the front and rear elements, respectively, and that some
+modification in this definition will allow a solution.
+Unfortunately, the problem cannot be remedied by a simple change to
+the definition for \Cref{front} and \Cref{rear}, because of
+the number of conditions or \defit{states} that the queue can be in.
+Ignoring the actual position of the first element, and ignoring the
+actual values of the elements stored in the queue, how many different
+states are there?
+There can be no elements in the queue, one element, two, and so on.
+At most there can be $n$~elements in the queue if there are $n$~array
+positions.
+This means that there are $n+1$~different states for the queue
+(0~through $n$~elements are possible).
+
+If the value of \Cref{front} is fixed, then $n+1$~different
+values for \Cref{rear} are needed to distinguish among the $n+1$~states.
+However, there are only $n$~possible values for \Cref{rear} unless we
+invent a special case for, say, empty queues.
+This is an example of the
+Pigeonhole Principle\index{pigeonhole principle@Pigeonhole Principle}
+defined in Exercise~\ref{MathPre}.\ref{pigeon}.
+The Pigeonhole Principle states that, given \(n\) pigeonholes
+and \(n+1\) pigeons, when all of the pigeons go into the holes we
+can be sure that at least one hole contains more than one pigeon.
+In similar manner, we can be sure that two of the $n+1$ states are
+indistinguishable by the \(n\) relative values of \Cref{front} and
+\Cref{rear}.
+We must seek some other way to distinguish full from empty queues.
+
+One obvious solution is to keep an explicit count of the number of
+elements in the queue, or at least a Boolean variable that indicates
+whether the queue is empty or not.
+Another solution is to make the array be of size~$n+1$, and only allow
+$n$~elements to be stored.
+Which of these solutions to adopt is purely a matter of the
+implementor's taste in such affairs.
+My choice is to use an array of size~$n+1$.
+\index{queue!empty vs. full|)}
+\index{queue!circular|)}
+
+\begin{figure}
+\xprogfig{AQueue.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Array-based queue implementation}
+{An array-based queue implementation.}{AQueueDef}
+\end{figure}
+
+Figure~\ref{AQueueDef} shows an array-based queue implementation.
+\Cref{listArray} holds the queue elements, and as usual, the
+queue constructor allows an optional parameter to set the maximum size
+of the queue.
+The array as created is actually large enough to hold one element more
+than the queue will allow, so that empty queues can be distinguished
+from full queues.
+Member \Cref{maxSize} is used to control the circular motion of the
+queue (it is the base for the modulus operator).
+Member \Cref{rear} is set to the position of the current rear element,
+while \Cref{front} is the position of the current front element.
+
+In this implementation, the front of the queue is defined to be toward
+the lower numbered positions in the array (in the counter-clockwise
+direction in Figure~\ref{GoodQueue}), and the rear is
+defined to be toward the higher-numbered positions.
+Thus, \Cref{enqueue} increments the rear pointer (modulus \Cref{size}),
+and \Cref{dequeue} increments the front pointer.
+Implementation of all member functions is straightforward.
+\index{queue!array-based|)}
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+\subsection{Linked Queues}
+
+\begin{figure}
+\xprogfig{LQueue.book}
+
+\vspace{-\medskipamount}
+\capt{4.5in}{Linked queue class implementation}
+{Linked queue class implementation.\index{queue!linked}}{LQueueDef}
+\end{figure}
+
+\index{queue!linked}
+The linked queue implementation is a straightforward adaptation
+of the linked list.
+Figure~\ref{LQueueDef} shows the linked queue class declaration.
+Methods \Cref{front} and \Cref{rear} are pointers to the front and
+rear queue elements, respectively.
+We will use a header link node,\index{header node} which allows for a
+simpler implementation of the enqueue operation by avoiding any
+special cases when the queue is empty.
+On initialization, the \Cref{front} and \Cref{rear} pointers will
+point to the header node, and front will always point to the header
+node while rear points to the true last link node in the queue.
+Method \Cref{enqueue} places the new element in a link
+node at the end of the linked list (i.e., the node that \Cref{rear}
+points to) and then advances \Cref{rear} to point to the new link node.
+Method \Cref{dequeue}\index{queue!dequeue} removes and returns the
+first element of the list.
+\index{queue!linked}
+
+\subsection{Comparison of Array-Based and Linked Queues}
+
+\index{queue!implementations compared}
+All member functions for both the array-based and linked queue
+implementations require constant time.
+The space comparison issues are the same as for the equivalent stack
+implementations.
+Unlike the array-based stack implementation, there is no convenient
+way to store two queues in the same array,
+unless items are always transferred directly from one queue to the other.
+\index{queue!implementations compared}
+\index{queue|)}
+
+\section{Dictionaries}
+\label{Dictionary}
+
+\index{abstract data type (ADT)|(}
+\index{dictionary!ADT|(}
+\index{key|(}
+The most common objective of computer programs is to store and
+retrieve data.
+Much of this book is about efficient ways to organize collections of
+data records so that they can be stored and retrieved quickly.
+In this section we describe a simple interface for such a collection,
+called a \defit{dictionary}.
+The dictionary ADT provides operations for storing records, finding
+records, and removing records from the collection.
+This ADT gives us a standard basis for comparing various data
+structures.
+
+Before we can discuss the interface for a dictionary, we must
+first define the concepts of a \defit{key} and \defit{comparable}
+objects.
+If we want to search for a given record in a database, how should we
+describe what we are looking for?
+A database record could simply be a number, or it could be quite
+complicated, such as a payroll record with many fields of varying
+types.
+We do not want to describe what we are looking for by detailing and
+matching the entire contents of the record.
+If we knew everything about the record already, we probably would not
+need to look for it.
+Instead, we typically define what record we want in terms of a
+key value.
+For example, if searching for payroll records, we might wish to
+search for the record that matches a particular ID number.
+In this example the ID number is the \defit{search key}.
+
+To implement the search function, we require that keys be comparable.
+At a minimum, we must be able to take two keys and reliably determine
+whether they are equal or not.
+That is enough to enable a sequential search through a database of
+records and find one that matches a given key.
+However, we typically would like for the keys to define a
+total order (see Section~\ref{SetDef}), which means that we can tell
+which of two keys is greater than the other.
+Using key types with total orderings gives the database
+implementor the opportunity to organize a collection of records in
+a way that makes searching more efficient.
+An example is storing the records in sorted order in an array, which
+permits a binary search.
+Fortunately, in practice most fields of most records consist of
+simple data types with natural total orders.
+For example, integers, floats, doubles, and character strings all are
+totally ordered.
+Ordering fields that are naturally multi-dimensional, such as a point
+in two or three dimensions, present special opportunities if we wish
+to take advantage of their multidimensional nature.
+This problem is addressed in Section~\ref{Spatial}.
+
+\begin{figure}
+\xprogfig{Dictionary.book}
+\ifthenelse{\boolean{java}}{\vspace{-\bigskipamount}}{}
+
+\capt{4.5in}{Dictionary ADT}
+{The ADT for a simple dictionary.}{DictDef}
+\end{figure}
+
+Figure~\ref{DictDef} shows the definition for a simple abstract
+dictionary class.
+The methods \Cref{insert} and \Cref{find} are the heart of the
+class.
+Method \Cref{insert} takes a record and
+inserts it into the dictionary.
+Method \Cref{find} takes a key value and returns some record from
+the dictionary whose key matches the one provided.
+If there are multiple records in the dictionary with that key value,
+there is no requirement as to which one is returned.
+
+Method \Cref{clear} simply re-initializes the dictionary.
+The \Cref{remove} method is similar to \Cref{find}, except that it
+also deletes the record returned from the dictionary.
+Once again, if there are multiple records in the dictionary that match
+the desired key, there is no requirement as to which one actually is
+removed and returned.
+Method \Cref{size} returns the number of elements in the
+dictionary.
+
+The remaining Method is \Cref{removeAny}.
+This is similar to \Cref{remove}, except that it does not take a key
+value.
+Instead, it removes an arbitrary record from the dictionary, if one
+exists.
+The purpose of this method is to allow a user the ability to iterate 
+over all elements in the dictionary (of course, the dictionary will
+become empty in the process).
+Without the \Cref{removeAny} method, a dictionary user could not get
+at a record of the dictionary that he didn't already know the key
+value for.
+With the \Cref{removeAny} method, the user can process all records
+in the dictionary as shown in the following code fragment.
+
+\xproghere{ch4p4.book}
+
+There are other approaches that might seem more natural for iterating
+though a dictionary, such as using a ``first'' and a ``next'' function.
+But not all data structures that we want to use to implement a
+dictionary are able to do ``first'' efficiently.
+For example, a hash table implementation cannot efficiently locate the
+record in the table with the smallest key value.
+By using \Cref{RemoveAny}, we have a mechanism that provides generic
+access.
+
+Given a database storing records of a particular type,
+we might want to search for records in multiple ways.
+For example, we might want to store payroll records in one dictionary
+that allows us to search by ID,
+and also store those same records in a second dictionary that
+allows us to search by name.
+
+Figure~\ref{Payroll} shows an implementation for a payroll record.
+Class \Cref{Payroll} has multiple fields, each of which might be
+used as a search key.
+Simply by varying the type for the key, and using the appropriate
+field in each record as the key value,
+we can define a dictionary whose search key is the ID field,
+another whose search key is the name field, and a third whose search
+key is the address field.
+Figure~\ref{Payroll2} shows an example where \Cref{Payroll} objects
+are stored in two separate dictionaries, one using the
+ID field as the key and the other using the name field as the key.
+\index{key|)}
+
+\begin{figure}
+\xprogfig{Payroll.book}
+\vspace{-\medskipamount}
+\capt{4.5in}{Payroll record implementation}
+{A payroll record implementation.}{Payroll}
+\ifthenelse{\boolean{cpp}}{\medskip}{}
+\end{figure}
+
+\begin{figure}
+\xprogfig{PayrollMain.book}
+\capt{4.5in}{Dictionary search example}
+{A dictionary search example.
+Here, payroll records are stored in two dictionaries, one organized by
+ID and the other organized by name.
+Both dictionaries are implemented with an unsorted
+array-based list.}{Payroll2}
+\medskip
+\end{figure}
+
+The fundamental operation for a dictionary is finding a record that
+matches a given key.
+This raises the issue of how to extract the key from a record.
+We would like any given dictionary implementation to support arbitrary
+record types, so we need some mechanism for extracting keys that is
+sufficiently general.
+One approach is to require all record types to support some particular
+method that returns the key value.
+For example, in Java the \Cref{Comparable} interface can be used to
+provide this effect.
+Unfortunately, this approach does not work when the same record type is
+meant to be stored in multiple dictionaries, each keyed by a different
+field of the record.
+This is typical in database applications.
+Another, more general approach is to supply a class whose job is to
+extract the key from the record.
+Unfortunately, this solution also does not work in all situations,
+because there are record types for which it is not possible to write
+a key extraction method.\footnote{One example of such a situation occurs
+when we have a collection of records that describe books in a library.
+One of the fields for such a record might be a list of subject
+keywords, where the typical record stores a few keywords.
+Our dictionary might be implemented as a list of records sorted by
+keyword.
+If a book contains three keywords, it would appear three times on the
+list, once for each associated keyword.
+However, given the record, there is no simple way to determine which
+keyword on the keyword list triggered this appearance of the record.
+Thus, we cannot write a function that extracts the key from such a
+record.}
+
+The fundamental issue is that the key value for a record is not an
+intrinsic property of the record's class, or of any field within the
+class.
+The key for a record is actually a property of the context in which
+the record is used.
+
+\begin{figure}
+\xprogfig{KVpair.book}
+
+\vspace{-\bigskipamount}
+\capt{4.5in}{Key-value pair}
+{Implementation for a class representing a key-value pair.}{KVpair}
+\end{figure}
+
+A truly general alternative is to explicitly store the key associated
+with a given record, as a separate field in the dictionary.
+That is, each entry in the dictionary will contain both a record and
+its associated key.
+Such entries are known as key-value pairs.
+It is typical that storing the key explicitly duplicates some field in
+the record.
+However, keys tend to be much smaller than records, so this additional
+space overhead will not be great.
+A simple class for representing key-value pairs is shown in
+Figure~\ref{KVpair}.
+The \Cref{insert} method of the dictionary class supports the
+key-value pair implementation because it takes two parameters, a record
+and its associated key for that dictionary.
+
+Now that we have defined the dictionary ADT and settled on the design
+approach of storing key-value pairs for our dictionary entries, we are
+ready to consider ways to implement it.
+Two possibilities would be to use an array-based or linked list.
+Figure~\ref{UALdict} shows an implementation for the dictionary using
+an (unsorted) array-based list.
+
+\begin{figure}
+\xprogfig{UALdict1.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Dictionary implemented with an array-based list}
+{A dictionary implemented with an unsorted array-based list.}{UALdict}
+\end{figure}
+
+\begin{figure}
+\xprogfig{UALdict2.book}
+\captcont
+\vspace{-\medskipamount}
+\end{figure}
+
+Examining class \Cref{UALdict} (UAL stands for ``unsorted array-based
+list), we can easily see that \Cref{insert}
+is a constant-time operation, because it simply inserts the new record
+at the end of the list.
+However, \Cref{find}, and \Cref{remove} both require \Thetan\ time in
+the average and worst cases, because we need to do a sequential search.
+Method \Cref{remove} in particular must touch every record in the
+list, because once the desired record is found, the remaining records
+must be shifted down in the list to fill the gap.
+Method \Cref{removeAny} removes the last record from the list, so
+this is a constant-time operation.
+
+As an alternative, we could implement the dictionary using a linked
+list.
+The implementation would be quite similar to that shown in
+Figure~\ref{UALdict}, and the cost of the functions should be the same
+asymptotically.
+
+\ifthenelse{\boolean{cpp}}
+{\begin{figure}
+\xprogfig{SAlist.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{A sorted array-based list}
+{An implementation for a sorted array-based list.}
+{SortListImpl}
+\end{figure}}{}
+
+\index{list!sorted|(}
+Another alternative would be to implement the dictionary with a sorted 
+list.
+The advantage of this approach would be that we might be able to speed 
+up the \Cref{find} operation by using a binary search.
+To do so, first we must define a variation on the \Cref{List} ADT to
+support sorted lists.\ifthenelse{\boolean{cpp}}
+{An implementation for the array-based sorted list is shown in
+Figure~\ref{SortListImpl}.}{}
+A sorted list is somewhat different from an unsorted list in that it
+cannot permit the user to control where elements get inserted.
+Thus, the \Cref{insert} method must be quite different in a sorted
+list than in an unsorted list.
+Likewise, the user cannot be permitted to append elements onto the
+list.
+For these reasons, a sorted list cannot be implemented with
+straightforward inheritance from the \Cref{List}
+ADT.\index{inheritance}
+
+\ifthenelse{\boolean{cpp}}
+{Class \Cref{SAList} (SAL stands for ``sorted array-based list'')
+does inherit from class \Cref{AList}; however it
+does so using class \Cref{AList} as a protected base
+class.\index{inheritance}
+This means that \Cref{SAList} has available for its use any member
+functions of \Cref{AList}, but those member functions are not
+necessarily available to the user of \Cref{SAList}.
+However, many of the \Cref{AList} member functions are useful to the
+\Cref{SALlist} user.
+Thus, most of the \Cref{AList} member functions are passed along
+directly to the \Cref{SAList} user without change.
+For example, the line
+
+\newpage
+
+\begin{progenv}
+AList<KVpair<Key,E> >::remove;
+\end{progenv}
+
+\noindent provides \Cref{SAList}'s clients with access to the
+\Cref{remove} method of \Cref{AList}.
+However, the original \Cref{insert} method from class \Cref{AList}
+is replaced, and the \Cref{append} method of \Cref{AList} is kept
+hidden.
+
+\begin{figure}
+\xprogfig{SALdict1.book}
+\vspace{-\bigskipamount}
+\capt{4.5in}{Dictionary implemented with a sorted array-based list}
+{Dictionary implementation using a sorted array-based list.}{SALdict}
+\end{figure}
+
+\begin{figure}
+\xprogfig{SALdict2.book}
+\captcont
+\end{figure}
+
+The dictionary ADT can easily be implemented from class \Cref{SAList},
+as shown in Figure~\ref{SALdict}.
+Method \Cref{insert} for the dictionary simply calls the \Cref{insert}
+method of the sorted list.
+Method \Cref{find} uses a generalization of the binary search
+function originally shown in Section~\ref{ProgTimeSec}.}{}
+The cost for \Cref{find} in a sorted list is \Thetalogn\ for a list of
+length \(n\).
+This is a great improvement over the cost of \Cref{find} in an
+unsorted list.
+Unfortunately, the cost of \Cref{insert} changes from constant time in 
+the unsorted list to \Thetan\ time in the sorted list.
+Whether the sorted list implementation for the dictionary ADT is more
+or less efficient than the unsorted list implementation depends on the
+relative number of
+\Cref{insert} and \Cref{find} operations to be performed.
+If many more \Cref{find} operations than \Cref{insert} operations are
+used, then it might be worth using a sorted list to implement the
+dictionary.
+In both cases, \Cref{remove} requires \Thetan\ time in the worst and
+average cases.
+Even if we used binary search to cut down on the time to find the
+record prior to removal, we would still need to shift down the
+remaining records in the list to fill the gap left by the
+\index{list!sorted|)}
+\index{dictionary!ADT|)}
+\index{abstract data type (ADT)|)}
+\Cref{remove} operation.
+
+Given two keys, we have not properly addressed the issue of
+how to compare them.
+One possibility would be to simply use the basic
+\Cref{==}, \Cref{<=}, and \Cref{>=} operators built into \Lang.
+This is the approach taken by our implementations for dictionaries
+shown
+in\ifthenelse{\boolean{cpp}}{Figures~\ref{UALdict} and~\ref{SALdict}.}{}
+\ifthenelse{\boolean{java}}{Figure~\ref{UALdict}.}{}
+If the key type is \Cref{int}, for example, this will work fine.
+However, if the key is a pointer to a string or any other type of
+object, then this will not give the desired result.
+When we compare two strings we probably want to know which comes first
+in alphabetical order, but what we will get from the standard
+comparison operators is simply which object appears first in memory.
+Unfortunately, the code will compile fine, but the answers probably
+will not be fine.
+
+In a language like \LangCPP\ that supports operator overloading,
+we could require that the user of the dictionary overload the
+\Cref{==}, \Cref{<=}, and \Cref{>=} operators for the given key type.
+This requirement then becomes an obligation on the user of the
+dictionary class.\index{obligations, hidden}
+Unfortunately, this obligation is hidden within the code of the
+dictionary (and possibly in the user's manual) rather than exposed in
+the dictionary's interface.
+As a result, some users of the dictionary might neglect to implement
+the overloading, with unexpected results.
+Again, the compiler will not catch this problem.
+
+\ifthenelse{\boolean{java}}
+{The Java \Cref{Comparable} interface provides an approach to solving
+this problem.
+In a key-value pair implementation, the keys can be required to
+implement the \Cref{Comparable} interface.
+In other applications, the records might be required to implement
+\Cref{Comparable}}{}
+
+The most general solution is to have users supply their own
+definition for comparing keys.
+The concept of a class that does comparison (called a
+\defit{comparator}) is quite important.
+By making these operations be \Gen\ parameters, the requirement to
+supply the comparator class becomes part of the
+interface.
+This design is an example of the Strategy design pattern, because the 
+``strategies'' for comparing and getting keys from records
+are provided by the client.\index{design pattern!strategy}
+\ifthenelse{\boolean{java}}
+{Alternatively, the \Cref{Comparable} class allows the user to define
+the comparator by implementing the \Cref{compareTo} method.}{}
+In some cases, it makes sense for the comparator class to
+extract the key from the record type, as an alternative to storing
+key-value pairs.
+
+\ifthenelse{\boolean{cpp}}
+{Here is an example of the required class for comparing two integers.
+
+\xproghere{intcomp.book}
+
+\noindent Class \Cref{intintCompare} provides methods for
+determining if two \Cref{int} variables are equal (\Cref{eq}),
+or if the first is less than the second (\Cref{lt}), or greater than
+the second (\Cref{gt}). 
+
+Here is a class for comparing two C-style character strings.
+It makes use of the standard library function \Cref{strcmp}
+to do the actual comparison.
+
+\xproghere{cccomp1.book}}{}
+
+We will
+use\ifthenelse{\boolean{cpp}}{a comparator}{}
+\ifthenelse{\boolean{java}}{the \Cref{Comparable} interface}{}
+in Section~\ref{HeapSec} to implement comparison in heaps,
+and in Chapter~\ref{InSort} to implement comparison in sorting algorithms.
+
+\section{Further Reading}
+
+For more discussion on choice of functions used to define the
+\Cref{List} ADT\index{abstract data type (ADT)},
+see the work of the
+Reusable Software Research Group from Ohio State.
+Their definition for the \Cref{List} ADT can be found
+in~\cite{OhioStateADT}.
+More information about designing such classes can be found
+in~\cite{Resolve}.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Assume a list has the following configuration:\index{list}
+\[\langle\ |\ 2,\ 23,\ 15,\ 5,\ 9\ \rangle.\]
+Write a series of \Lang\ statements using the \Cref{List}
+ADT\index{abstract data type (ADT)}\index{list!adt@ADT}
+of Figure~\ref{ListDef} to delete the element with value 15.
+
+\item
+Show the list configuration resulting from each series of list
+operations using the \Cref{List} ADT of
+Figure~\ref{ListDef}.\index{list}
+Assume that lists \Cref{L1} and \Cref{L2} are empty at the beginning
+of each series.
+Show where the current position is in the list.
+
+\begin{enumerate}
+\item \xprogexer{ch4p2.book}
+
+\item \xprogexer{ch4p3.book}
+
+\end{enumerate}
+
+\item
+Write a series of \Lang\ statements that uses the \Cref{List} ADT of
+Figure~\ref{ListDef} to create a
+list capable of holding twenty elements and which actually stores the
+list with the following configuration:\index{list}
+\[\langle\ 2,\ 23\ |\ 15,\ 5,\ 9\ \rangle.\]
+
+\item
+Using the list ADT of Figure~\ref{ListDef}, write a function to
+interchange the current element and the one following it.\index{list}
+
+\item
+\label{FenceExer}
+In the linked list implementation presented in
+Section~\ref{LinkedList}, the current position is implemented using a
+pointer to the element ahead of the logical current node.
+The more ``natural'' approach might seem to be to have \Cref{curr}
+point directly to the node containing the current element.
+However, if this was done, then the pointer of the node preceding the
+current one cannot be updated properly because there is
+no access to this node from \Cref{curr}.
+An alternative is to add a new node \emph{after} the current element,
+copy the value of the current element to this new node,
+and then insert the new value into the old current node.
+
+\begin{enumerate}
+\item
+What happens if \Cref{curr} is at the end of the list already?
+Is there still a way to make this work?
+Is the resulting code simpler or more complex than the implementation
+of Section~\ref{LinkedList}?
+
+\item
+Will deletion always work in constant time if \Cref{curr} points
+directly to the current node?
+In particular, can you make several deletions in a row?
+
+\end{enumerate}
+
+\item
+Add to the \Cref{LList} class implementation a member function
+to reverse the order of the elements on the list.
+Your algorithm should run in \Thetan\ time for a list of $n$
+elements.\index{list}
+
+\item
+Write a function to merge two linked lists.
+The input lists have their elements in sorted order, from lowest to
+highest.
+The output list should also be sorted from lowest to highest.
+Your algorithm should run in linear time on the length of the output
+list.
+
+\item
+A \defit{circular linked list} is one in which the \Cref{next} field
+for the last link node of the list points to the first link node of
+the list.
+This can be useful when you wish to have a relative positioning
+for elements, but no concept of an absolute first or last position.
+\begin{enumerate}
+\item
+Modify the code of Figure~\ref{LinkListDef} to implement
+circular singly linked lists.\index{list!circular}
+
+\item
+Modify the code of Figure~\ref{DblListImpl} to implement circular
+doubly linked lists.\index{list!circular}\index{list!doubly linked}
+\end{enumerate}
+
+\item
+Section~\ref{CompareLists} states ``the space required by the
+array-based list implementation is \Omegan, but can be greater.''
+Explain why this is so.\index{list}
+
+\item
+Section~\ref{CompareLists} presents an equation for determining the
+break-even point for the space requirements of two implementations of
+lists.\index{list!space requirements}
+The variables are $D$, $E$, $P$, and $n$.
+What are the dimensional units for each variable?
+Show that both sides of the equation balance in terms of their
+dimensional units.
+
+\item
+Use the space equation of Section~\ref{CompareLists} to determine the
+break-even point for an array-based list and linked list
+implementation for lists when the sizes for the data field,
+a pointer, and the array-based list's array are as specified.
+State when the linked list needs less space than the array.
+\begin{enumerate}
+\item The data field is eight bytes, a pointer is four bytes, and the
+array holds twenty elements.
+\item The data field is two bytes, a pointer is four bytes, and the
+array holds thirty elements.
+\item The data field is one byte, a pointer is four bytes, and the
+array holds thirty elements.
+\item The data field is 32 bytes, a pointer is four bytes, and the
+array holds forty elements.
+\end{enumerate}
+\index{list!space requirements}
+
+\item
+Determine the size of an \Cref{int} variable, a \Cref{double}
+variable, and a pointer on your computer.
+\ifthenelse{\boolean{cpp}}
+{(The \Lang\ operator \Cref{sizeof} might be useful here if you do not
+already know the answer.)}{}
+\begin{enumerate}
+\item
+Calculate the break-even point, as a function of \(n\), beyond which
+the array-based list is more space efficient than the linked list for
+lists whose elements are of type \Cref{int}.
+\item
+Calculate the break-even point, as a function of \(n\), beyond which
+the array-based list is more space efficient than the linked list for
+lists whose elements are of type \Cref{double}.
+\end{enumerate}
+\index{list!comparison of space requirements}
+
+\item
+Modify the code of Figure~\ref{AStackDef} to implement two stacks sharing
+the same array, as shown in Figure~\ref{TwoArrayStacks}.
+\index{stack!two in one array}
+
+\item
+Modify the array-based queue definition of Figure~\ref{AQueueDef} to
+use a separate Boolean member to keep track of whether the queue is
+empty, rather than require that one array position remain empty.
+\index{queue!circular}
+
+\item
+A \defit{palindrome}\index{palindrome} is a string that reads
+the same forwards as backwards.
+Using only a fixed number of stacks and queues, the stack and queue
+ADT functions, and a fixed number of \Cref{int} and \Cref{char}
+variables, write an algorithm to determine if a string is a
+palindrome.\index{stack}\index{queue}
+Assume that the string is read from standard input one character at a time.
+The algorithm should output \TRUE\ or \FALSE\ as appropriate.
+
+\item
+Re-implement function \Cref{fibr} from
+Exercise~\ref{MathPre}.\ref{FiboEx}, using a
+stack to replace the recursive call as described in
+Section~\ref{ImpRecur}.
+
+\item
+Write a recursive algorithm to compute the value of the recurrence
+relation
+\[\Tn = \cvar{T}(\lceil n/2 \rceil) + \cvar{T}(\lfloor n/2 \rfloor) + n;
+\quad \Tone = 1.\]
+Then, rewrite your algorithm to simulate the recursive calls with a stack.
+
+\item
+Let $Q$ be a non-empty queue, and let $S$ be an empty stack.
+Using only the stack and queue ADT functions and a single element
+variable~$X$, write an algorithm to reverse the order of the elements
+in~$Q$.\index{stack}\index{queue}
+
+% This is easier than the recursive version, and reasonably easy to do
+% both parts.
+\item
+\index{nested parentheses|(}
+A common problem for compilers and text editors is to determine if the
+parentheses (or other brackets) in a string are balanced and properly
+nested.
+For example, the string ``((())())()'' contains properly nested pairs of
+parentheses, but the string ``)()('' does not, and the string ``())''
+does not contain properly matching parentheses.
+\begin{enumerate}
+\item
+Give an algorithm that returns \TRUE\ if a string
+contains properly nested and balanced parentheses, and \FALSE\
+otherwise.
+Use a stack to keep track of the number of left parentheses seen so far.
+\emph{Hint}: At no time while scanning a legal string from left to
+right will you have encountered more right parentheses than left
+parentheses.
+
+\item
+Give an algorithm that returns the position in the string of
+the first offending parenthesis if the string is not properly nested
+and balanced.
+That is, if an excess right parenthesis is found, return its position;
+if there are too many left parentheses, return the position of the
+first excess left parenthesis.
+Return $-1$ if the string is properly balanced and nested.
+Use a stack to keep track of the number and positions of left
+parentheses seen so far.
+\end{enumerate}
+\index{nested parentheses|)}
+
+\item
+Imagine that you are designing an application where you need to
+perform the operations \Cref{Insert},
+\Cref{Delete\_Maximum}, and \Cref{Delete\_Minimum}.
+For this application, the cost of inserting is not important, because it
+can be done off-line prior to startup of the time-critical section,
+but the performance of the two deletion operations are critical.
+Repeated deletions of either kind must work as fast as possible.
+Suggest a data structure that can support this application, and
+justify your suggestion.
+What is the time complexity for each of the three key operations?
+
+\item
+Write a function that reverses the order of an array of \(n\) items.
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+A \defit{deque}\index{deque} (pronounced ``deck'') is like a queue,
+except that items may be added and removed from both the front and the
+rear.
+Write either an array-based or linked implementation for the deque.
+
+\item
+One solution to the problem of running out of space for an array-based
+list implementation is to replace the array with a larger array
+whenever the original array overflows.
+A good rule that leads to an implementation that is both space and
+time efficient is to double the current size of the array when there
+is an overflow.
+Re-implement the array-based \Cref{List} class of
+Figure~\ref{ArrayListDef} to support this array-doubling
+rule.\index{list!array-based}
+
+\item
+Use singly linked lists to implement integers of unlimited size.
+Each node of the list should store one digit of the integer.
+You should implement addition, subtraction, multiplication, and
+exponentiation operations.
+Limit exponents to be positive integers.
+What is the asymptotic running time for each of your operations,
+expressed in terms of the number of digits for the two
+operands of each function?\index{integer representation}
+
+\item
+Implement doubly linked lists by storing the sum of the 
+\Cref{next} and \Cref{prev} pointers in a single pointer variable
+as described in Example~\ref{DblSUM}.\index{list!doubly linked}
+
+\item
+\label{CityListEx}
+Implement a city database using unordered lists.
+Each database record contains the name of the city (a string of
+arbitrary length) and the coordinates of the city expressed as integer
+$x$ and $y$ coordinates.
+Your database should allow records to be inserted, deleted by name or
+coordinate, and searched by name or coordinate.
+Another operation that should be supported is to print
+all records within a given distance of a specified point.
+Implement the database using an array-based list implementation, and
+then a linked list implementation.
+Collect running time statistics for each operation in both implementations.
+What are your conclusions about the relative advantages and
+disadvantages of the two implementations?
+Would storing records on the list in alphabetical order by city name
+speed any of the operations?
+Would keeping the list in alphabetical order slow any of the
+operations?\index{city database}
+
+\item
+\index{variable-length record}
+\index{stack!variable-size elements}
+Modify the code of Figure~\ref{AStackDef} to support storing
+variable-length strings of at most 255 characters.
+The stack array should have type \Cref{char}.
+A string is represented by a series of characters (one character per
+stack element), with the length of the string stored in the stack
+element immediately above the string itself, as illustrated
+by Figure~\ref{VariableStack}.
+The \Cref{push}\index{stack!push} operation would store an element
+requiring $i$~storage units in the $i$~positions beginning with the
+current value of \Cref{top}
+and store the size in the position $i$~storage units above \Cref{top}.
+The value of \Cref{top} would then be reset above the newly inserted
+element.
+The \Cref{pop}\index{stack!pop} operation need only look at the size
+value stored in position $\Cref{top} - 1$ and then pop off the
+appropriate number of units.\index{variable-length record}
+You may store the string on the stack in reverse order if you prefer,
+provided that when it is popped from the stack, it is returned in its
+proper order.
+
+\begin{figure}
+\pdffig{VarStack}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{An array-based stack storing variable-length strings}
+{An array-based stack storing variable-length strings.
+Each position stores either one character or the length of the string
+immediately to the left of it in the stack.}
+{VariableStack}
+\bigskip
+\end{figure}
+
+\item
+\label{BagADTExer}
+Define an ADT for a bag (see Section~\ref{SetDef}) and create an
+array-based implementation for bags.
+Be sure that your bag ADT does not rely in any way on knowing or
+controlling the position of an element.
+Then, implement the dictionary ADT of Figure~\ref{DictDef} using
+your bag implementation.
+
+\item
+Implement the dictionary ADT of Figure~\ref{DictDef} using an unsorted 
+linked list as defined by class \Cref{LList} in
+Figure~\ref{LinkListDef}.
+Make the implementation as efficient as you can, given the restriction 
+that your implementation must use the unsorted linked list and its access
+operations to implement the dictionary.
+State the asymptotic time requirements for each function member of the 
+dictionary ADT under your implementation.
+
+\item
+Implement the dictionary ADT of Figure~\ref{DictDef} based on stacks.
+Your implementation should declare and use two stacks.
+
+\item
+Implement the dictionary ADT of Figure~\ref{DictDef} based on queues.
+Your implementation should declare and use two queues.
+
+\end{projects}
+\index{list|)}

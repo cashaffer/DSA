@@ -1,0 +1,1355 @@
+% analtech.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\part{Theory of Algorithms}
+\label{PartTheoryAlgs}
+\mycleardoublepage
+
+\chapter{Analysis Techniques}
+\label{AnalTech}
+\def\CHHEAD{Chap.\ \thechapter\ Analysis Techniques}    % Head title -- even pages
+
+%''When you can measure what you are speaking about, and express it in
+%numbers, you know something about it;
+%but when you cannot express it in numbers, your knowledge is of a
+%meager and unsatisfactory kind.
+%It may be the beginning of knowledge, but you have scarcely,
+%in your thoughts, advanced to the stage of science.''
+% -- ``Popular Lectures and Addresses, '' Lord (William Thompson) Kelvin
+
+Often it is easy to invent an equation to model the behavior of an
+algorithm or data structure.\index{algorithm analysis!asymptotic}
+Often it is easy to derive a closed-form solution for the equation
+should it contain a recurrence or summation.
+But sometimes analysis proves more difficult.
+It may take a clever insight to derive the right model, such as the
+snowplow argument for analyzing the average run length resulting from
+Replacement Selection
+(Section~\ref{RepSelSec}).\index{replacement selection}
+In this example, once the snowplow argument is understood,
+the resulting equations follow naturally.
+Sometimes, developing the model is straightforward but analyzing
+the resulting equations is not.
+An example is the average-case analysis for
+Quicksort.\index{quicksort@Quicksort}
+The equation given in Section~\ref{QuickSort} simply enumerates all
+possible cases for the pivot position, summing corresponding costs for
+the recursive calls to Quicksort.
+However, deriving a closed-form solution for the resulting recurrence
+relation is not as easy.\index{replacement selection}
+
+Many analyses of iterative algorithms use a summation to model
+the cost of a loop.
+Techniques for finding closed-form solutions to summations are
+presented in Section~\ref{Summation}.\index{summation}
+The cost for many algorithms based on recursion are best
+modeled by recurrence relations.\index{recurrence relation}
+A discussion of techniques for solving
+recurrences is provided in Section~\ref{Recurrence}.
+These sections build on the introduction to summations and
+recurrences provided in Section~\ref{Sum}, so the reader should
+already be familiar with that material.
+
+Section~\ref{AmortAnal} provides an introduction to the topic of
+\defit{amortized analysis}.\index{amortized analysis}
+Am\-or\-ti\-zed analysis deals with the cost of a series of operations.
+Perhaps a single operation in the series has high cost,
+but as a result the cost of the remaining operations is limited.
+Amortized analysis has been used successfully to analyze several of
+the algorithms presented in previous sections,
+including the cost of a series of
+UNION/FIND\index{union/find@UNION/FIND}
+operations (Section~\ref{ParentPointer}),
+the cost of partition in Quicksort\index{quicksort@Quicksort}
+(Section~\ref{QuickSort}),
+the cost of a series of splay tree\index{splay tree}
+operations (Section~\ref{BalancedTree}), and the cost of a
+series of operations on
+self-organizing lists\index{list!ordered by frequency}
+(Section~\ref{SelfOrg}).
+Section~\ref{AmortAnal} discusses the topic in more detail.
+
+\section{Summation Techniques}
+\label{Summation}
+
+\index{summation|(}
+Consider the following simple summation.
+
+\[\sum_{i=1}^n i.\]
+
+\noindent In Section~\ref{Induct} it was proved by induction that this
+summation has the well-known closed form \(n(n+1)/2\).\index{proof!induction}
+But while induction is a good technique for proving that a proposed
+closed-form expression is correct, 
+how do we find a candidate closed-form expression to test in the first
+place?
+Let us try to think through this problem from first principles,
+as though we had never seen it before.
+
+A good place to begin analyzing a summation it is to give an
+estimate of its value for a given \(n\).
+Observe that the biggest term for this summation is \(n\),
+and there are \(n\) terms being summed up.
+So the total must be less than \(n^2\).
+Actually, most terms are much less than \(n\), and
+the sizes of the terms grows linearly.
+If we were to draw a picture with bars for the size of the terms,
+their heights would form a line, and we could enclose them in a box
+\(n\) units wide and \(n\) units high.
+It is easy to see from this that a closer estimate for the summation
+is about \((n^2)/2\).
+Having this estimate in hand helps us when trying to determine an
+exact closed-form solution, because we will hopefully recognize if our
+proposed solution is badly wrong.
+
+Let us now consider some ways that we might hit upon an exact equation
+for the closed form solution to this summation.
+One particularly clever approach we can take is to
+observe that we can ``pair up'' the first and last terms,
+the second and (\(n-1\))th terms, and so on.
+Each pair sums to \(n+1\).
+The number of pairs is \(n/2\).
+Thus, the solution is \(n(n+1)/2\).
+This is pretty, and there is no doubt about it being correct.
+The problem is that it is not a useful technique for solving many
+other summations.
+
+Now let us try to do something a bit more general.
+We already recognized that, because the largest term is \(n\) and
+there are \(n\) terms, the summation is less than \(n^2\).
+If we are lucky, the closed form solution is a polynomial.
+Using that as a working assumption,
+we can invoke a technique called \defit{guess-and-test}.
+We will guess that the closed-form solution for this summation is a
+polynomial of the form \(c_1 n^2 + c_2 n + c_3\) for some constants
+\(c_1\), \(c_2\), and \(c_3\).
+If this is true, then we can plug in the answers to small cases of the
+summation to solve for the coefficients.
+For this example, substituting 0, 1, and 2 for \(n\) leads to three
+simultaneous equations.
+Because the summation when \(n = 0\) is just 0, \(c_3\) must be~0.
+For \(n = 1\) and \(n = 2\) we get the two equations
+\begin{eqnarray*}
+c_1 + c_2     & = & 1 \\
+4 c_1 + 2 c_2 & = & 3,
+\end{eqnarray*}
+\noindent which in turn yield \(c_1 = 1/2\) and \(c_2 = 1/2\).
+Thus, if the closed-form solution for the summation is a polynomial,
+it can only be
+\[1/2 n^2 + 1/2 n + 0\]
+which is more commonly written
+\[\frac{n(n+1)}{2}.\]
+
+At this point, we still must do the ``test'' part of the
+guess-and-test approach.
+We can use an induction proof to verify whether our\index{proof!induction}
+candidate closed-form solution is correct.
+In this case it is indeed correct, as shown by Example~\ref{SumIEx}.
+The induction proof is necessary because our initial assumption that
+the solution is a simple polynomial could be wrong.
+For example, it might have been that the true solution
+includes a logarithmic term, such as
+\(c_1n^2 + c_2 n \log n\).
+The process shown here is essentially fitting a curve to a fixed
+number of points.
+Because there is always an \(n\)-degree polynomial that fits \(n+1\)
+points, we have not done enough work to be sure that we to know the
+true equation without the induction proof.\index{proof!induction}
+
+Guess-and-test is useful whenever the solution is a polynomial
+expression.
+In particular, similar reasoning can be used to solve for
+\(\sum_{i=1}^n i^2\), or more generally \(\sum_{i=1}^n i^c\) for \(c\)
+any positive integer.
+Why is this not a universal approach to solving summations?
+Because many summations do not have a polynomial as their closed
+form solution.
+
+A more general approach is based on the
+\defit{subtract-and-guess} or \defit{divide-and-guess} strategies.
+\index{summation!shifting method|(}
+One form of subtract-and-guess is known as the
+\defit{shifting method}. 
+The shifting method subtracts the summation from a variation on the
+summation.
+The variation selected for the subtraction should be one that makes
+most of the terms cancel out.
+To solve sum \(f\), we pick a known function \(g\) and find a pattern in
+terms of \(f(n) - g(n)\) or \(f(n)/g(n)\).
+
+\begin{example}
+%Rawlins example
+Find the closed form solution for \(\sum_{i=1}^n i\) using
+the divide-and-guess approach.
+We will try two example functions to illustrate the divide-and-guess
+method: dividing by \(n\) and dividing by \(f(n-1)\).
+Our goal is to find patterns that we can use to guess a closed-form
+expression as our candidate for testing with an
+induction proof.\index{proof!induction}
+To aid us in finding such patterns, we can construct a table showing
+the first few numbers of each function, and the result of dividing one
+by the other, as follows.
+
+{\small
+\[
+\begin{array}{r|rrrrrrrrrr}
+n&1&2&3&4&5&6&7&8&9&10\\
+\hline
+f(n)&1&3&6&10&15&21&28&36&46&57\\
+n&1&2&3&4&5&6&7&8&9&10\\
+f(n)/n&2/2&3/2&4/2&5/2&6/2&7/2&8/2&9/2&10/2&11/2\\
+f(n\!-\!1)&0&1&3&6&10&15&21&28&36&46\\
+f(n)/f(n\!-\!1)&&3/1&4/2&5/3&6/4&7/5&8/6&9/7&10/8&11/9
+\end{array}\]
+}
+
+Dividing by both \(n\) and \(f(n-1)\) happen to give us useful
+patterns to work with.
+\(\frac{f(n)}{n} = \frac{n+1}{2}\), and 
+\(\frac{f(n)}{f(n-1)} = \frac{n+1}{n-1}\).
+Of course, lots of other guesses for function \(g\) do not work.
+For example, \(f(n) - n = f(n-1)\).
+Knowing that \(f(n) = f(n-1) + n\) is not useful for determining the
+closed form solution to this summation.
+Or consider \(f(n) - f(n-1) = n\).
+Again, knowing that \(f(n) = f(n-1) + n\) is not useful.
+Finding the right combination of equations can be like finding a
+needle in a haystack.
+
+In our first example, we can see directly what the closed-form
+solution should be.
+Since \(\frac{f(n)}{n} = \frac{n+1}{2}\),
+obviously \(f(n) = n(n+1)/2\).
+
+Dividing \(f(n)\) by \(f(n-1)\) does not give so obvious a result,
+but it provides another useful illustration.
+
+\begin{eqnarray*}
+\frac{f(n)}{f(n-1)} &=& \frac{n+1}{n-1}\\
+f(n) (n-1) &=& (n+1) f(n-1)\\
+f(n) (n-1) &=& (n+1) (f(n) - n)\\
+n f(n) - f(n) &=& n f(n) + f(n) - n^2 - n\\
+2 f(n) &=& n^2 + n = n (n+1)\\
+f(n) &=& \frac{n (n + 1)}{2}
+\end{eqnarray*}
+
+Once again, we still do not have a proof that
+\(f(n) = n(n+1)/2\). Why?
+Because we did not prove that \(f(n)/n = (n+1)/2\) nor that
+\(f(n)/f(n-1) = (n+1)(n-1)\).
+We merely hypothesized patterns from looking at a few terms.
+Fortunately, it is easy to check our hypothesis with
+induction.\index{proof!induction}
+\end{example}
+
+\begin{example}
+Solve the summation
+\[ \sum_{i=1}^n 1/2^i. \]
+\noindent
+We will begin by writing out a table listing the first few values of
+the summation, to see if we can detect a pattern.
+
+\medskip
+
+\begin{center}
+\begin {tabular}{l|l l l l l l }
+\baselineskip=20pt
+$n$ & 1 &2 &3 &4 &5 &6\\
+\hline
+\\[-10pt]
+$f(n)$& $\frac{1}{2}$ &$\frac{3}{4}$ &$\frac{7}{8}$ &$\frac{15}{16}$
+&$\frac{31}{32}$ &$\frac{63}{64}$\\[3pt]
+\hline
+\\[-12pt]
+$1-f(n)$ & $\frac{1}{2}$ & $\frac{1}{4}$ & $\frac{1}{8}$ &
+$\frac{1}{16}$ & $\frac{1}{32}$ & $\frac{1}{64}$\\
+\end {tabular}
+\end{center}
+
+\medskip
+
+\noindent By direct inspection of the second line of the table,
+we might recognize the pattern
+$f(n) = \frac{2^n-1}{2^n}$.
+A simple induction proof can then prove that this always holds
+true.\index{proof!induction}
+Alternatively, consider if we hadn't noticed the pattern for the form
+of $f(n)$.
+We might observe that $f(n)$ appears to be reaching an asymptote at
+one.
+In which case, we might consider looking at the difference between
+$f(n)$ and the expected asymptote.
+This result is shown in the last line of the table, which has a clear
+pattern since the $i$th entry is of $1/2^i$.
+From this we can easily deduce a guess that
+$f(n) = 1 - \frac{1}{2^n}$.
+Again, a simple induction proof will verify the guess.\index{proof!induction}
+\end{example}
+
+\begin{example}
+Solve the summation
+\[f(n) = \sum_{i=0}^{n} ar^i = a + ar + ar^2 + \cdots + ar^n.\]
+\noindent This is called a geometric series.
+Our goal is to find some function \(g(n)\) such
+that the difference between \(f(n)\) and \(g(n)\) one from the other
+leaves us with an easily manipulated equation.
+Because the difference between consecutive terms of the summation is a
+factor of \(r\), we can shift terms if we multiply the entire
+expression by \(r\):
+\[rf(n) = r\sum_{i=0}^{n} ar^i = ar + ar^2 + ar^3 + \cdots + ar^{n+1}.\]
+\noindent We can now subtract the one equation from the other, as follows:
+\begin{eqnarray*}
+f(n) - rf(n) =~a &+& ar + ar^2 + ar^3 + \cdots + ar^{n}\\
+                 &-& (ar + ar^2 + ar^3 + \cdots + ar^n) - ar^{n+1}.
+\end{eqnarray*}
+
+\noindent The result leaves only the end terms: 
+
+\vspace{-\bigskipamount}
+\vspace{-\bigskipamount}
+
+\begin{eqnarray*}
+f(n) - rf(n) & = & \sum_{i=0}^{n} ar^i - r\sum_{i=0}^{n} ar^i.\\
+(1-r)f(n)    & = & a - ar^{n+1}.
+\end{eqnarray*}
+\noindent Thus, we get the result
+\[f(n) = \frac{a - ar^{n+1}}{1 - r}\]
+\noindent where \( r \neq 1. \)
+\end{example}
+
+\begin{example}
+% Manber's example
+For our second example of the shifting method, we solve
+
+\vspace{-\medskipamount}
+\[f(n) = \sum_{i=1}^{n} i2^i = 1 \cdot 2^1 + 2 \cdot 2^2 + 3 \cdot
+2^3 + \cdots + n \cdot 2^n.\]
+
+\vspace{-\medskipamount}
+\noindent We can achieve our goal if we multiply by two:
+
+\vspace{-\bigskipamount}
+
+\[2f(n) = 2\sum_{i=1}^{n} i2^i = 1 \cdot 2^2 + 2 \cdot 2^3 + 3 \cdot
+2^4 + \cdots + (n-1) \cdot 2^n + n \cdot 2^{n+1}.\]
+\noindent The \(i\)th term of \(2f(n)\) is \(i \cdot 2^{i+1}\),
+while the \((i+1)\)th term of \(f(n)\) is \mbox{\((i+1) \cdot 2^{i+1}\)}.
+Subtracting one expression from the other yields the summation of
+\(2^i\) and a few non-canceled terms:
+
+\vspace{-\bigskipamount}
+\vspace{-\medskipamount}
+\vspace{-\medskipamount}
+\begin{eqnarray*}
+2f(n) - f(n) & = & 2\sum_{i=1}^n i 2^i - \sum_{i=1}^n i 2^i\\
+             & = & \sum_{i=1}^n i 2^{i+1} - \sum_{i=1}^n i 2^i.\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.3pc}Shift \(i\)'s value in the second summation,
+substituting \((i+1)\) for \(i\):}}
+             & = & n2^{n+1} + \sum_{i=0}^{n-1}i2^{i+1} -
+                              \sum_{i=0}^{n-1}(i+1)2^{i+1}.\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.3pc}Break the second summation into two parts:}}
+             & = & n2^{n+1} + \sum_{i=0}^{n-1}i2^{i+1} -
+                              \sum_{i=0}^{n-1}i2^{i+1} -
+                              \sum_{i=0}^{n-1}2^{i+1}.\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.3pc}Cancel like terms:}}
+             & = & n2^{n+1} - \sum_{i=0}^{n-1} 2^{i+1}.\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.3pc}Again shift \(i\)'s value in the
+summation, substituting \(i\) for \((i+1)\):}}
+             & = & n2^{n+1} - \sum_{i=1}^{n} 2^i.\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.3pc}Replace the new summation with a
+solution that we already know:}}
+             & = & n2^{n+1} - \left ( 2^{n+1} - 2 \right ).\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.3pc}Finally, reorganize the equation:}}
+             & = & (n-1)2^{n+1} + 2.
+\end{eqnarray*}
+\end{example}\index{summation!shifting method|)}\index{summation|)}
+
+\section{Recurrence Relations}
+\label{Recurrence}
+
+\index{recurrence relation|(}
+Recurrence relations are often used to model the cost of recursive
+functions.
+For example, the standard Mergesort\index{mergesort@Mergesort}
+(Section~\ref{MergeSort}) takes a
+list of size~\(n\), splits it in half, performs Mergesort on each half,
+and finally merges the two sublists in \(n\)~steps.
+The cost for this can be modeled as
+\[{\bf T}(n) = 2{\bf T}(n/2) + n.\]
+\noindent In other words, the cost of the algorithm on input of
+size~\(n\) is two times the cost for input of size \(n/2\) (due to the two
+recursive calls to Mergesort) plus~\(n\) (the time to merge the sublists
+together again).
+
+There are many approaches to solving recurrence relations, and we
+briefly consider three here.
+The first is an estimation technique:
+Guess the upper and lower bounds for the recurrence, use
+induction\index{proof!induction} to prove the bounds, and tighten as
+required.
+The second approach is to expand the recurrence to convert it to a
+summation and then use summation techniques.
+The third approach is to take advantage of already proven theorems
+when the recurrence is of a suitable form.
+In particular, typical divide and conquer algorithms such as
+Mergesort yield recurrences of a form that fits a pattern for which
+we have a ready solution.\index{divide and conquer}
+
+\subsection{Estimating Upper and Lower Bounds}
+
+\index{recurrence relation!estimating|(}
+The first approach to solving recurrences is to guess the
+answer and then attempt to prove it correct.
+If~a correct upper or lower bound estimate is given, 
+an easy induction\index{proof!induction} proof will verify this fact.
+If~the proof is successful, then try to tighten the bound.
+If~the induction proof fails, then loosen the bound and try again.
+Once the upper and lower bounds match, you are finished.
+This is a useful technique when you are only looking for asymptotic
+complexities.
+When seeking a precise closed-form solution (i.e., you seek the
+constants for the expression), this method will probably be too much
+work.
+
+\begin{example}
+% Very close to Manber's example.
+Use the guessing technique to find the asymptotic bounds for
+Mergesort, whose running time is described by the equation
+\[{\bf T}(n) = 2{\bf T}(n/2) + n; \quad {\bf T}(2) = 1.\]
+\noindent We begin by guessing that this recurrence has an upper
+bound in \Ontwo.
+To be more precise, assume that
+\[{\bf T}(n) \leq n^2.\]
+\noindent We prove this guess is correct by induction.\index{proof!induction}
+In this proof, we assume that \(n\) is a
+power of two, to make the calculations easy.
+For the base case, \({\bf T}(2) = 1~\leq~2^2\).
+For the induction step, we need to show that \({\bf T}(n) \leq n^2\)
+implies that \({\bf T}(2n) \leq (2n)^2\) for \(n = 2^N, N \geq 1\).
+The induction hypothesis is
+\[{\bf T}(i) \leq i^2, {\rm for~all}~i \leq n.\]
+\noindent It follows that
+\[{\bf T}(2n) = 2{\bf T}(n) + 2n \leq 2n^2 + 2n \leq 4n^2 \leq (2n)^2\]
+\noindent which is what we wanted to prove.
+Thus, \({\bf T}(n)\) is in \Ontwo.
+
+Is \Ontwo\ a good estimate?
+In the next-to-last step we went from \(n^2 + 2n\) to the much larger
+\(4n^2\).
+This suggests that \Ontwo\ is a high estimate.
+If we guess something smaller, such as \({\bf T}(n) \leq cn\) for
+some constant \(c\), it should be clear that this cannot work because
+\(c 2 n = 2 c n\) and there is no room for the extra \(n\) cost to join
+the two pieces together.
+Thus, the true cost must be somewhere between \(cn\) and \(n^2\).
+
+Let us now try \({\bf T}(n) \leq n \log n\).
+For the base case, the definition of the recurrence sets
+\({\bf T}(2) = 1 \leq (2 \cdot \log 2) = 2\).
+Assume (induction hypothesis) that \({\bf T}(n) \leq n \log n\).
+Then,\index{proof!induction}
+\[{\bf T}(2n) = 2{\bf T}(n) + 2n \leq 2n \log n + 2n
+\leq 2n(\log n + 1) \leq 2 n \log 2n\]
+\noindent which is what we seek to prove.
+In similar fashion, we can prove that \({\bf T}(n)\) is in \Omeganlogn.
+Thus, \({\bf T}(n)\) is also \Thetanlogn.
+\end{example}
+
+\begin{example}
+We know that the factorial function grows exponentially.
+How does it compare to \(2^n\)? To \(n^n\)?
+Do they all grow ``equally fast'' (in an asymptotic sense)?
+We can begin by looking at a few initial terms.
+
+{\small
+\[\begin{array}{r|rrrrrrrrr}
+n&1&2&3&4&5&6&7&8&9\\
+\hline
+n! &1&2&6&24&120&720&5040&40320&362880\\
+2^n&2&4&8&16&32&64&128&256&512\\
+n^n&1&4&9&256&3125&46656&823543&16777216&387420489
+\end{array}\]
+}
+
+We can also look at these functions in terms of their recurrences.
+
+\[n! = \left\{
+\begin{array}{ll}
+1&n=1\\
+n(n-1)!&n>1\\
+\end{array}
+\right. \]
+
+\[2^n = \left\{
+\begin{array}{ll}
+2&n=1\\
+2(2^{n-1})&n>1\\
+\end{array}
+\right. \]
+
+\[n^n = \left\{
+\begin{array}{ll}
+n&n=1\\
+n(n^{n-1})&n>1\\
+\end{array}
+\right. \]
+
+At this point, our intuition should be telling us pretty clearly the
+relative growth rates of these three functions.
+But how do we prove formally which grows the fastest?
+And how do we decide if the differences are significant in an
+asymptotic sense, or just constant factor differences?
+
+We can use logarithms to help us get an idea about the relative growth
+rates of these functions.
+Clearly, \(\log 2^n = n\).
+Equally clearly, \(\log n^n = n \log n\).
+We can easily see from this that \(2^n\) is \(o(n^n)\), that is,
+\(n^n\) grows asymptotically faster than \(2^n\).
+
+How does \(n!\) fit into this?
+We can again take advantage of logarithms.
+Obviously \(n! \leq n^n\), so we know that \(\log n!\) is \Onlogn.
+But what about a lower bound for the factorial function?
+Consider the following.
+
+{\small
+\begin{eqnarray*}
+n! &=& n \times (n - 1) \times \cdots \times \frac{n}{2} \times
+(\frac{n}{2} - 1) \times \cdots \times 2 \times 1\\
+&\geq& \frac{n}{2} \times \frac{n}{2} \times \cdots \times \frac{n}{2}
+\times 1 \times \cdots \times 1 \times 1\\
+&=& (\frac{n}{2})^{n/2}
+\end{eqnarray*}
+}
+
+Therefore
+\[\log n! \geq \log(\frac{n}{2})^{n/2} =
+(\frac{n}{2})\log(\frac{n}{2}).\]
+
+In other words, \(\log n!\) is in \Omeganlogn.
+Thus, \(\log n! = \Theta(n \log n)\).
+
+Note that this does \textbf{not} mean that \(n! = \Theta(n^n)\).
+Because \(\log n^2 = 2 \log n\), it follows that
+\(\log n = \Theta(\log n^2)\) but \(n \neq \Theta(n^2)\).
+The log function often works as a ``flattener'' when dealing with
+asymptotics.
+That is, whenever \(\log f(n)\) is in \(O(\log g(n))\) we know that
+\fn\ is in \Ogn.
+But knowing that \(\log f(n) = \Theta(\log g(n))\) does not
+necessarily mean that \(f(n) = \Theta(g(n))\).
+\end{example}
+
+\begin{example}
+\index{fibonacci sequence@Fibonacci sequence|(}
+What is the growth rate of the Fibonacci sequence?
+We define the Fibonacci sequence as
+\(f(n) = f(n-1) + f(n-2)\) for \(n \geq 2\); \(f(0) = f(1) = 1\).
+
+In this case it is useful to compare the ratio of \(f(n)\) to
+\(f(n-1)\).
+The following table shows the first few values.
+
+{\small
+\[\begin{array}{c|lllllll}
+n&1&2&3&4&5&6&7\\
+\hline
+f(n)&1&2&3&5&8&13&21\\
+f(n)/f(n-1)&1&2&1.5&1.666&1.625&1.615&1.619
+\end{array}\]
+}
+
+If we continue for more terms, the ratio appears to converge on a
+value slightly greater then~1.618.
+Assuming \(f(n)/f(n-1)\) really does converge to a fixed value as
+\(n\) grows, we can determine what that value must be.
+
+\[\frac{f(n)}{f(n-2)} = \frac{f(n-1)}{f(n-2)} + \frac{f(n-2)}{f(n-2)}
+\rightarrow x+1\]
+
+\noindent For some value \(x\).
+This follows from the fact that \(f(n) = f(n-1) + f(n-2)\).
+We divide by \(f(n-2)\) to make the second term go away, and we also
+get something useful in the first term.
+Remember that the goal of such manipulations is to give us an equation
+that relates \(f(n)\) to something without recursive calls.
+
+For large \(n\), we also observe that:
+\[\frac{f(n)}{f(n-2)} = \frac{f(n)}{f(n-1)}\frac{f(n-1)}{f(n-2)}
+\rightarrow x^2\]
+\noindent as \(n\) gets big.
+This comes from multiplying \(f(n)/f(n-2)\) by \(f(n-1)/f(n-1)\) and
+rearranging.
+
+If \(x\) exists, then \(x^2 - x - 1 \rightarrow 0\).
+Using the quadratic equation, the only solution greater than one is
+\[x = \frac{1 + \sqrt{5}}{2} \approx 1.618.\]
+This expression also has the name \(\phi\).
+What does this say about the growth rate of the Fibonacci sequence?
+It is exponential, with \(f(n) = \Theta(\phi^n)\).
+More precisely, \(f(n)\) converges to
+\[\frac{\phi^n - (1 - \phi)^n}{\sqrt{5}}.\]
+\index{fibonacci sequence@Fibonacci sequence|)}
+\end{example}
+
+\index{recurrence relation!estimating|)}
+
+\subsection{Expanding Recurrences}
+
+\index{recurrence relation!expanding}
+Estimating bounds is effective if you only need an approximation to
+the answer.
+More precise techniques are required to find an exact solution.
+One approach is called \defit{expanding} the recurrence.
+In this method, the smaller terms on the right side of the equation
+are in turn replaced by their definition.
+This is the expanding step.
+These terms are again expanded, and so on, until a full series
+with no recurrence results.
+This yields a summation, and techniques for solving summations can
+then be used.
+A couple of simple expansions were shown in Section~\ref{Sum}.
+A more complex example is given below.
+
+\begin{example}
+Find the solution for
+\[{\bf T}(n) = 2{\bf T}(n/2) + 5 n^2; \quad {\bf T}(1) = 7.\]
+\noindent For simplicity we assume that \(n\) is a power of two,
+so we will rewrite it as \(n = 2^k\).
+This recurrence can be expanded as follows:
+\begin{eqnarray*}
+{\bf T}(n) & = & 2{\bf T}(n/2) + 5n^2\\
+     & = & 2(2{\bf T}(n/4) + 5(n/2)^2) + 5n^2\\
+     & = & 2(2(2{\bf T}(n/8) + 5(n/4)^2) + 5(n/2)^2) + 5n^2\\
+     & = & 2^k{\bf T}(1) + 2^{k-1}\cdot5\left (\frac{n}{2^{k-1}}\right )^2
+                         + \cdots + 2\cdot5\left (\frac{n}{2}\right )^2
+                         + 5n^2.
+\end{eqnarray*}
+\noindent This last expression can best be represented by a summation
+as follows:\index{summation}
+\begin{eqnarray*}
+&   & 7n + 5\sum_{i=0}^{k-1} n^2/2^i\\
+& = & 7n + 5n^2\sum_{i=0}^{k-1} 1/2^i.\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.5pc}From Equation~\ref{SumHalves}, we have:}}
+& = & 7n + 5n^2\left (2 - 1/2^{k-1}\right )\\
+& = & 7n + 5n^2(2 - 2/n)\\
+& = & 7n + 10 n^2 - 10n\\
+& = & 10n^2 - 3n.
+\end{eqnarray*}
+\noindent This is the \emph{exact} solution to the recurrence for \(n\)
+a power of two.
+At this point, we should use a simple induction proof to verify that
+our solution is indeed correct.\index{proof!induction}
+\end{example}
+
+\begin{example}
+Our next example models the cost of the algorithm to build a heap.
+Recall from Section~\ref{HeapSec} that to build a heap, we first heapify
+the two subheaps, then push down the root to its proper position.
+The cost is:
+\[f(n) \leq 2f(n/2) + 2 \log n.\]
+
+Let us find a closed form solution for this recurrence.
+We can expand the recurrence a few times to see that
+
+\begin{eqnarray*}
+f(n) &\leq& 2f(n/2) + 2 \log n\\
+&\leq& 2[2f(n/4) + 2 \log n/2] + 2 \log n\\
+&\leq& 2[2(2f(n/8) + 2 \log n/4) + 2 \log n/2] + 2 \log n
+\end{eqnarray*}
+
+We can deduce from this expansion that this recurrence is equivalent
+to following summation and its derivation:
+
+\begin{eqnarray*}
+f(n) &\leq& \sum_{i=0}^{\log n -1} 2^{i+1} \log(n/2^i)\\
+&=& 2 \sum_{i=0}^{\log n -1} 2^i (\log n - i)\\
+&=& 2 \log n \sum_{i=0}^{\log n -1} 2^i - 4 \sum_{i=0}^{\log n -1} i 2^{i-1}\\
+&=& 2 n \log n - 2 \log n - 2 n \log n + 4n -4\\
+&=& 4n - 2 \log n - 4.
+\end{eqnarray*}
+\end{example}
+
+\index{recurrence relation!expanding}
+
+\subsection{Divide and Conquer Recurrences}
+
+\index{recurrence relation!divide and conquer|(}
+\index{divide and conquer|(}
+\index{recurrence relation!Master Theorem|(}
+The third approach to solving recurrences is to take advantage of
+known theorems that provide the solution for classes of recurrences.
+Of particular practical use is a theorem that gives the
+answer for a class known as \defit{divide and conquer} recurrences.
+These have the form
+\[{\bf T}(n) = a{\bf T}(n/b) + cn^k; \quad {\bf T}(1) = c\]
+\noindent where \(a\), \(b\), \(c\), and \(k\) are constants.
+In general, this recurrence describes a problem of size \(n\) divided
+into \(a\) subproblems of size \(n/b\), while \(cn^k\) is the amount of work
+necessary to combine the partial solutions.
+Mergesort is an example of a divide and conquer algorithm, and its
+recurrence fits this form.\index{mergesort@Mergesort}
+So does binary search.\index{search!binary}
+We use the method of expanding recurrences to derive the general
+solution for any divide and conquer recurrence, assuming that \(n = b^m\).
+\begin{eqnarray*}
+{\bf T}(n) & = & a{\bf T}(n/b) + cn^k\\
+     & = & a(a{\bf T}(n/b^2) + c(n/b)^k) + cn^k\\
+     & = & a(a[a{\bf T}(n/b^3) + c(n/b^2)^k] + c(n/b)^k) + cn^k\\
+     & = & a^m{\bf T}(1) + a^{m-1}c(n/b^{m-1})^k + \cdots + ac(n/b)^k + cn^k\\
+     & = & a^mc + a^{m-1}c(n/b^{m-1})^k + \cdots + ac(n/b)^k + cn^k\\
+     & = & c\sum_{i=0}^{m} a^{m-i} b^{ik}\\
+     & = &ca^m\sum_{i=0}^{m} (b^k/a)^i.\index{summation}
+\end{eqnarray*}
+\noindent Note that
+\begin{eqnarray}
+\label{ThmEquiv}
+a^m = a^{\log_bn} = n^{\log_ba}.
+\end{eqnarray}
+
+The summation is a geometric series whose sum depends on the ratio
+\(r = b^k/a\).\index{summation}
+\noindent There are three cases.
+
+\begin{enumerate}
+
+\item
+\(r < 1.\)
+From Equation~\ref{FracSum},\index{summation}
+\[\sum_{i=0}^{m}r^i < 1/(1-r), {\rm a~constant.}\]
+\noindent Thus,
+\[{\bf T}(n) = \Theta(a^m) = \Theta(n^{log_ba}).\]
+
+\item
+\(r = 1.\)
+Because \(r = b^k/a\), we know that \(a = b^k\).
+From the definition of logarithms it follows immediately that
+\(k = \log_ba\).
+\noindent We also note from Equation~\ref{ThmEquiv} that \(m = \log_b n\).
+Thus,\index{summation}
+\[\sum_{i=0}^{m} r = m + 1 = \log_bn + 1.\]
+\noindent Because \(a^m = n \log_b a = n^k\), we have
+\[{\bf T}(n) = \Theta(n^{\log_ba}\log n) = \Theta(n^k\log n).\]
+
+\item
+\(r > 1.\)
+From Equation~\ref{GenPowerSum},
+\[\sum_{i=0}^{m} r = \frac{r^{m+1} - 1}{r - 1} = \Theta(r^m).\]
+\noindent Thus,\index{summation}
+\[{\bf T}(n) = \Theta(a^mr^m)
+       = \Theta(a^m(b^k/a)^m)
+       = \Theta(b^{km})
+       = \Theta(n^k).\]
+\end{enumerate}
+
+We can summarize the above derivation as the following theorem,
+sometimes referred to as the \defit{Master Theorem}.
+
+\begin{theorem}
+\label{RecurThm}
+\textbf{(The Master Theorem)} For any recurrence relation of the form
+\({\bf T}(n) = a{\bf T}(n/b) + cn^k, {\bf T}(1) = c\),
+the following relationships hold.
+
+\[{\bf T}(n) = \left\{ \begin{array}{ll}
+                   \Theta(n^{\log_ba}) & \mbox{if \(a > b^k\)} \\
+                   \Theta(n^k\log n)   & \mbox{if \(a = b^k\)} \\
+                   \Theta(n^k)         & \mbox{if \(a < b^k\).}
+                  \end{array}
+         \right. \]
+\end{theorem}
+
+This theorem may be applied whenever appropriate, rather than
+re-deriving the solution for the recurrence.
+
+\begin{example}
+Apply the Master Theorem to solve
+\[{\bf T}(n) = 3{\bf T}(n/5) + 8n^2.\]
+\noindent Because $a = 3$, $b = 5$, $c = 8$, and $k = 2$, we find that
+$3 < 5^2$.
+Applying case (3) of the theorem, \({\bf T}(n) = \Thetantwo\).
+\end{example}
+
+\begin{example}
+Use the Master Theorem to solve the recurrence relation
+for Mergesort:\index{mergesort@Mergesort}
+\[{\bf T}(n) = 2{\bf T}(n/2) + n; \quad {\bf T}(1) = 1.\]
+\noindent Because $a = 2$, $b = 2$, $c = 1$, and $k = 1$, we find
+that $2 = 2^1$.
+Applying case (2) of the theorem, \({\bf T}(n) = \Thetanlogn\).
+\end{example}
+\index{recurrence relation!Master Theorem|)}
+\index{divide and conquer|)}
+\index{recurrence relation!divide and conquer|)}
+
+\subsection{Average-Case Analysis of Quicksort}
+\label{QuickAnal}
+
+\index{quicksort@Quicksort!analysis|(}
+In Section~\ref{QuickSort}, we determined that the average-case
+analysis of Quicksort had the following recurrence:\index{summation}
+
+\[{\bf T}(n) = cn + \frac{1}{n}\sum_{k=0}^{n-1} [{\bf T}(k) +
+    {\bf T}(n -1 - k)], \qquad {\bf T}(0) = {\bf T}(1) = c.\]
+
+\noindent The $cn$ term is an upper bound on the \Cref{findpivot} and
+\Cref{partition} steps.
+This equation comes from assuming that the partitioning element is
+equally likely to occur in any position \(k\).
+It can be simplified by observing that the two
+recurrence terms ${\bf T}(k)$ and ${\bf T}(n - 1 - k)$ are equivalent,
+because one simply counts up from $T(0)$ to $T(n-1)$ while the other
+counts down from $T(n-1)$ to $T(0)$.
+This yields
+\[{\bf T}(n) = cn + \frac{2}{n}\sum_{k=0}^{n-1} {\bf T}(k).\]
+This form is known as a recurrence with \defit{full history}.
+The key to solving such a recurrence is to cancel out the summation
+terms.
+The shifting method for summations provides a way to do
+this.\index{summation!shifting method}
+Multiply both sides by $n$ and subtract the result from the formula
+for $n{\bf T}(n+1)$:
+\begin{eqnarray*}
+n{\bf T}(n) & = & cn^2 + 2 \sum_{k=1}^{n-1} {\bf T}(k)\\
+(n+1){\bf T}(n+1) & = & c(n+1)^2 + 2 \sum_{k=1}^{n} {\bf T}(k).\\
+\noalign{\hspace{\parskip}
+\hbox{\rule{0in}{1.3pc}
+
+Subtracting $n{\bf T}(n)$ from both sides yields:}
+
+\hspace{\parskip}}
+(n+1){\bf T}(n+1) - n{\bf T}(n) & = & c(n+1)^2 - cn^2 + 2{\bf T}(n)\\
+(n+1){\bf T}(n+1) - n{\bf T}(n) & = & c(2n+1) + 2{\bf T}(n)\\
+(n+1){\bf T}(n+1) & = & c(2n+1) + (n+2){\bf T}(n)\\
+{\bf T}(n+1) & = & \frac{c(2n+1)}{n+1} + \frac{n+2}{n+1}{\bf T}(n).
+\end{eqnarray*}
+
+\noindent At this point, we have eliminated the summation and can now
+use our normal methods for solving recurrences to get a closed-form
+solution.
+Note that $\frac{c(2n+1)}{n+1} < 2c$, so we can simplify the result.
+Expanding the recurrence, we get
+
+\begin{eqnarray*}
+{\bf T}(n+1) & \leq & 2c + \frac{n+2}{n+1} {\bf T}(n)\\
+             & = & 2c + \frac{n+2}{n+1}\left (2c +
+                        \frac{n+1}{n}{\bf T}(n-1)\right )\\
+             & = & 2c + \frac{n+2}{n+1}\left (2c + \frac{n+1}{n}\left
+                       (2c + \frac{n}{n-1}{\bf T}(n-2)\right )\right )\\
+             & = & 2c + \frac{n+2}{n+1}\left (2c + \cdots +
+                            \frac{4}{3}(2c + \frac{3}{2}{\bf T}(1))\right )\\
+             & = & 2c\left (1 + \frac{n+2}{n+1}
+                     + \frac{n+2}{n+1}\frac{n+1}{n} + \cdots
+                     + \frac{n+2}{n+1}\frac{n+1}{n}\cdots\frac{3}{2}\right )\\
+             & = & 2c\left (1 + (n+2)\left (\frac{1}{n+1}
+                     + \frac{1}{n} + \cdots + \frac{1}{2}\right )\right )\\
+             & = & 2c + 2c(n+2)\left (\Harmonicnp - 1\right )\\
+\end{eqnarray*}
+
+\vspace{-\bigskipamount}
+\noindent for \Harmonicnp, the Harmonic
+Series.\index{harmonic series@Harmonic Series}
+From Equation~\ref{HarmonicEq}, \(\Harmonicnp = \Theta(\log n)\),
+so the final solution is \Thetanlogn.
+\index{quicksort@Quicksort!analysis|)}
+\index{recurrence relation|)}
+
+
+\section{Amortized Analysis}
+\label{AmortAnal}
+
+\index{amortized analysis|(}
+This section presents the concept of \defit{amortized analysis},
+which is the analysis for a series of operations taken as a whole.
+In particular, amortized analysis allows us to deal with the
+situation where the worst-case cost for $n$~operations is less than
+$n$~times the worst-case cost of any one operation.
+Rather than focusing on the individual cost of each operation
+independently and summing them, amortized analysis looks at the
+cost of the entire series and ``charges'' each individual operation
+with a share of the total cost.
+
+We can apply the technique of amortized analysis in the case of
+a series of sequential searches in an unsorted
+array.\index{search!sequential}
+For $n$ random searches, the average-case cost for each search is
+$n/2$, and so the \emph{expected} total cost for the series is $n^2/2$.
+Unfortunately, in the worst case all of the searches would
+be to the last item in the array.
+In this case, each search costs $n$ for a total worst-case cost
+of~$n^2$.
+Compare this to the cost for a series of $n$~searches such that each
+item in the array is searched for precisely once.
+In this situation, some of the searches \emph{must} be expensive, but
+also some searches \emph{must} be cheap.
+The total number of searches, in the best, average, and worst case,
+for this problem must be
+\(\sum_{i=i}^n i \approx n^2/2\).\index{summation} 
+This is a factor of two better than the more pessimistic analysis that
+charges each operation in the series with its worst-case cost.
+
+As another example of amortized analysis, consider the process of
+incrementing a binary counter.
+The algorithm is to move from the lower-order (rightmost) bit toward
+the high-order (leftmost) bit, changing 1s to 0s until the first~0
+is encountered.
+This 0 is changed to a~1, and the increment operation is done.
+Below is \Lang\ code to implement the increment operation,
+assuming that a binary number of length~$n$ is stored in array
+\Cref{A} of length~$n$.
+
+\xproghere{incr.book}
+
+If we count from 0 through $2^n - 1$, (requiring a counter with at
+least $n$~bits), what is the average cost for an increment operation
+in terms of the number of bits processed?
+Naive worst-case analysis says that if all $n$~bits are~1 (except for
+the high-order bit), then $n$~bits need to be processed.
+Thus, if there are $2^n$~increments, then the cost is~$n 2^n$.
+However, this is much too high, because it is rare for so many bits to
+be processed.
+In fact, half of the time the low-order bit is~0, and so only that
+bit is processed.
+One quarter of the time, the low-order two bits are~01, and so
+only the low-order two bits are processed.
+Another way to view this is that the low-order bit is always flipped,
+the bit to its left is flipped half the time,
+the next bit one quarter of the time, and so on.
+We can capture this with the summation (charging costs to bits going
+from right to left)\index{summation}
+\[\sum_{i=0}^{n-1} \frac{1}{2^i} < 2.\]
+\noindent In other words, the average number of bits flipped on each
+increment is 2, leading to a total cost of only $2 \cdot 2^n$ for
+a series of $2^n$ increments.
+
+\index{stack|(}
+A useful concept for amortized analysis is illustrated by a simple
+variation on the stack data structure, where the \Cref{pop} function
+is slightly modified to take a second parameter $k$ indicating that
+$k$~pop operations are to be performed.
+This revised pop function, called
+\Cref{multipop}, might look as follows:
+
+\xproghere{ch14p1.book}
+
+The ``local'' worst-case analysis for \Cref{multipop} is \Thetan\ for
+$n$~elements in the stack.
+Thus, if there are $m_1$ calls to \Cref{push} and $m_2$ calls to
+\Cref{multipop}, then the naive worst-case cost for the series of
+operation is \mbox{\(m_1 + m_2\cdot n = m_1 + m_2 \cdot m_1\)}.
+This analysis is unreasonably pessimistic.
+Clearly it is not really possible to pop $m_1$~elements each time
+\Cref{multipop} is called.
+Analysis that focuses on single operations cannot deal with this
+global limit, and so we turn to amortized analysis to model the
+entire series of operations.
+
+The key to an amortized analysis of this problem lies in the concept
+of \defit{potential}.
+At any given time, a certain number of items may be on the stack.
+The cost for \Cref{multipop} can be no more than this number of items.
+Each call to \Cref{push} places another item on the stack, which can
+be removed by only a single \Cref{multipop} operation.
+Thus, each call to \Cref{push} raises the potential of the stack by
+one item.
+The sum of costs for all calls to \Cref{multipop} can never be more
+than the total potential of the stack (aside from a constant time cost
+associated with each call to \Cref{multipop} itself).
+
+The amortized cost for any series of \Cref{push} and \Cref{multipop}
+operations is the sum of three costs.
+First, each of the \Cref{push} operations takes constant time.
+Second, each \Cref{multipop} operation takes a constant time in
+overhead, regardless of the number of items popped on that call.
+Finally, we count the sum of the potentials expended by all
+\Cref{multipop} operations, which is at most $m_1$, the number of
+\Cref{push} operations.
+This total cost can therefore be expressed as
+\[m_1 + (m_2 + m_1) = \Theta(m_1 + m_2).\]
+\index{stack|)}
+\index{amortized analysis|)}
+
+\vspace{-\bigskipamount}
+A similar argument was used in our analysis for the partition function
+in the Quicksort algorithm (Section~\ref{QuickSort}).
+While on any given pass through the while loop the left or right
+pointers might move all the way through the remainder of the
+partition, doing so would reduce the number of times that the while
+loop can be further executed.
+
+\index{list!self-organizing|(}
+\index{move-to-front|(}
+Our final example uses amortized analysis to prove a relationship
+between the cost of the move-to-front self-organizing list heuristic
+from Section~\ref{SelfOrg} and the cost for the optimal static
+ordering of the list.
+
+Recall that, for a series of search operations, the minimum cost for a
+static list results when the list is sorted by
+frequency of access to its records.
+This is the optimal ordering for the records if we never allow the
+positions of records to change, because the most-frequently accessed
+record is first (and thus has least cost), followed by the next most
+frequently accessed record, and so on.
+
+\begin{theorem}
+\label{MTFThm}
+The total number of comparisons required by any series~\svar{S} of $n$
+or more searches on a self-organizing list of length~$n$ using the
+move-to-front heuristic is never more than twice the total number of
+comparisons required when series~\svar{S} is applied to the list
+stored in its optimal static order.
+\end{theorem}
+
+\begin{proof}
+Each comparison of the search key with a record in the list is either
+successful or unsuccessful.
+For $m$~searches, there must be exactly $m$ successful comparisons for
+both the self-organizing list and the static list.
+The total number of unsuccessful comparisons in the self-organizing
+list is the sum, over all pairs of distinct keys, of the number of
+unsuccessful comparisons made between that pair.
+
+Consider a particular pair of keys \svar{A} and \svar{B}.
+For any sequence of searches \svar{S}, the total number of
+(unsuccessful) comparisons between \svar{A} and \svar{B} is identical
+to the number of comparisons between \svar{A} and \svar{B} required
+for the subsequence of \svar{S} made up only of searches for \svar{A} or
+\svar{B}.
+Call this subsequence $\svar{S}_{\mbox{AB}}$.
+In other words, including searches for other keys does not
+affect the relative position of \svar{A} and~\svar{B} and so does not
+affect the relative contribution to the total cost of the unsuccessful
+comparisons between \svar{A} and~\svar{B}.
+
+The number of unsuccessful comparisons between \svar{A} and \svar{B}
+made by the move-to-front heuristic on subsequence
+$\svar{S}_{\mbox{AB}}$ is at most twice the
+number of unsuccessful comparisons between \svar{A} and \svar{B} required
+when $\svar{S}_{\mbox{AB}}$ is applied to the optimal static
+ordering for the list.
+To see this, assume that $\svar{S}_{\mbox{AB}}$ contains
+$i$~\svar{A}s and $j$~\svar{B}s, with $i \leq j$.
+Under the optimal static ordering, $i$~unsuccessful comparisons are
+required because \svar{B} must appear before \svar{A} in the list
+(because its access frequency is higher).
+Move-to-front will yield an unsuccessful comparison whenever the
+request sequence changes from \svar{A} to \svar{B} or from \svar{B}
+to~\svar{A}.
+The total number of such changes possible is $2i$ because each change
+involves an \svar{A} and each \svar{A} can be part of at most two
+changes.
+
+Because the total number of unsuccessful comparisons required by
+move-to-front for any given pair of keys is at most twice that
+required by the optimal static ordering, the total number of
+unsuccessful comparisons required by move-to-front for all pairs of
+keys is also at most twice as high.
+Because the number of successful comparisons is the same for both
+methods, the total number of comparisons required by move-to-front is
+less than twice the number of comparisons required by the optimal
+static ordering.\index{move-to-front|)}\index{list!self-organizing|)}
+\end{proof}
+
+
+\section{Further Reading}
+A good introduction to solving recurrence relations appears in
+\ttl{Applied Combinatorics} by Fred S. Roberts \cite{Combinatorics}.
+For a more advanced treatment, see \ttl{Concrete Mathematics} by
+Graham, Knuth, and Patashnik \cite{ConcreteMath}.\index{recurrence relation}
+
+Cormen, Leiserson, and Rivest provide a good discussion on
+various methods for performing amortized analysis in
+\ttl{Introduction to Algorithms} \cite{CLR}.\index{amortized analysis}
+For an amortized analysis that the splay tree requires $m \log n$ time
+to perform a series of $m$ operations on $n$ nodes when $m>n$,
+see ``Self-Adjusting Binary Search Trees'' by Sleator and
+Tarjan \cite{SplayRef}.
+The proof for Theorem~\ref{MTFThm} comes from
+``Amortized Analysis of Self-Organizing Sequential Search
+Heuristics'' by Bentley and McGeoch \cite{BentOrganize}.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Use the technique of guessing a polynomial and deriving the
+coefficients to solve the summation\index{summation}
+\[\sum_{i = 1}^{n} i^2.\]
+
+\item
+Use the technique of guessing a polynomial and deriving the
+coefficients to solve the summation\index{summation!guess and test}
+\[\sum_{i = 1}^{n} i^3.\]
+
+\item
+Find, and prove correct, a closed-form solution for
+\[\sum_{i = a}^{b} i^2.\]
+
+\item
+Use subtract-and-guess or divide-and-guess to find the
+closed form solution for the following summation. You must first find
+a pattern from which to deduce a potential closed form solution,
+and then prove that the proposed solution is correct.
+
+\[ \sum_{i=1}^n i/2^i \]
+
+\item
+Use the shifting method to solve the
+summation\index{summation!shifting method}
+\[\sum_{i=1}^{n} i^2.\]
+
+\item
+Use the shifting method to solve the
+summation\index{summation!shifting method}
+\[\sum_{i=1}^{n} 2^i.\]
+
+\item
+Use the shifting method to solve the
+summation\index{summation!shifting method}
+\[\sum_{i=1}^{n} i 2^{n-i}.\]
+
+\item
+Consider the following code fragment.
+
+\xprogexamp{ch14p2.book}
+\begin{enumerate}
+\item
+Determine a summation that defines the final
+value for variable \texttt{sum} as a function of $n$.
+
+\item
+Determine a closed-form solution for your summation.
+\end{enumerate}
+
+\item
+%From Rawlins
+A chocolate company decides to promote its chocolate bars by including
+a coupon with each bar.
+A bar costs a dollar, and with \(c\) coupons you get a free bar.
+So depending on the value of \(c\), you get more than one bar of
+chocolate for a dollar when considering the value of the coupons.
+How much chocolate is a dollar worth (as a function of \(c\))?
+
+\item
+Write and solve a recurrence relation to compute the number of times
+Fibr is called in the Fibr function of Exercise~\ref{MathPre}.\ref{FiboEx}.
+
+\item
+Give and prove the closed-form solution for the
+recurrence relation\index{recurrence relation}
+${\bf T}(n) = {\bf T}(n-1) + 1$, ${\bf T}(1) = 1$.
+
+\item
+Give and prove the closed-form solution for the
+recurrence relation\index{recurrence relation}
+${\bf T}(n) = {\bf T}(n-1) + c$, ${\bf T}(1) = c$.
+
+\item
+Prove by induction\index{proof!induction} that the closed-form solution for
+the recurrence relation\index{recurrence relation}
+\[{\bf T}(n) = 2{\bf T}(n/2) + n; \quad {\bf T}(2) = 1\]
+\noindent is in \Omeganlogn.
+
+\item % Manber 3.26
+For the following recurrence, give a closed-form solution.
+You should not give an exact solution, but only an asymptotic solution
+(i.e., using \(\Theta\) notation).
+You may assume that \(n\) is a power of 2.
+Prove that your answer is correct.
+
+\[\Tn = \Tnhalf + \sqrt{n}\ \mbox{for}\ n>1; \quad \Tone = 1. \]
+
+\item
+Using the technique of expanding the recurrence, find the exact
+closed-form solution for the recurrence
+relation\index{recurrence relation!expanding}
+\[{\bf T}(n) = 2{\bf T}(n/2) + n; \quad {\bf T}(2) = 2.\]
+\noindent You may assume that \(n\) is a power of 2.
+
+\item
+Section~\ref{HeapSec} provides an asymptotic analysis for the
+worst-case cost of function \Cref{buildHeap}.
+Give an exact worst-case analysis for \Cref{buildHeap}.
+
+\item
+For each of the following recurrences, find and then prove (using
+induction) an exact closed-form solution.\index{proof!induction}
+When convenient, you may assume that \(n\) is a power of 2.
+
+\begin{enumerate}
+\item % Manber 3.6
+\(\Tn = \Tnone + n/2\ \mbox{for}\ n>1; \quad \Tone = 1.\)
+\item
+\(\Tn = 2\Tnhalf + n\ \mbox{for}\ n>2; \quad \Ttwo = 2. \)
+\end{enumerate}
+
+\item
+Use Theorem~\ref{RecurThm} to prove that binary
+search\index{search!binary} requires \Thetalogn\ time.
+
+\item
+Recall that when a hash table\index{hashing} gets to be more than
+about one half full, its performance quickly degrades.
+One solution to this problem is to reinsert all elements of the hash
+table into a new hash table that is twice as large.
+Assuming that the (expected) average case cost to insert into a hash
+table is \Thetaone, prove that the average cost to insert is still
+\Thetaone\ when this re-insertion policy is used.
+
+\item
+Given a \TTtree\ with $N$ nodes, prove that inserting $M$ additional
+nodes requires ${\rm O}(M+N)$ node splits.\index{two-three@\TTtree}
+
+\item
+One approach to implementing an array-based list where the list size
+is unknown is to let the array grow and shrink.\index{list}
+This is known as a \defit{dynamic array}.\index{array!dynamic}
+When necessary, we can grow or shrink the array by copying the array's 
+contents to a new array.
+If we are careful about the size of the new array, this copy operation 
+can be done rarely enough so as not to affect the amortized cost of
+the operations.
+
+\begin{enumerate}
+\item
+What is the amortized\index{amortized analysis} cost of inserting
+elements into the list if
+the array is initially of size~1 and we double the array size whenever
+the number of elements that we wish to store exceeds the size of the
+array?
+Assume that the insert itself cost \Oone\ time per operation and so we 
+are just concerned with minimizing the copy time to the new array.
+% Answer: This is in \Oone (the total work done is always <= 2n for n
+% items inserted)
+
+\item
+Consider an underflow strategy that cuts the array size in half
+whenever the array falls below half full.
+Give an example where this strategy leads to a bad amortized cost.
+Again, we are only interested in measuring the time of the array copy
+operations.
+% Answer: keep adding until overflow, then repeatedly remove an item
+% then insert an item.  This is in \Ontwo total cost for n items
+%inserted.
+
+\item
+Give a better underflow strategy than that suggested in part (b).
+Your goal is to find a strategy whose
+amortized analysis shows that array copy requires \On\ time for a
+series of \(n\) operations.\index{amortized analysis}
+% Answer: Cut size in half when the array becomes < 1/4 full.
+\end{enumerate}
+
+\item
+Recall that two vertices in an undirected graph are in the same
+connected component if there is a path
+connecting them.\index{graph!connected component}
+A good algorithm to find the connected components of an undirected
+graph begins by calling a DFS on the first vertex.
+All vertices reached by the DFS are in the same connected component
+and are so marked.
+We then look through the vertex \Cref{mark} array until an unmarked
+vertex $i$ is found.\index{depth-first search}
+Again calling the DFS on $i$, all vertices reachable from $i$ are in
+a second connected component.
+We continue working through the \Cref{mark} array until all vertices
+have been assigned to some connected component.
+A sketch of the algorithm is as follows:
+
+\xprogexer{Grconcom.book}
+
+Use the concept of potential from amortized analysis to explain why the
+total cost of this algorithm is $\Theta(|\mbox{V}| + |\mbox{E}|)$.
+(Note that this will not be a true amortized analysis because this
+algorithm does not allow an arbitrary series of DFS operations but
+rather is fixed to do a single call to DFS from each vertex.)
+
+%The key insight to an analysis of this problem is that no
+%single vertex can be a member of more than one component,
+%and an edge will only be looked at once.
+%There are a total of $|\mbox{V}|$ vertices and $|\mbox{E}|$ edges,
+%and the first call to \Cref{DFScomponent} could visit some, one or
+%all of them.
+%Once a vertex or edge has been visited, it is no longer available for
+%the next component, thus reducing the potential for future calls to
+%\Cref{DFScomponent}.
+%The total amortized cost for \emph{all} calls to \Cref{DFScomponent}
+%is $\Theta(|\mbox{V}| + |\mbox{E}|)$.
+%The total work done by the connected components algorithm aside from
+%work done in \Cref{DFScomponent} is also \Thetan.
+%Thus, the cost for the entire connected components algorithm
+%is \Thetan.
+
+\item
+Give a proof similar to that used for Theorem~\ref{MTFThm} to show
+that the total number of comparisons required by any series of
+$n$ or more searches \svar{S} on a self-organizing list of length~$n$
+using the count heuristic is never more than twice the total number of
+comparisons required when series~\svar{S} is applied to the list
+stored in its optimal static order.
+
+\item
+Use mathematical induction to prove that\index{proof!induction}
+
+\[\sum_{i=1}^n Fib(i) = Fib(n-2) - 1, \mbox{for}\ n \geq 1.\]
+
+\item
+Use mathematical induction to prove that Fib(i) is even if and only if
+n is divisible by 3.\index{proof!induction}
+
+\item
+Use mathematical induction to prove that for $n \geq 6$,
+$fib(n) > (3/2)^{n-1}$.\index{proof!induction}
+
+\item
+Find closed forms for each of the following recurrences.
+
+\begin{enumerate}
+\item $F(n) = F(n-1) + 3; F(1) = 2.$
+\item $F(n) = 2F(n-1); F(0) = 1.$
+\item $F(n) = 2F(n-1) + 1; F(1) = 1.$
+\item $F(n) = 2nF(n-1); F(0) = 1.$
+\item $F(n) = 2^{n}F(n-1); F(0) = 1.$
+\item $F(n) = 2 + \sum_{i=1}^{n-1} F(i); F(1) = 1.$
+\end{enumerate}
+
+\item
+Find $\Theta$ for each of the following recurrence relations.
+\begin{enumerate}
+\item $T(n) = 2T(n/2) + n^2.$
+\item $T(n) = 2T(n/2) + 5.$
+\item $T(n) = 4T(n/2) + n.$
+\item $T(n) = 2T(n/2) + n^2.$
+\item $T(n) = 4T(n/2) + n^3.$
+\item $T(n) = 4T(n/3) + n.$
+\item $T(n) = 4T(n/3) + n^2.$
+\item $T(n) = 2T(n/2) + \log n.$
+\item $T(n) = 2T(n/2) + n \log n.$
+\end{enumerate}
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+Implement the UNION/FIND algorithm\index{union/find@UNION/FIND}
+of Section~\ref{ParentPointer}
+using both path compression and the\index{path compression}
+weighted union rule.\index{weighted union rule}
+Count the total number of node accesses required for various series of
+equivalences to determine if the actual performance of the algorithm
+matches the expected cost of $\Theta(n \log^* n)$.
+
+\end{projects}

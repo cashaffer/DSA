@@ -1,0 +1,1462 @@
+% gentree.tex
+% A Practical Introduction to Data Structures and Algorithm Analysis
+% 3rd Edition: Shared between C++ and Java versions
+
+\chapter{Non-Binary Trees}
+\label{GeneralTree}
+\def\CHHEAD{Chap.\ \thechapter\ Non-Binary Trees}    % Head title -- even pages
+
+\index{general tree|(}
+Many organizations are hierarchical in nature, such as the military
+and most businesses.
+Consider a company with a president and some number of vice presidents
+who report to the president.
+Each vice president has some number of direct subordinates, and so on.
+If we wanted to model this company with a data structure,
+it would be natural to think of the president
+in the root node of a tree, the vice presidents at level 1, and their
+subordinates at lower levels in the tree as we go
+down the organizational hierarchy.
+
+Because the number of vice presidents is likely to be more than two,
+this company's organization cannot easily be represented by a
+binary tree.\index{binary tree}
+We need instead to use a tree whose nodes have an arbitrary
+number of children.
+Unfortunately, when we permit trees to have nodes with an arbitrary
+number of children, they become much harder to implement than binary
+trees.
+We consider such trees in this chapter.
+To distinguish them from binary trees,
+we use the term \defit{general tree}.
+
+Section~\ref{TreeDef} presents general tree terminology.
+Section~\ref{ParentPointer} presents a simple representation for
+solving the important problem of processing equivalence
+classes.\index{equivalence!class}
+Several pointer-based implementations for general trees are covered in
+Section~\ref{TreeRepSec}.
+Aside from general trees and binary trees, there are also uses for
+trees whose internal nodes have a fixed number \(K\) of
+children where \(K\) is something other than two.
+Such trees are known as \Kary\ trees.
+Section~\ref{Kary} generalizes the properties of
+binary trees to \Kary\ trees.
+Sequential representations, useful for applications such as storing
+trees on disk, are covered in Section~\ref{DFExpr}.
+
+\section{General Tree Definitions and Terminology}
+\label{TreeDef}
+
+\index{general tree!terminology|(}
+A \defit{tree} \cvar{T} is a finite set of one or more nodes such
+that there is one designated node \svar{R}, called the root
+of~\cvar{T}.
+If the set \((\cvar{T} -\{\svar{R}\}\)) is not empty, these nodes are
+partitioned into \(n > 0\) disjoint subsets \(\cvar{T}_0\),
+\(\cvar{T}_1\), ..., \(\cvar{T}_{n-1}\), each of which is a tree,
+and whose roots \(\svar{R}_1\), \(\svar{R}_2\), ..., \(\svar{R}_n\),
+respectively, are children of \svar{R}.
+The subsets \(\cvar{T}_i\) \((0 \leq i < n)\) are said to be
+\defit{subtrees} of \cvar{T}.
+These subtrees are ordered in that \(\cvar{T}_i\) is said to come before
+\(\cvar{T}_j\) if \(i < j\).
+By convention, the subtrees are arranged from left to right with
+subtree \(\cvar{T}_0\) called the leftmost child of \svar{R}.
+A node's \defit{out degree}  is the number of children for that node.
+A \defit{forest} is a collection of one or more trees.
+Figure~\ref{GenTreeFig} presents further tree notation generalized
+from the notation for binary trees presented in
+Chapter~\ref{BinaryTree}.
+
+\begin{figure}
+\pdffig{GTreeFig}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Notation for general trees}
+{Notation for general trees.
+Node~\svar{P} is the parent of nodes~\svar{V}, \(\svar{S1}\),
+and~\(\svar{S2}\).
+Thus, \svar{V},~\(\svar{S1}\), and~\(\svar{S2}\) are children
+of~\svar{P}.
+Nodes~\svar{R} and~\svar{P} are ancestors of~\svar{V}.
+Nodes~\svar{V}, \(\svar{S1}\), and~\(\svar{S2}\) are called
+\defit{siblings}.
+The oval surrounds the subtree having \svar{V} as its root.}{GenTreeFig}
+\bigskip
+\end{figure}
+
+Each node in a tree has precisely one parent, except for the root,
+which has no parent.
+From this observation, it immediately follows that a tree with 
+\(n\) nodes must have \(n-1\)~edges because each node, aside from the
+root, has one edge connecting that node to its parent.
+\index{general tree!terminology|)}
+
+\subsection{An ADT for General Tree Nodes}
+
+\index{general tree!adt@ADT|(}
+\index{abstract data type (ADT)|(}
+Before discussing general tree implementations, we should first make
+precise what operations such implementations must support.
+Any implementation must be able to initialize a tree.
+Given a tree, we need access to the root of that tree.
+There must be some way to access the children of a node.
+In the case of the ADT for binary tree nodes, this was done by
+providing member functions that give explicit access to the left and
+right child pointers.
+Unfortunately, because we do not know in advance how many children a
+given node will have in the general tree, we cannot give explicit
+functions to access each child.
+An alternative must be found that works for an unknown number of
+children.
+
+One choice would be to provide a function that takes as its parameter
+the index for the desired child.
+That combined with a function that returns the number of children for
+a given node would support the ability to access any node or process
+all children of a node.
+Unfortunately, this view of access tends to bias the
+choice for node implementations in favor of an array-based approach,
+because these functions favor random access to a list of children.
+In practice, an implementation based on a linked list is often
+preferred.
+
+An alternative is to provide access to the first (or leftmost) child
+of a node, and to provide access to the next (or right) sibling of a
+node.
+Figure~\ref{GenTreeADT} shows class declarations for general trees and 
+their nodes.
+Based on these two access functions, the children of a node can be
+traversed like a list.
+Trying to find the next sibling of the rightmost sibling would return
+\NULL.
+
+\begin{figure}
+\xprogfig{GTNode.book}
+
+\bigskip
+\xprogfig{GenTree.book}
+
+\vspace{-\bigskipamount}
+
+\ifthenelse{\boolean{java}}{\capt{4.5in}{Interfaces for the general tree and
+general tree node}{Interfaces for the general tree and general tree
+node}{GenTreeADT}}{}
+\ifthenelse{\boolean{cpp}}{\capt{4.5in}{Definitions for the general tree and
+general tree node}{Definitions for the general tree and general tree
+node}{GenTreeADT}}{}
+
+\end{figure}
+\index{abstract data type (ADT)|)}
+\index{general tree!adt@ADT|)}
+
+\subsection{General Tree Traversals}
+\label{GenTraverse}
+
+\index{traversal!general tree|(}
+In Section~\ref{BinTravers}, three tree traversals were presented for
+binary trees: preorder, postorder, and inorder.
+For general trees, preorder and postorder traversals are defined with
+meanings similar to their binary tree
+counterparts.
+Preorder traversal of a general tree first visits the root of the
+tree, then performs a preorder traversal of each subtree from left to
+right.
+A postorder traversal of a general tree performs a postorder traversal
+of the root's subtrees from left to right, then visits the root.
+Inorder traversal does not have a natural definition for the
+general tree, because there is no particular number of children for an
+internal node.
+An arbitrary definition --- such as visit the leftmost subtree in
+inorder, then the root, then visit the remaining subtrees in inorder
+--- can be invented.
+However, inorder traversals are generally not useful with
+general trees.
+
+\begin{figure}
+\pdffig{GTreeEx}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{An example of a general tree}
+{An example of a general tree.}
+{GenTreeEx}
+\end{figure}
+
+\begin{example}
+A preorder traversal of the tree in Figure~\ref{GenTreeEx}
+visits the nodes in order 
+\(R A C D E B F\).
+
+A postorder traversal of this tree visits the nodes in
+order
+\(C D E A F B R\).
+\end{example}
+
+To perform a preorder traversal, it is necessary to visit each of the
+children for a given node (say \svar{R}) from left to right.
+This is accomplished by starting at \svar{R}'s leftmost child
+(call it \svar{T}).
+From \svar{T}, we can move to \svar{T}'s right sibling, and then to
+that node's right sibling, and so on.
+
+Using the ADT of Figure~\ref{GenTreeADT}, here is a \Lang\
+implementation to print the nodes of a general tree in
+preorder.\index{abstract data type (ADT)}
+Note the \Cref{for} loop at the end, which processes the list of
+children by beginning with the leftmost child, then repeatedly moving
+to the next child until calling \Cref{next} returns \NULL.
+\index{traversal!general tree|)}
+
+\xproghere{GTprint.book}
+
+\newpage
+
+\section{The Parent Pointer Implementation}
+\label{ParentPointer}
+
+Perhaps\index{general tree!parent pointer implementation|(}
+the simplest general tree implementation is to store for each
+node only a pointer to that node's parent.
+We will call this the \defit{parent pointer} implementation.
+Clearly this implementation is not general purpose, because it is
+inadequate for such important operations as finding
+the leftmost child or the right sibling for a node.
+Thus, it may seem to be a poor idea to implement a general
+tree in this way.
+However, the parent pointer implementation stores precisely the
+information required to answer the following, useful question:
+``Given two nodes, are they in the same tree?''
+To answer the question, we need only follow the series of parent
+pointers from each node to its respective root.
+If both nodes reach the same root, then they must be in the same tree.
+If the roots are different, then the two nodes are not in the same
+tree.
+The process of finding the ultimate root for a given node we will call
+\defit{FIND}.
+
+The parent pointer representation is most often used to maintain a
+collection of disjoint sets.
+Two disjoint sets share no members in common (their intersection is
+empty).
+A collection of disjoint sets partitions some objects
+such that every object is in exactly one of the disjoint sets.
+There are two basic operations that we wish to support:
+\begin{enumerate}
+\item[(1)] determine if two objects are in the same set, and
+\item[(2)]  merge two sets together.
+\end{enumerate}
+\noindent Because two merged sets are united, the merging operation is
+called UNION and the whole process of determining if two
+objects are in the same set and then merging the sets goes by the name
+``UNION/FIND.''\index{union/find@UNION/FIND}
+
+To implement UNION/FIND, we represent each disjoint set with a
+separate general tree.
+Two objects are in the same disjoint set if they are in the same tree.
+Every node of the tree (except for the root) has precisely one parent.
+Thus, each node requires the same space to represent it.
+The collection of objects is typically stored in an array, where each
+element of the array corresponds to one object, and each element
+stores the object's value.
+The objects also correspond to nodes in the various disjoint trees
+(one tree for each disjoint set), so we also store the parent value
+with each object in the array.
+Those nodes that are the roots of their respective trees store an
+appropriate indicator.
+Note that this representation means that a single array is being used
+to implement a collection of trees.
+This makes it easy to merge trees together with UNION operations.
+
+Figure~\ref{ParPtrImpl} shows the parent pointer implementation for
+the general tree, called \Cref{ParPtrTree}.
+This class is greatly simplified from the declarations of
+Figure~\ref{GenTreeADT} because we need only a subset of the general
+tree operations.
+Instead of implementing a separate node class, \Cref{ParPtrTree}
+simply stores an array where each array element corresponds to
+a node of the tree.
+Each position \(i\) of the array stores the value for node
+\(i\) and the array position for the parent of node~\(i\).
+Class \Cref{ParPtrTree} is given two new methods, \Cref{differ} and
+\Cref{UNION}.
+Method \Cref{differ} checks if two objects are in different sets,
+and method \Cref{UNION} merges two sets together.
+A private method \Cref{FIND} is used to find the ultimate root for
+an object.
+
+\begin{figure}
+\xprogfig{UFgtree.book}
+\bigskip
+\xprogfig{UFfind.book}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Implementation for UNION/FIND}
+{General tree implementation using parent pointers for the UNION/ FIND
+algorithm.}{ParPtrImpl}
+\end{figure}
+
+An application using the UNION/FIND operations
+should store a set of \(n\) objects, where each object is assigned a
+unique index in the range 0 to~\(n-1\).
+The indices refer to the corresponding parent pointers in the array.
+Class \Cref{ParPtrTree} creates and initializes the
+UNION/FIND array, and methods \Cref{differ} and
+\Cref{UNION} take array indices as inputs.
+
+Figure~\ref{ParentPtr} illustrates the parent pointer implementation.
+Note that the nodes can appear in any order within the array, and
+the array can store up to \(n\) separate trees.
+For example, Figure~\ref{ParentPtr} shows two trees stored in the same
+array.
+Thus, a single array can store a collection of items distributed among
+an arbitrary (and changing) number of disjoint subsets.
+
+\begin{figure}
+\pdffig{ParPtr}
+\smallskip
+\capt{4.5in}{Parent pointer representation}
+{The parent pointer array implementation.
+Each node corresponds to a position in the node array,
+which stores its value and a pointer to its parent.
+The parent pointers are represented by the position in the array
+of the parent.
+The root of any tree stores \Cref{ROOT}, represented graphically by a
+slash in the ``Parent's Index'' box.
+This figure shows two trees stored in the same parent pointer array,
+one rooted at~\svar{R}, and the other rooted at~\svar{W}.}
+{ParentPtr}
+\bigskip
+\end{figure}
+
+Consider the problem of assigning the members of a set to
+disjoint subsets called
+\defit{equivalence classes}.\index{equivalence!class|(}
+Recall from Section~\ref{SetDef} that an equivalence relation is
+reflexive, symmetric, and transitive.
+Thus, if objects \svar{A} and \svar{B} are equivalent, and objects
+\svar{B} and \svar{C} are equivalent, we must be able to recognize
+that objects \svar{A} and \svar{C} are also equivalent.
+
+\begin{figure}
+\pdffig{UFexamp}
+\vspace{-\bigskipamount}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{A graph with two connected components}
+{A graph with two connected components.}
+{UFexamp}
+\end{figure}
+
+There are many practical uses for disjoint sets and representing
+equivalences.
+For example, consider Figure~\ref{UFexamp} which shows a graph of
+ten nodes labeled \svar{A} through \svar{J}.
+Notice that for nodes \svar{A} through \svar{I}, there is some series
+of edges that connects any pair of the nodes, but node \svar{J} is
+disconnected from the rest of the nodes.
+Such a graph might be used to represent connections such as wires
+between components on a circuit board, or roads between cities.
+We can consider two nodes of the graph to be equivalent if there is a
+path between them.
+Thus, nodes \svar{A}, \svar{H}, and \svar{E} would
+be equivalent in Figure~\ref{UFexamp}, but \svar{J} is not equivalent
+to any other.
+A subset of equivalent (connected) edges in a graph is called a
+\defit{connected component}.
+The goal is to quickly classify the objects
+into disjoint sets that correspond to the connected components.
+Another application for UNION/FIND occurs in Kruskal's algorithm for
+computing the minimal cost spanning tree for a graph
+(Section~\ref{Kruskal}).
+
+The input to the UNION/FIND algorithm is typically  a series of
+equivalence pairs.
+In the case of the connected components example, the equivalence pairs 
+would simply be the set of edges in the graph.
+An equivalence pair might say that object~\svar{C} is equivalent to
+object~\svar{A}.
+If so, \svar{C}~and~\svar{A} are placed in the same subset.
+If a later equivalence relates \svar{A} and~\svar{B}, then
+by implication \svar{C} is also equivalent to~\svar{B}.
+Thus, an equivalence pair may cause two subsets to merge, each of
+which contains several objects.
+
+\ifthenelse{\boolean{cpp}}{\newpage}{}
+
+Equivalence classes can be managed efficiently with the UNION/FIND
+algorithm.
+Initially, each object is at the root of its own tree.
+An equivalence pair is processed by checking to see if both objects
+of the pair are in the same tree using method \Cref{differ}.
+If they are in the same tree, then no change need be made because the
+objects are already in the same equivalence class.
+Otherwise, the two equivalence classes should be merged by the
+\Cref{UNION} method.
+
+\begin{figure}
+\pdffig{EquivEx}
+\vspace{-\smallskipamount}
+\capt{4.5in}{Equivalence processing example}
+{An example of equivalence processing.
+(a)~Initial configuration for the ten nodes of the graph in
+Figure~\ref{UFexamp}.
+The nodes are placed into ten independent equivalence classes.
+(b)~The result of processing five edges:
+(\svar{A},~\svar{B}), (\svar{C},~\svar{H}), (\svar{G},~\svar{F}),
+(\svar{D},~\svar{E}), and (\svar{I},~\svar{F}).
+(c)~The result of processing two more edges:
+(\svar{H},~\svar{A}) and (\svar{E},~\svar{G}).
+(d)~The result of processing edge (\svar{H},~\svar{E}).}
+{EquivExamp}
+\end{figure}
+
+\begin{example}
+As an example of solving the equivalence class problem, consider the
+graph of Figure~\ref{UFexamp}.
+Initially, we assume that each node of the graph is in a distinct
+equivalence class.
+This is represented by storing each as the root of its own tree.
+Figure~\ref{EquivExamp}(a) shows this initial configuration using the
+parent pointer array representation.
+Now, consider what happens when equivalence relationship
+(\svar{A},~\svar{B}) is processed.
+The root of the tree containing~\svar{A} is~\svar{A}, and the root of
+the tree containing~\svar{B} is~\svar{B}.
+To make them equivalent, one of these two roots is set to be the
+parent of the other.
+In this case it is irrelevant which points to which, so we arbitrarily
+select the first in alphabetical order to be the root.
+This is represented in the parent pointer array by setting the parent
+field of~\svar{B} (the node in array position~1 of the array)
+to store a pointer to~\svar{A}.
+Equivalence pairs (\svar{C},~\svar{H}), (\svar{G},~\svar{F}), and
+(\svar{D},~\svar{E}) are processed in similar fashion.
+When processing the equivalence pair (\svar{I},~\svar{F}),
+because~\svar{I} and~\svar{F} are both their own roots,
+\svar{I}~is set to point to~\svar{F}.
+Note that this also makes \svar{G} equivalent to~\svar{I}.
+The result of processing these five equivalences is shown in
+Figure~\ref{EquivExamp}(b).
+\end{example}
+
+The parent pointer representation places no limit on the number of
+nodes that can share a parent.
+To make equivalence processing as efficient as possible, 
+the distance from each node to the root of its respective tree should
+be as small as possible.
+Thus, we would like to keep the height of the trees small when merging
+two equivalence classes together.
+Ideally, each tree would have all nodes pointing directly to the root.
+Achieving this goal all the time would require too much additional
+processing to be worth the effort, so we must settle for getting as
+close as possible.
+
+\index{weighted union rule|(}
+A low-cost approach to reducing the height is to be smart about how
+two trees are joined together.
+One simple technique, called the
+\defit{weighted union rule},
+joins the tree with fewer nodes to the tree with more nodes by making
+the smaller tree's root point to the root of the bigger tree.
+This will limit the total depth of the tree to \Ologn, because the
+depth of nodes only in the smaller tree will now increase by one,
+and the depth of the deepest node in the combined tree can only be at
+most one deeper than the deepest node before the trees were combined.
+The total number of nodes in the combined tree is therefore at least
+twice the number in the smaller subtree.
+Thus, the depth of any node can be increased at most \(\log n\) times
+when \(n\) equivalences are processed.
+
+\begin{example}
+When processing equivalence pair (\svar{I},~\svar{F}) in
+Figure~\ref{EquivExamp}(b), \svar{F}~is the root of a tree with two
+nodes while \svar{I}~is the root of a tree with only one node.
+Thus, \svar{I}~is set to point to~\svar{F} rather than the other way
+around.
+Figure~\ref{EquivExamp}(c) shows the result of processing two more
+equivalence pairs: (\svar{H},~\svar{A}) and (\svar{E},~\svar{G}).
+For the first pair, the root for~\svar{H} is~\svar{C} while the root
+for~\svar{A} is itself.
+Both trees contain two nodes, so it is an arbitrary decision as to
+which node is set to be the root for the combined tree.
+In the case of equivalence pair (\svar{E},~\svar{G}),
+the root of~\svar{E} is~\svar{D} while the
+root of~\svar{G} is~\svar{F}.
+Because~\svar{F} is the root of the larger tree, node~\svar{D} is set
+to point to~\svar{F}.
+\end{example}
+
+Not all equivalences will combine two trees.
+If equivalence (\svar{F},~\svar{G}) is processed when the
+representation is in the state shown in Figure~\ref{EquivExamp}(c),
+no change will be made because~\svar{F} is already the root
+for~\svar{G}.
+\index{weighted union rule|)}
+
+\index{path compression|(}
+The weighted union rule helps to minimize the depth of the tree, but
+we can do better than this.
+\defit{Path compression} is a method that tends to create extremely
+shallow trees.
+Path compression takes place while finding the root
+for a given node~\svar{X}.
+Call this root~\svar{R}.
+Path compression resets the parent of every node on the path from
+\svar{X} to \svar{R} to point directly to~\svar{R}.
+This can be implemented by first finding~\svar{R}.
+A second pass is then made along the path from \svar{X} to~\svar{R},
+assigning the parent field of each node encountered to~\svar{R}.
+Alternatively, a recursive algorithm can be implemented as follows.
+This version of \Cref{FIND} not only returns the root of the
+current node, but also makes all ancestors of the current node point
+to the root.
+
+\xproghere{UFpcfind.book}
+
+\ifthenelse{\boolean{java}}{\newpage}{}
+
+\begin{example}
+Figure~\ref{EquivExamp}(d) shows the result of processing equivalence
+pair (\svar{H},~\svar{E}) on the the representation shown in
+Figure~\ref{EquivExamp}(c) using the standard weighted union rule
+without path compression.
+Figure~\ref{PathCompFig} illustrates the path compression process for
+the same equivalence pair.
+After locating the root for node~\svar{H}, we can perform path
+compression to make~\svar{H} point directly to root object~\svar{A}.
+Likewise, \svar{E}~is set to point directly to its root,~\svar{F}.
+Finally, object~\svar{A} is set to point to root object~\svar{F}.
+
+Note that path compression takes place during the
+FIND operation, \emph{not} during the UNION operation.
+In Figure~\ref{PathCompFig}, this means that nodes \svar{B},
+\svar{C}, and \svar{H} have node \svar{A} remain as their parent,
+rather than changing their parent to be \svar{F}.
+While we might prefer to have these nodes point to \svar{F}, to
+accomplish this would require that additional information from the
+FIND operation be passed back to the UNION operation.
+This would not be practical.
+\end{example}
+
+\begin{figure}
+\pdffig{PathComp}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{Path Compression Example}
+{An example of path compression, showing the result of
+processing equivalence pair (\svar{H},~\svar{E}) on the representation
+of Figure~\ref{EquivExamp}(c).}{PathCompFig}
+\smallskip
+\end{figure}
+
+Path compression keeps the cost of each FIND operation very
+close to constant.
+To~be more precise about what is meant by ``very close to constant,''
+the cost of path compression for \(n\) FIND operations on
+\(n\)~nodes (when combined with the weighted union rule for joining
+sets) is approximately\footnote{To be more precise, this cost has been
+found to grow in time proportional to the inverse of Ackermann's
+function.
+See Section~\ref{GenFurtherRead}.}
+\(\Theta(n \log^* n)\).\index{logarithm!log star@\(\log^*\)} 
+The notation ``\(\log^* n\)'' means the number of times that
+the log of \(n\) must be taken before \(n \leq 1\).
+For example, \(\log^* 65536\) is 4 because
+\(\log 65536 = 16\), \(\log 16 = 4\), \(\log 4 = 2\), and finally
+\(\log 2 = 1\).
+Thus, \(\log^* n\) grows \emph{very} slowly, so the cost for a series
+of \(n\)~FIND operations is very close to \(n\).
+
+Note that this does not mean that the tree resulting from
+processing \(n\) equivalence pairs necessarily has depth
+\(\Theta(\log^* n)\).
+One can devise a series of equivalence operations that yields
+\Thetalogn\ depth for the resulting tree.
+However, many of the equivalences in such a series will look only at
+the roots of the trees being merged, requiring little processing time.
+The \emph{total} amount of processing time required for \(n\)
+operations will be \(\Theta(n \log^* n)\),
+yielding nearly constant time for each equivalence operation.
+This is an example of amortized analysis, discussed
+further in Section~\ref{AmortAnal}.
+\index{path compression|)}
+\index{equivalence!class|)}
+\index{general tree!parent pointer implementation|)}
+
+\section{General Tree Implementations}
+\label{TreeRepSec}
+
+\index{general tree!implementation|(}
+We now tackle the problem of devising an implementation for general
+trees that allows efficient processing for all member functions of the
+ADTs shown in Figure~\ref{GenTreeADT}.\index{abstract data type (ADT)}
+This section presents several approaches to implementing general
+trees.
+Each implementation yields  advantages and disadvantages in the amount
+of space required to store a node and the relative ease with which
+key operations can be performed.
+General tree implementations should place no restriction on how many
+children a node may have.
+In some applications, once a node is created the number of children
+never changes.
+In such cases, a fixed amount of space can be allocated for the
+node when it is created, based on the number of children for the node.
+Matters become more complicated if children can be added to or deleted
+from a node, requiring that the node's space allocation be adjusted
+accordingly.
+
+\subsection{List of Children}
+\label{LOChild}
+
+\index{general tree!list of children|(}
+Our first attempt to create a general tree implementation is called
+the ``list of children'' implementation for general trees.
+It simply stores with each internal node a
+linked list of its children.
+This is illustrated by Figure~\ref{ChildList}.
+
+\begin{figure}
+\pdffig{ChildLst}
+\smallskip
+\capt{4.5in}{The ``list of children'' implementation for general trees.}
+{The ``list of children'' implementation for general trees.
+The column of numbers to the left of the node array labels the array
+indices.
+The column labeled ``Val'' stores node values.
+The column labeled ``Par'' stores indices (or pointers) to the
+parents.
+The last column stores pointers to the linked list of children for
+each internal node.
+Each element of the linked list stores a pointer to
+one of the node's children (shown as the array index of the target
+node).}{ChildList}
+\bigskip
+\end{figure}
+
+The ``list of children'' implementation stores the tree nodes in an
+array.
+Each node contains a value, a pointer (or index) to its parent, and a
+pointer to a linked list of the node's children, stored in order from
+left to right.
+Each linked list element contains a pointer to one child.
+Thus, the leftmost child of a node can be found directly because it is
+the first element in the linked list.
+However, to find the right sibling for a node is more difficult.
+Consider the case of a node~\svar{M} and its parent~\svar{P}.
+To find \svar{M}'s~right sibling, we must move down the child list
+of~\svar{P} until the linked list element storing the pointer
+to~\svar{M} has been found.
+Going one step further takes us to the linked list element that stores
+a pointer to \svar{M}'s~right sibling.
+Thus, in the worst case, to find \svar{M}'s~right sibling requires
+that all children of \svar{M}'s~parent be searched.
+
+Combining trees using this representation is difficult if each tree
+is stored in a separate node array.
+If the nodes of both trees are stored in a single node array, then
+adding tree~\cvar{T} as a subtree of node~\svar{R} is done by
+simply adding the root of~\cvar{T} to \svar{R}'s list of children.
+\index{general tree!list of children|)}
+
+\subsection{The Left-Child/Right-Sibling Implementation}
+\label{LeftRight}
+
+\index{general tree!left-child/right-sibling}
+With the ``list of children'' implementation, it is difficult to
+access a node's right sibling.\index{general tree!list of children}
+Figure~\ref{Explicit} presents an improvement.
+Here, each node stores its value and pointers to its parent, leftmost
+child, and right sibling.
+Thus, each of the basic ADT operations can be implemented by reading a
+value directly from the node.\index{abstract data type (ADT)}
+If two trees are stored within the same node array, then adding one
+as the subtree of the other simply requires setting three pointers.
+Combining trees in this way is illustrated by
+Figure~\ref{AddExplicit}.
+This implementation is more space efficient than the
+``list of children'' implementation, and each node requires a fixed
+amount of space in the node
+array.\index{general tree!left-child/right-sibling}
+
+\begin{figure}
+\pdffig{Explicit}
+\vspace{-\bigskipamount}\vspace{-\bigskipamount}
+\vspace{-\smallskipamount}
+
+\capt{4.5in}{The left-child/right-sibling implementation}
+{The ``left-child/right-sibling'' implementation.}{Explicit}
+\end{figure}
+
+\begin{figure}
+\pdffig{ExpliAdd}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{Combining two trees}
+{Combining two trees that use the ``left-child/right-sibling''
+implementation.
+The subtree rooted at~\svar{R} in Figure~\ref{Explicit} now becomes
+the first child of~\svar{R}\('\).
+Three pointers are adjusted in the node array:
+The left-child field of~\svar{R}\('\) now points to node~\svar{R}, while
+the right-sibling field for~\svar{R} points to node~\svar{X}.
+The parent field of node~\svar{R} points to
+node~\svar{R}\('\).}{AddExplicit}
+\bigskip
+\end{figure}
+
+\subsection{Dynamic Node Implementations}
+\label{LinkedSec}
+
+The two general tree implementations just described use an
+array to store the collection of nodes.
+In contrast, our standard implementation for binary trees stores each
+node as a separate dynamic object containing its value and pointers to
+its two children.
+Unfortunately, nodes of a general tree can have any number of
+children, and this number may change during the life of the node.
+A general tree node implementation must support these properties.
+One solution is simply to limit the number of children permitted for
+any node and allocate pointers for exactly that number of children.
+There are two major objections to this.
+First, it places an undesirable limit on the number of children, which
+makes certain trees unrepresentable by this implementation.
+Second, this might be extremely wasteful of space because most
+nodes will have far fewer children and thus leave some pointer
+positions empty.
+
+The alternative is to allocate variable space for each node.
+There are two basic approaches.
+One is to allocate an array of child pointers as part of the node.
+In essence, each node stores an array-based list of child pointers.
+Figure~\ref{GenLinkedFixed} illustrates the concept.
+This approach assumes that the number of children is known when the
+node is created, which is true for some applications but not for
+others.
+It also works best if the number of children does not change.
+If the number of children does change (especially if it increases),
+then some special recovery mechanism must be provided to support
+a change in the size of the child pointer array.
+One possibility is to allocate a new node of the correct size from
+free store and return the old copy of the node to free store for
+later reuse.
+This works especially well in a language with built-in garbage
+collection such as \LangJava.
+For example, assume that a node~\svar{M} initially has two children,
+and that space for two child pointers is allocated when \svar{M} is
+created.
+If a third child is added to~\svar{M}, space for a new node with three
+child pointers can be allocated, the contents of \svar{M} is copied
+over to the new space, and the old space is then returned to free
+store.
+As an alternative to relying on the system's garbage collector,
+a memory manager for variable size storage units can be implemented,
+as described in Section~\ref{MemMan}.
+Another possibility is to use a collection of free lists, one for each
+array size, as described in Section~\ref{freelist}.
+Note in Figure~\ref{GenLinkedFixed} that the current number of
+children for each node is stored explicitly in a \Cref{size} field.
+The child pointers are stored in an array with \Cref{size} elements.
+
+\begin{figure}
+\pdffig{GenLkFx}
+\vspace{-\medskipamount}
+
+\capt{4.5in}{A dynamic general tree with fixed-size arrays}
+{A dynamic general tree representation with fixed-size arrays for the
+child pointers.
+(a)~The general tree.
+(b)~The tree representation.
+For each node, the first field stores the node value while the second
+field stores the size of the child pointer array.}
+{GenLinkedFixed}
+\medskip
+\end{figure}
+
+Another approach that is more flexible, but which requires more space, 
+is to store a linked list of child pointers with each node
+as illustrated by Figure~\ref{GenLinkedLinked}.
+This implementation is essentially the same as the ``list of
+children'' implementation of Section~\ref{LOChild}, but with
+dynamically allocated nodes rather than storing the nodes in an
+array.
+
+\begin{figure}
+\pdffig{GenLkLk}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{A dynamic general tree with linked lists of child pointers}
+{A dynamic general tree representation with linked lists of child
+pointers.
+(a)~The general tree.
+(b)~The tree representation.}{GenLinkedLinked} 
+\end{figure}
+
+\newpage
+
+\subsection{Dynamic ``Left-Child/Right-Sibling'' Implementation}
+\label{DynamicLR}
+
+\index{general tree!converting to binary tree}
+The ``left-child/right-sibling'' implementation of
+Section~\ref{LeftRight} stores a fixed number of pointers with each
+node.
+This can be readily adapted to a dynamic implementation.
+In essence, we substitute a binary tree for a
+general tree.
+Each node of the ``left-child/right-sibling'' implementation points to
+two ``children'' in a new binary tree structure.
+The left child of this new structure is the node's first child
+in the general tree.
+The right child is the node's right sibling.
+We can easily extend this conversion to a forest of general trees,
+because the roots of the trees can be considered siblings.
+Converting from a forest of general trees to a single binary tree is
+illustrated by Figure~\ref{FortoBin}.
+Here we simply include links from each node to its right sibling and
+remove links to all children except the leftmost child.
+Figure~\ref{GenBin} shows how this might look in an implementation
+with two pointers at each node.
+Compared with the implementation illustrated by
+Figure~\ref{GenLinkedLinked} which requires overhead of three
+pointers/node, the implementation of Figure~\ref{GenBin} only requires
+two pointers per node.
+The representation of Figure~\ref{GenBin} is likely to be easier
+to implement, space efficient, and more flexible than the other
+implementations presented in this section.
+\begin{figure}
+\pdffig{FortoBin}
+\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+
+\capt{4.5in}{Converting from a forest of general trees to a binary tree}
+{Converting from a forest of general trees to a single binary tree.
+Each node stores pointers to its left child and right sibling.
+The tree roots are assumed to be siblings for the purpose of
+converting.}{FortoBin}
+\medskip\smallskip
+\end{figure}
+
+\begin{figure}
+\pdffig{GenBin}
+\vspace{-\bigskipamount}
+
+\capt{4.5in}{Dynamic ``left-child/right-sibling'' representation}
+{A general tree converted to the dynamic ``left-child/right-sibling''
+representation.
+Compared to the representation of Figure~\ref{GenLinkedLinked}, this
+representation requires less space.}{GenBin}
+\medskip
+\end{figure}
+
+\index{general tree!converting to binary tree}
+\index{general tree!implementation|)}
+
+\section{\protect\boldmath $K$-ary Trees}
+\label{Kary}
+
+\index{kary@\Kary\ tree|(}
+\Kary\ trees are trees whose internal nodes all have exactly \(K\)
+children.
+Thus, a full binary tree is a \mbox{2-ary} tree.
+The \PRquad\ discussed in Section~\ref{Spatial} is an example of a
+4-ary tree.\index{pr quadtree@\PRquad}
+Because \Kary\ tree nodes have a fixed number of children,
+unlike general trees, they are relatively easy to implement.
+In general, \Kary\ trees bear many similarities to binary trees,
+and similar implementations can be used for \Kary\ tree nodes.
+Note that as \(K\)~becomes large, the potential number of \NULL\
+pointers grows, and the difference between the required sizes for
+internal nodes and leaf nodes increases.
+Thus, as \(K\)~becomes larger, the need to choose separate
+implementations for the internal and leaf nodes becomes more pressing.
+
+\defit{Full} and \defit{complete} \Kary\ trees are analogous to full
+and complete binary trees, respectively.
+Figure~\ref{ThreeTree} shows full and complete \Kary\ trees for \(K=3\).
+In practice, most applications of \Kary\ trees limit them to be either
+full or complete.
+
+\begin{figure}
+\pdffig{ThreeTr}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{Full and complete 3-ary trees}
+{Full and complete 3-ary trees.
+(a)~This tree is full (but not complete).
+(b)~This tree is complete (but not full).}{ThreeTree}
+\bigskip
+\end{figure}
+
+Many of the properties of binary trees extend to \Kary\ trees.
+Equivalent theorems to those in Section~\ref{BinSpace} regarding the
+number of NULL pointers in a \Kary\ tree and the relationship between
+the number of leaves and the number of internal nodes in a
+\Kary\ tree can be derived.
+We can also store a complete \Kary\ tree in an array,
+using simple formulas to compute a node's relations in a manner
+similar to that used in
+Section~\ref{Complete}.\index{kary@\Kary\ tree|)}
+
+\section{Sequential Tree Implementations}
+\label{DFExpr}
+
+\index{sequential tree implementations|(}
+Next we consider a fundamentally different approach to implementing
+trees.
+The goal is to store a series of node values with the minimum
+information needed to reconstruct the tree structure.
+This approach, known as a \defit{sequential} tree implementation, has
+the advantage of saving space because no pointers are stored.
+It has the disadvantage that accessing any node in the tree requires
+sequentially processing all nodes that appear before 
+it in the node list.
+In other words, node access must start at the beginning of the node
+list, processing nodes sequentially in whatever order they are stored
+until the desired node is reached.
+Thus, one primary virtue of the other implementations discussed in
+this section is lost: efficient access (typically \Thetalogn\ time) to
+arbitrary nodes in the tree.
+Sequential tree implementations are ideal for archiving trees on disk
+for later use because they save space, and the tree structure can
+be reconstructed as needed for later processing.
+
+Sequential tree implementations can be used to \defit{serialize} a 
+tree structure.\index{serialization}
+Serialization is the process of storing an object as a series of
+bytes, typically so that the data structure can be transmitted between
+computers.
+This capability is important when using data structures in a
+distributed processing environment.
+
+A sequential tree implementation typically stores the node values as
+they would be enumerated\index{traversal!enumeration} by a preorder
+traversal, along with sufficient information to describe the tree's
+shape.
+If the tree has restricted form, for example if it is a full binary
+tree, then less information about structure typically needs to be
+stored.
+A general tree, because it has the most flexible shape, tends to require
+the most additional shape information. 
+There are many possible sequential tree implementation schemes.
+We will begin by describing methods appropriate to binary trees,
+then generalize to an implementation appropriate to a general tree
+structure.
+
+Because every node of a binary tree is either a leaf or has two
+(possibly empty) children, we can take advantage of this fact to
+implicitly represent the tree's structure.
+The most straightforward sequential tree implementation lists every
+node value as it would be enumerated by a preorder traversal.
+Unfortunately, the node values alone do not provide enough information 
+to recover the shape of the tree.
+In particular, as we read the series of node values, we do not
+know when a leaf node has been reached.
+However, we can treat all non-empty nodes as internal nodes with two
+(possibly empty) children.
+Only \NULL\ values will be interpreted as leaf nodes, and these can be 
+listed explicitly.
+Such an augmented node list provides enough information to recover
+the tree structure.
+
+\begin{example}
+\label{Serialbinone}
+For the binary tree of Figure~\ref{BinExamp2},
+the corresponding sequential representation would be as follows
+(assuming that `/' stands for \NULL):
+\begin{eqnarray}
+\svar{A} \svar{B} / \svar{D} / / \svar{C} \svar{E} \svar{G} / / /
+\svar{F} \svar{H} / / \svar{I} / /\label{SeqEqOne}
+\end{eqnarray}
+To reconstruct the tree structure from this node list, we begin by
+setting node~\svar{A} to be the root.
+\svar{A}'s~left child will be node~\svar{B}.
+Node~\svar{B}'s left child is a \NULL\ pointer, so node~\svar{D} must
+be \svar{B}'s~right child.
+Node~\svar{D} has two \NULL\ children, so node~\svar{C} must be the
+right child of node~\svar{A}.
+\end{example}
+
+\begin{figure}
+\pdffig{BinExamp}
+\vspace{-\bigskipamount}\vspace{-\medskipamount}
+
+\capt{4.5in}{Binary tree for sequential tree implementation examples}
+{Sample binary tree for sequential tree implementation
+examples.}{BinExamp2}
+\medskip
+\end{figure}
+
+To illustrate the difficulty involved in using the sequential tree
+representation for processing, consider searching for the right child
+of the root node.
+We must first move sequentially through the node list of the left
+subtree.
+Only at this point do we reach the value of the root's right child.
+Clearly the sequential representation is space efficient, but not time
+efficient for descending through the tree along some arbitrary path.
+
+Assume that each node value takes a constant amount of space.
+An example would be if the node value is a positive integer and \NULL\
+is indicated by the value zero.
+From the Full Binary Tree Theorem of
+Section~\ref{BinSpace},\index{full binary tree theorem}
+we know that the size of the node list will be about twice the number
+of nodes (i.e., the overhead fraction is 1/2).
+The extra space is required by the \NULL\ pointers.
+We should be able to store the node list more compactly.
+However, any sequential implementation must recognize when a leaf node
+has been reached, that is, a leaf node indicates the end of a subtree.
+One way to do this is to explicitly list with each node whether it is
+an internal node or a leaf.
+If a node~\svar{X} is an internal node, then we know that its two
+children (which may be subtrees) immediately follow \svar{X} in the
+node list.
+If~\svar{X} is a leaf node, then the next node in the list is the
+right child of some ancestor of~\svar{X}, not the right child
+of~\svar{X}.
+In~particular, the next node will be the child of~\svar{X}'s most
+recent ancestor that has not yet seen its right child.
+However, this assumes that each internal node does in fact have two
+children, in other words, that the tree is
+full.\index{binary tree!full} 
+Empty children must be indicated in the node list explicitly.
+Assume that internal nodes are marked with a prime (\('\)) and that
+leaf nodes show no mark.
+Empty children of internal nodes are indicated by `/', but the (empty)
+children of leaf nodes are not represented at all.
+Note that a full binary tree stores no \NULL\ values with this
+implementation, and so requires less overhead.
+
+\begin{example}
+\label{Serialbintwo}
+We can represent the tree of Figure~\ref{BinExamp2} as follows:
+\begin{eqnarray}
+\svar{A}' \svar{B}' / \svar{D} \svar{C}' \svar{E}' \svar{G} /
+\svar{F}' \svar{H} \svar{I}\label{SeqEqTwo}
+\end{eqnarray}
+
+\noindent Note that slashes are needed for the empty children because
+this is not a full binary tree.
+\end{example}
+
+Storing \(n\)~extra bits can be a considerable savings over
+storing \(n\)~\NULL\ values.
+In Example~\ref{Serialbintwo}, each node is shown with a mark if it is
+internal, or no mark if it is a leaf.
+This requires that each node value has space to store the mark bit.
+This might be true if, for example, the node value were stored as a
+4-byte integer but the range of the values sored was small enough so
+that not all bits are used.
+An example would be if all node values must be positive.
+Then the high-order (sign) bit of the integer value could be used as
+the mark bit.
+
+Another approach is to store a separate bit vector to represent the
+status of each node.
+In this case, each node of the tree corresponds to one bit in the bit
+vector.
+A value of `1' could indicate an internal node, and `0' could indicate
+a leaf node.
+
+\begin{example}
+\label{Serialbitvector}
+The bit vector for the tree if Figure~\ref{BinExamp2}
+(including positions for the null children of nodes \svar{B} and
+\svar{E}) would be
+\begin{eqnarray}
+11001100100
+\end{eqnarray}
+\end{example}
+
+Storing general trees by means of a sequential implementation requires
+that more explicit structural information be included with the node
+list.
+Not only must the general tree implementation indicate whether a node
+is leaf or internal, it must also indicate how many children the
+node has.
+Alternatively, the implementation can indicate when a node's child
+list has come to an end.
+The next example dispenses with marks for internal or leaf nodes.
+Instead it includes a special mark (we will use the ``)'' symbol) to
+indicate the end of a child list.
+All leaf nodes are followed by a ``)'' symbol because they have no
+children.
+A leaf node that is also the last child for its parent would indicate
+this by two or more successive ``)'' symbols.
+
+\begin{example}
+\label{Serialgen}
+For the general tree of Figure~\ref{GenTreeEx}, we get the sequential
+representation
+\begin{eqnarray}
+\svar{R} \svar{A} \svar{C}) \svar{D}) \svar{E})) \svar{B}
+\svar{F})))\label{SeqEqThree}
+\end{eqnarray}
+\noindent Note that \svar{F} is followed  by three ``)'' marks,
+because it is a leaf, the last node of \svar{B}'s rightmost subtree,
+and the last node of \svar{R}'s
+rightmost subtree.
+\end{example}
+\index{sequential tree implementations|)}
+
+Note that this representation for serializing general trees cannot be
+used for binary trees.
+This is because a binary tree is not merely a restricted form of
+general tree with at most two children.
+Every binary tree node has a left and a right child, though either or
+both might be empty.
+For example, the representation of Example~\ref{Serialgen} cannot let
+us distinguish whether node~\svar{D} in Figure~\ref{BinExamp2} is the
+left or right child of node~\svar{B}.
+
+\section{Further Reading}
+\label{GenFurtherRead}
+
+The expression \(\log^* n\)\index{logarithm!log star@\(\log^*\)} cited
+in Section~\ref{ParentPointer} is closely related to the inverse of
+Ackermann's function.\index{ackermann's function@Ackermann's function}
+For more information about Ackermann's function and the cost of path
+compression for UNION/FIND, see Robert~E. Tarjan's paper
+``On the efficiency of a good but not linear set merging
+algorithm''~\cite{Tarjan}.
+The article ``Data Structures and Algorithms for Disjoint Set Union
+Problems'' by Galil and Italiano \cite{UFind} covers many aspects of the
+equivalence class problem.\index{equivalence!class}
+
+\ttl{Foundations of Multidimensional and Metric Data Structures}
+by Hanan Samet \cite{SametNew} treats various implementations of tree
+structures in
+detail within the context of \(K\)-ary trees.\index{kary@\Kary\ tree}
+Samet covers sequential implementations as well as the
+linked and array implementations such as those described in this
+chapter and Chapter~\ref{BinaryTree}.
+While these books are ostensibly concerned with spatial data
+structures, many of the concepts treated are relevant to
+anyone who must implement tree structures.
+
+\section{Exercises}
+
+\begin{exercises}
+
+\item
+Write an algorithm to determine if two general trees are identical.
+Make the algorithm as efficient as you can.
+Analyze your algorithm's running time.
+
+\item
+Write an algorithm to determine if two binary trees are identical
+when the ordering of the subtrees for a node is ignored.
+For example, if a tree has root node with value \svar{R}, left child
+with value \svar{A} and right child with value \svar{B}, this would
+be considered identical to another tree with root node value \svar{R},
+left child value \svar{B}, and right child value \svar{A}.
+Make the algorithm as efficient as you can.
+Analyze your algorithm's running time.
+How much harder would it be to make this algorithm work on a general
+tree?
+
+\item
+Write a postorder traversal function for general trees, similar to the
+preorder traversal function named \Cref{preorder} given in
+Section~\ref{GenTraverse}.\index{traversal!general tree}
+
+\item
+Write a function that takes as input a general tree and returns the
+number of nodes in that tree.
+Write your function to use the \Cref{GenTree} and \Cref{GTNode}
+ADTs\index{abstract data type (ADT)}
+of Figure~\ref{GenTreeADT}.\index{general tree!adt@ADT}
+
+\index{weighted union rule|(}
+\item
+Describe how to implement the weighted union rule efficiently.
+In~particular, describe what information must be stored with each node
+and how this information is updated when two trees are
+merged.
+Modify the implementation of Figure~\ref{ParPtrImpl} to support the
+weighted union rule.
+
+\item
+A potential alternative to the weighted union rule for combining two
+trees is the height union rule.
+The height union rule requires that the root of the tree with greater
+height become the root of the union.
+Explain why the height union rule can lead to worse average time
+behavior than the weighted union rule.
+
+\item
+Using the weighted union rule and path compression, show the array for
+the parent pointer implementation that results from the following
+series of equivalences on a set of objects indexed by the
+values 0 through~15.
+Initially, each element in the set should be in a separate equivalence
+class.\index{path compression}
+When two trees to be merged are the same size, make the root with
+greater index value be the child of the root with lesser index value.
+\index{equivalence!class}
+\smallskip
+
+(0,~2) (1,~2) (3,~4) (3,~1) (3,~5) (9,~11) (12,~14) (3,~9)
+(4,~14) (6,~7) (8,~10) (8,~7) (7,~0) (10,~15) (10,~13)
+
+\item
+Using the weighted union rule and path compression, show the array for
+the parent pointer implementation that results from the following
+series of equivalences on a set of objects indexed by the
+values 0 through~15.
+Initially, each element in the set should be in a separate equivalence
+class.\index{path compression}
+When two trees to be merged are the same size, make the root with
+greater index value be the child of the root with lesser index value.
+\index{equivalence!class}
+\smallskip
+
+(2,~3) (4,~5) (6,~5) (3,~5) (1,~0) (7,~8) (1,~8) (3,~8) (9,~10)
+(11,~14) (11,~10) (12,~13) (11,~13) (14,~1)
+
+\item
+Devise a series of equivalence statements for a collection of sixteen
+items that yields a tree of height~5 when both the weighted union rule
+and path compression are
+used.\index{weighted union rule}\index{path compression}
+What is the total number of parent pointers followed to perform this
+series?\index{equivalence!class}
+\index{weighted union rule|)}
+
+\item
+\label{PathHalf}
+One alternative to path compression that gives similar performance
+gains is called \defit{path halving}.
+In path halving, when the path is traversed from the node to the root,
+we make the grandparent of every other node $i$ on the path the new
+parent of $i$.
+Write a version of \Cref{FIND} that implements path halving.
+Your \Cref{FIND} operation should work as you move up the tree, rather
+than require the two passes needed by path compression.
+
+\item
+Analyze the fraction of overhead required by the
+``list of children''\index{general tree!list of children}
+implementation, the ``left-child/right-sibling''
+implementation,\index{general tree!left-child/right-sibling}
+and the two linked implementations of
+Section~\ref{LinkedSec}.\index{general tree!dynamic implementations}
+How do these implementations compare in space efficiency?
+
+\item
+Using the general tree ADT\index{abstract data type (ADT)}
+of Figure~\ref{GenTreeADT}, write a
+function that takes as input the root of a general tree and returns a
+binary tree generated by the conversion process illustrated by
+Figure~\ref{FortoBin}.\index{general tree!converting to binary tree}
+
+\item
+Use mathematical induction\index{induction} to prove that the number
+of leaves in a non-empty full \Kary\ tree is \((K-1)n + 1\), where \(n\)
+is the number of internal nodes.\index{kary@\Kary\ tree}
+
+\item
+Derive the formulas for computing the relatives of a non-empty
+complete \Kary\ tree node stored in the complete tree representation
+of Section~\ref{Complete}.\index{kary@\Kary\ tree}
+
+\item
+Find the overhead fraction for a full \Kary\ tree implementation with
+space requirements as follows:\index{kary@\Kary\ tree}
+
+\begin{enumerate}
+
+\item
+All nodes store data, \(K\) child pointers, and a parent pointer.
+The data field requires four bytes and each pointer requires four
+bytes.
+
+\item
+All nodes store data and \(K\) child pointers.
+The data field requires sixteen bytes and each pointer requires four
+bytes.
+
+\item
+All nodes store data and a parent pointer,
+and internal nodes store \(K\) child pointers.
+The data field requires eight bytes and each pointer requires four
+bytes.
+
+\item
+Only leaf nodes store data; only internal nodes store \(K\) child
+pointers.
+The data field requires four bytes and each pointer requires two
+bytes.
+\end{enumerate}
+
+\item
+\label{GenSeqExer}
+\begin{enumerate}
+\item
+Write out the sequential\index{sequential tree implementations}
+representation for Figure~\ref{GenExer}
+using the coding illustrated by Example~\ref{Serialbinone}.
+
+\item
+Write out the sequential representation for Figure~\ref{GenExer}
+using the coding illustrated by Example~\ref{Serialbintwo}.
+\end{enumerate}
+
+\begin{figure}
+\pdffig{BinExam2}
+\vspace{-\bigskipamount}\vspace{-\smallskipamount}
+
+\capt{4.5in}{Example tree for Exercise~\ref{GeneralTree}.\ref{GenSeqExer}}
+{A sample tree for
+Exercise~\ref{GeneralTree}.\ref{GenSeqExer}.}{GenExer}
+\end{figure}
+
+\item
+Draw the binary tree representing the following sequential
+representation for binary trees illustrated by
+Example~\ref{Serialbinone}:
+
+\[ \mbox{A} \mbox{B} \mbox{D} // \mbox{E} //  \mbox{C} / \mbox{F} // \]
+
+\item
+Draw the binary tree representing the following sequential
+representation for binary trees illustrated by
+Example~\ref{Serialbintwo}:
+
+\[ \mbox{A}' / \mbox{B}' / \mbox{C}' \mbox{D}' \mbox{G} / \mbox{E} \]
+
+\noindent Show the bit vector for leaf and internal nodes (as
+illustrated by Example~\ref{Serialbitvector}) for this tree.
+
+\item
+Draw the general tree represented by the following
+sequential\index{sequential tree implementations}
+representation for general trees illustrated by
+Example~\ref{Serialgen}:
+
+\[ \mbox{X} \mbox{P} \mbox{C}) \mbox{Q}) \mbox{R} \mbox{V}) \mbox{M})))) \]
+
+\item
+\begin{enumerate}
+\item
+Write a function to decode the
+sequential\index{sequential tree implementations} representation for
+binary trees illustrated by Example~\ref{Serialbinone}.
+The input should be the sequential representation and the output
+should be a pointer to the root of the resulting binary tree.
+
+\item
+Write a function to decode the sequential representation for full
+binary trees illustrated by Example~\ref{Serialbintwo}.
+The input should be the sequential representation and the output
+should be a pointer to the root of the resulting binary tree.
+
+\item
+Write a function to decode the sequential representation for
+general trees illustrated by Example~\ref{Serialgen}.
+The input should be the sequential representation and the output
+should be a pointer to the root of the resulting general tree.
+\end{enumerate}
+
+\item
+Devise a sequential\index{sequential tree implementations}
+representation for
+Huffman\index{huffman coding tree@Huffman coding tree} coding
+trees suitable for use as part of a file compression utility
+(see Project~\ref{BinaryTree}.\ref{HuffFileEx}).
+
+\end{exercises}
+
+\section{Projects}
+
+\begin{projects}
+
+\item
+Write classes that implement the general tree class declarations of
+Figure~\ref{GenTreeADT} using the dynamic ``left-child/right-sibling''
+representation described in Section~\ref{DynamicLR}.
+
+\item
+Write classes that implement the general tree class declarations of
+Figure~\ref{GenTreeADT} using the linked general tree implementation
+with child pointer arrays of Figure~\ref{GenLinkedFixed}.
+Your implementation should support only fixed-size nodes that do not
+change their number of children once they are created.
+Then, re-implement these classes with the linked list of children
+representation of Figure~\ref{GenLinkedLinked}.
+How do the two implementations compare in space and time efficiency
+and ease of implementation?
+
+\item
+Write classes that implement the general tree class declarations of
+Figure~\ref{GenTreeADT} using the linked general tree implementation
+with child pointer arrays of Figure~\ref{GenLinkedFixed}.
+Your implementation must be able to support changes in the number of
+children for a node.
+When created, a node should be allocated with only enough space to
+store its initial set of children.
+Whenever a new child is added to a node such that the array overflows,
+allocate a new array from free store that can store twice as many
+children.
+
+\item
+Implement a BST file archiver.\index{bst@BST}
+Your program should take a BST created in main memory using the
+implementation of Figure~\ref{BSTClass} and write it out
+to disk using one of the sequential representations of
+Section~\ref{DFExpr}.
+It should also be able to read in disk files using your sequential
+representation and create the equivalent main memory representation.
+
+\item
+\label{ClusterProb}
+Use the UNION/FIND algorithm to implement a solution to the
+following problem.
+Given a set of points represented by their \XYcoords, assign the
+points to clusters.
+Any two points are defined to be in the same cluster if they are
+within a specified distance~\(d\) of each other.
+For the purpose of this problem, clustering is an equivalence
+relationship.\index{equivalence!class}\index{cluster problem}
+In other words, points~\svar{A}, \svar{B}, and~\svar{C} are defined to
+be in the same cluster if the distance between~\svar{A} and~\svar{B}
+is less than~\(d\) and the distance between~\svar{A} and~\svar{C} is
+also less than~\(d\), even if the distance between~\svar{B} and~\svar{C}
+is greater than~\(d\).
+To solve the problem, compute the distance between each pair of
+points, using the equivalence processing algorithm to merge clusters
+whenever two points are within the specified distance.
+What is the asymptotic complexity of this algorithm?
+Where is the bottleneck in processing?\index{general tree|)}
+
+\item
+In this project, you will run some empirical tests to determine if
+some variations on path compression in the UNION/FIND algorithm will
+lead to improved performance.
+You should compare the following five implementations:
+\begin{enumerate}
+\item Standard UNION/FIND with path compression and weighted union.
+\item Path compression and weighted union, except that path
+compression is done \emph{after} the UNION, instead of during the FIND 
+operation.
+That is, make all nodes along the paths traversed in both trees point
+directly to the root of the larger tree.
+\item Weighted union and path halving as described in
+Exercise~\ref{GeneralTree}.\ref{PathHalf}.
+\item Weighted union and a simplified form of path compression.
+At the end of every FIND operation, make the node point to its
+tree's root (but don't change the pointers for other nodes along the
+path).
+\item Weighted union and a simplified form of path compression.
+Both nodes in the equivalence will be set to point directly to the
+root of the larger tree after the UNION operation.
+For example, consider processing the equivalence (\svar{A}, \svar{B}) where
+\(\svar{A}'\) is the root of~\svar{A} and \(\svar{B}'\) is the root
+of~\svar{B}.
+Assume the tree with root \(\svar{A}'\) is bigger than the tree
+with root~\(\svar{B}'\).
+At the end of the UNION/FIND operation, nodes~\svar{A}, \svar{B},
+and~\(\svar{B}'\) will all point directly to~\(\svar{A}'\).
+\end{enumerate}
+
+\end{projects}
