@@ -1,0 +1,30 @@
+import java.io.*;
+
+// This program tests a bunch of various code fragements from
+// Chapter 3, mainly for syntactic correctness.
+class Ch3 {
+	
+  static void sort(int[] A) {}
+
+  static int value(int i) { return i; }
+
+  static boolean EVEN(int x)
+  { return (x % 1) == 0; }
+
+  final static int n = 100;
+
+  public static void main(String args[]) throws IOException {
+	int i, j, k;
+	int sum, sum1, sum2, sum3;
+	int a;
+	int b = 10;
+	int tmp;
+
+    int[] A = new int[n];
+
+    int[][] AA = new int[n][n];
+
+    for (i=0; i<n; i++)
+      A[i] = i;
+
+// c3p1.book

@@ -1,0 +1,9 @@
+/** A JUnit test class for the factorial function. */
+
+import java.io.*;
+import java.math.*;
+
+public class HashTest
+    extends junit.framework.TestCase
+{
+

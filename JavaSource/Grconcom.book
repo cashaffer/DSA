@@ -1,0 +1,18 @@
+static void concom(Graph G) {
+  int i;
+  for (i=0; i<G.n(); i++)  // For n vertices in graph
+    G.setMark(i, 0);       // Vertex i in no component
+  int comp = 1;            // Current component
+  for (i=0; i<G.n(); i++)
+    if (G.getMark(i) == 0) // Start a new component
+      DFS_component(G, i, comp++);
+  for (i=0; i<G.n(); i++)
+    out.append(i + " " + G.getMark(i) + " ");
+}
+
+static void DFS_component(Graph G, int v, int comp) {
+  G.setMark(v, comp);
+  for (int w = G.first(v); w < G.n(); w = G.next(v, w))
+    if (G.getMark(w) == 0)
+      DFS_component(G, w, comp);
+}

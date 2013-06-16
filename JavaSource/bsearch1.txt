@@ -1,0 +1,13 @@
+/** A JUnit test class for binary search */
+
+import java.io.*;
+
+public class BsearchTest
+    extends junit.framework.TestCase
+{
+
+/** Return the position of an element in a sorted int array.
+    @param A The array
+    @param K The value being searched for.
+    @return The position of the "K" if it is in the array,
+            or A.length otherwise. */

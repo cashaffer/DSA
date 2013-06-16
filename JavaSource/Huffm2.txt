@@ -1,0 +1,95 @@
+
+// Find the index in CodeTable for the given codeword
+static int getindex(char codeword)
+{
+  int i;
+
+  for (i=0; i<codeTable.size(); i++)
+    if (codeword == codeTable.elementAt(i).data())
+      return i;
+  return i; // Not found
+}
+
+
+// Print out the codes; insert these codes into CodeTable
+static void outputTree(HuffBaseNode<Character> node, String prefix) {
+  assert node != null : "Bad input tree";
+  // This is a full binary tree so must not be null subtree
+  if (node.isLeaf()) {
+    System.out.println(((HuffLeafNode<Character>)node).element() + "\t" + prefix);
+    char temp  = ((HuffLeafNode<Character>)node).element();
+    codeTable.addElement(new Code(temp, prefix));
+    total += prefix.length() * node.weight();
+  }
+  else {
+    outputTree(((HuffInternalNode)node).left(), prefix + "0");
+    outputTree(((HuffInternalNode)node).right(), prefix + "1");
+  }
+}
+
+
+// Process Encode and Decode commands
+static void doCommands(BufferedReader d, HuffTree<Character> tree)
+      throws IOException {
+  HuffBaseNode<Character> temp;
+  String line;
+  int i;
+
+  while ((line = d.readLine()) != null) {
+    if (line.substring(0, 6).equals("decode")) {
+      for (i=0; line.charAt(i) != '"'; i++);
+      System.out.print("Decode " + line.charAt(i++));
+      temp = tree.root();
+      for (; line.charAt(i) != '"'; i++) { // Traverse the tree
+        if (line.charAt(i) == '0')
+          temp = ((HuffInternalNode)temp).left();
+        else if (line.charAt(i) == '1')
+          temp = ((HuffInternalNode)temp).right();
+        else
+          assert false : "Bad input: " + line;
+        if (temp.isLeaf()) {
+          System.out.print(((HuffLeafNode)temp).element());
+          temp = tree.root(); // reset at root
+        }
+      }
+      System.out.println(line.charAt(i));
+    }
+    else if (line.substring(0, 6).equals("encode")) {
+      for (i=0; line.charAt(i) != '"'; i++);
+      System.out.print("Encode " + line.charAt(i++));
+      for (; line.charAt(i) != '"'; i++) {
+        // Assume codes are characters.  Should generalize this.
+        int index = getindex(line.charAt(i));
+        assert index < codeTable.size() :
+		  "Tried to find code of bad character|" +
+		  line.charAt(i) + "|";
+        System.out.print(codeTable.elementAt(index).code());
+      }
+      System.out.println(line.charAt(i));
+    }
+    else
+      assert false : "Bad command line: " + line;
+  } // while
+}
+
+public static void main(String argv[])
+       throws FileNotFoundException, IOException {
+  BufferedReader f;
+
+  if (argv.length == 0) // Read from standard input
+      f = new BufferedReader(new InputStreamReader(System.in));
+  else // Data file entered as parameter
+      f = new BufferedReader(new InputStreamReader(new FileInputStream(argv[0])));
+  System.out.println("Read frequencies");
+  readFreqs(f);
+  System.out.println("Build the tree");
+  HuffTree<Character> codes = buildTree();
+  System.out.println("Output the tree");
+  outputTree(codes.root(), "");
+  System.out.println("Average code length is " +
+		(double)total/(double)codes.weight());
+  doCommands(f, codes);
+  System.in.read();
+}
+
+}

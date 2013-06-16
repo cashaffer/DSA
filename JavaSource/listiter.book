@@ -1,0 +1,4 @@
+for (L.moveToStart(); L.currPos()<L.length(); L.next()) {
+  it = L.getValue();
+  doSomething(it);
+}

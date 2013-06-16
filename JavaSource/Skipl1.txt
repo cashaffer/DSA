@@ -1,0 +1,52 @@
+/** Skiplist implementation for Dictionary ADT */
+class SkipList<Key extends Comparable<? super Key>, E>
+         implements Dictionary<Key, E> {
+  private SkipNode<Key,E> head;
+  private int level;
+  private int size;
+
+  public SkipList() {
+    head = new SkipNode<Key,E>(null, null, 0);
+    level = -1;
+    size = 0;
+  }
+
+  private void AdjustHead(int newLevel) {
+    SkipNode<Key,E> temp = head;
+    head = new SkipNode<Key,E>(null, null, newLevel);
+    for (int i=0; i<=level; i++)
+      head.forward[i] = temp.forward[i];
+    level = newLevel;
+  }
+
+  public void print() {
+    SkipNode<Key,E> temp = head;
+    while (temp != null) {
+      System.out.print(temp.element() + ": length is "
+                       + temp.forward.length + ":");
+      for (int i=0; i<temp.forward.length; i++)
+        if (temp.forward[i] == null)
+          System.out.print("null ");
+        else
+          System.out.print(temp.forward[i].element() + " ");
+      System.out.println();
+      temp = temp.forward[0];
+    }
+    System.out.println();
+  }
+
+  public int size() { return size; }
+
+  public E removeAny() {
+    assert false : "removeAny not implemented";
+    return null;
+  }
+
+  public E remove(Key k) {
+    assert false : "remove not implemented";
+    return null;
+  }
+
+  public void clear() {
+    assert false : "clear not implemented";
+  }

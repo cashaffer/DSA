@@ -1,0 +1,63 @@
+/** Dictionary implemented using a 2-3tree. */
+class TTTree<Key extends Comparable<? super Key>, E>
+                    implements Dictionary<Key, E> {
+  private TTNode<Key,E> root;     // Root of 2-3 tree
+  private int reccount;        // # of records now in 2-3 tree
+
+  TTTree() { 
+    reccount = 0;
+    root = null;
+  }
+
+  public void clear() {   /** Reinitialize */
+    reccount = 0;
+    root = null;
+  }
+
+  public void insert(Key k, E e) {  /** Insert an element */
+    root = inserthelp(root, k, e);
+    reccount++;
+  }
+
+  /** Remove an element */
+  public E remove(Key k) {
+    System.out.println("remove not implemented");
+    return null;
+  }
+
+  /** Remove some element. */
+  public E removeAny() {
+    System.out.println("removeany not implemented");
+    return null;
+  }
+
+  /** Find a record with key value "k" */
+  public E find(Key k) {
+    return findhelp(root, k);
+  }
+
+  /** Return number of values in the tree */
+  public int size() { return reccount; }
+
+  private void printhelp(TTNode<Key,E> rt, StringBuffer out, int level) {
+    for (int i=1; i<=level; i++) {
+      System.out.print("  ");
+      out.append("T");
+    }
+    if (rt == null) {
+        System.out.println("null");
+        return;
+    }
+    System.out.println(rt);
+    out.append(rt);
+    if (rt.isLeaf()) return;
+    printhelp(rt.lchild(), out, level+1);
+    printhelp(rt.cchild(), out, level+1);
+    printhelp(rt.rchild(), out, level+1);
+  }
+
+  public String toString() {
+    StringBuffer out = new StringBuffer(1000);
+    printhelp(root, out, 0);
+    return out.toString();
+  }

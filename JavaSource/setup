@@ -1,0 +1,383 @@
+# Chapter 2
+
+mkdir ../DSJAVA/Rfact
+cat fact1.txt rfact.x fact2.txt > ../DSJAVA/Rfact/Rfact.java
+cp Assert.java ../DSJAVA/Rfact
+
+mkdir ../DSJAVA/Permute
+cp Elem.java ../DSJAVA/Permute
+cp IElem.java ../DSJAVA/Permute
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Permute/DSutil.java
+cat per1.txt largestE.x per2.txt > ../DSJAVA/Permute/Permute.java
+cp Assert.java ../DSJAVA/Permute
+
+mkdir ../DSJAVA/Largest
+cat large1.txt largest.x large2.txt > ../DSJAVA/Largest/Largest.java
+cp Assert.java ../DSJAVA/Largest
+
+mkdir ../DSJAVA/ToH
+cat TOH1.txt TOH.x TOH2.txt > ../DSJAVA/ToH/ToH.java
+cp Pole.java ../DSJAVA/ToH
+cp Assert.java ../DSJAVA/ToH
+
+mkdir ../DSJAVA/Fib
+cat fib1.txt fibi.x fibr.x fib2.txt > ../DSJAVA/Fib/Fib.java
+cp Assert.java ../DSJAVA/Fib
+
+# Chapter 3
+
+mkdir ../DSJAVA/Flag
+cp Flag.java ../DSJAVA/Flag
+cp Assert.java ../DSJAVA/Flag
+
+mkdir ../DSJAVA/Ch3
+cat ch3a.txt ch3p1.x ch3b.txt ch3p2.x ch3c.txt ch3p3.x ch3d.txt ch3p4.x ch3e.txt ch3p5.x ch3f.txt ch3p6.x ch3g.txt ch3p7.x ch3h.txt ch3p8.x ch3i.txt ch3p9.x ch3j.txt ch3p10.x ch3k.txt ch3p11.x ch3l.txt ch3p12.x ch3m.txt > ../DSJAVA/Ch3/Ch3.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Ch3/DSutil.java
+
+mkdir ../DSJAVA/Bsearch
+cat bsearch1.txt binary.x bsearch2.txt > ../DSJAVA/Bsearch/Bsearch.java
+cp Elem.java ../DSJAVA/Bsearch
+cp IElem.java ../DSJAVA/Bsearch
+cp Assert.java ../DSJAVA/Bsearch
+
+mkdir ../DSJAVA/Collatz
+cat collatz1.txt collatz.x collatz2.txt > ../DSJAVA/Collatz/Collatz.java
+cp Assert.java ../DSJAVA/Collatz
+
+mkdir ../DSJAVA/Binsimp
+cat binsimpa.txt binsimp1.x binsimpb.txt binsimp2.x binsimpc.txt > ../DSJAVA/Binsimp/Binsimp.java
+cp IElem.java ../DSJAVA/Binsimp
+cp Elem.java ../DSJAVA/Binsimp
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Binsimp/DSutil.java
+cp Assert.java ../DSJAVA/Binsimp
+
+# Chapter 4
+
+mkdir ../DSJAVA/Alist
+cat Lmain1.txt listfind.x ALmain.txt Lmain2.txt > ../DSJAVA/Alist/Listmain.java
+cp List.java Elem.java IElem.java Assert.java ../DSJAVA/Alist
+cat Alist1.x Alist2.x > ../DSJAVA/Alist/AList.java
+
+mkdir ../DSJAVA/Llist
+cat Lmain1.txt listfind.x LLmain.txt Lmain2.txt > ../DSJAVA/Llist/Listmain.java
+cp List.java Link.java Elem.java IElem.java Assert.java ../DSJAVA/Llist
+cat Llist1.x Llist2.x > ../DSJAVA/Llist/LList.java
+
+mkdir ../DSJAVA/Flist
+cat Lmain1.txt listfind.x LLmain.txt Lmain2.txt > ../DSJAVA/Flist/Listmain.java
+cp List.java Elem.java IElem.java Assert.java ../DSJAVA/Flist
+cp Flink.java ../DSJAVA/Flist/Link.java
+cat Flist1.txt Flist.x Flist2.txt > ../DSJAVA/Flist/LList.java
+
+mkdir ../DSJAVA/Dlist
+cat Lmain1.txt listfind.x DLmain.txt Lmain2.txt > ../DSJAVA/Dlist/Listmain.java
+cp DLink.java List.java Elem.java IElem.java Assert.java ../DSJAVA/Dlist
+cat Dlist1.txt Dlist.x Dlist2.txt > ../DSJAVA/Dlist/DList.java
+
+mkdir ../DSJAVA/Astack
+cp Stack.java AStack.java Elem.java IElem.java Assert.java ../DSJAVA/Astack
+cat Stkmain1.txt ASmain.txt Stkmain2.txt > ../DSJAVA/Astack/Stackmain.java
+
+mkdir ../DSJAVA/Lstack
+cp Link.java Stack.java LStack.java Elem.java IElem.java Assert.java ../DSJAVA/Lstack
+cat Stkmain1.txt LSmain.txt Stkmain2.txt > ../DSJAVA/Lstack/Stackmain.java
+
+mkdir ../DSJAVA/Aqueue
+cp Queue.java AQueue.java Elem.java IElem.java Assert.java ../DSJAVA/Aqueue
+cat Qmain1.txt AQmain.txt Qmain2.txt > ../DSJAVA/Aqueue/Queuemain.java
+
+mkdir ../DSJAVA/Lqueue
+cp Link.java Queue.java LQueue.java Elem.java IElem.java Assert.java ../DSJAVA/Lqueue
+cat Qmain1.txt LQmain.txt Qmain2.txt > ../DSJAVA/Lqueue/Queuemain.java
+
+
+# Chapter 5
+
+mkdir ../DSJAVA/Var
+cat VarMain1.txt VarNodes.x VarMain2.txt traverse.x VarMain3.txt > ../DSJAVA/Var/Var.java
+cp BinNode.java ../DSJAVA/Var
+
+mkdir ../DSJAVA/Huffman
+cp Elem.java List.java Link.java Assert.java LettFreq.java BinNode.java BinNodePtr.java Code.java HuffTree.java ../DSJAVA/Huffman
+cp huffex.dat hufftest.dat huffbook.dat ../DSJAVA/Huffman
+cat Llist1.x Llist2.x > ../DSJAVA/Huffman/LList.java
+cat Huffm1.txt Huffbld.x Huffm2.txt > ../DSJAVA/Huffman/Huffman.java
+
+mkdir ../DSJAVA/BST
+cat BST1.txt BSTfind.x BSTins.x BSTdmin.x BSTgmin.x BSTdel.x BSTprint.x preorder.x BST2.txt > ../DSJAVA/BST/BST.java
+cp BSTmain.java BinNode.java BinNodePtr.java Assert.java Elem.java IElem.java ../DSJAVA/BST
+
+mkdir ../DSJAVA/MaxHeap
+cp MaxhMain.java Elem.java IElem.java Assert.java ../DSJAVA/MaxHeap
+cat MaxHeap1.x MaxHeap2.x > ../DSJAVA/MaxHeap/MaxHeap.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/MaxHeap/DSutil.java
+
+mkdir ../DSJAVA/MinHeap
+cp MinHeap.java MinhMain.java Elem.java IElem.java Assert.java ../DSJAVA/MinHeap
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/MinHeap/DSutil.java
+
+
+# Chapter 6
+
+mkdir ../DSJAVA/GenTree
+cp GTNode.java GTNodeImpl.java GenTree.java GenTreeImpl.java Elem.java IElem.java ../DSJAVA/GenTree
+cat GTmain1.txt GTprint.x GTmain2.txt > ../DSJAVA/GenTree/GTmain.java
+
+mkdir ../DSJAVA/Equiv
+cat UFgtree.x UFfind.x UFgtree2.x > ../DSJAVA/Equiv/GenTree.java
+cp UFmain.java ../DSJAVA/Equiv
+cp UFNode.java ../DSJAVA/Equiv/GTNode.java
+
+mkdir ../DSJAVA/Equivpc
+cat UFgtree.x UFpcfind.x UFgtree2.x > ../DSJAVA/Equivpc/GenTree.java
+cp UFmain.java ../DSJAVA/Equivpc
+cp UFNode.java ../DSJAVA/Equivpc/GTNode.java
+
+
+# Chapter 7
+
+mkdir ../DSJAVA/Grtestm
+cat Gmain1m.txt Grprint.txt Grtest.txt Gmain2.txt > ../DSJAVA/Grtestm/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grtestm/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkexamp.gph ../DSJAVA/Grtestm
+
+mkdir ../DSJAVA/Grtestl
+cat Gmain1l.txt Grprint.txt Grtest.txt Gmain2.txt > ../DSJAVA/Grtestl/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grtestl/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grtestl/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkexamp.gph List.java GraphList.java Link.java ../DSJAVA/Grtestl
+
+mkdir ../DSJAVA/Grdfsm
+cat Gmain1m.txt Grdfs.txt Grdfs.x Gmain2.txt > ../DSJAVA/Grdfsm/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grdfsm/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkexamp.gph ../DSJAVA/Grdfsm
+
+mkdir ../DSJAVA/Grdfsl
+cat Gmain1l.txt Grdfs.txt Grdfs.x Gmain2.txt > ../DSJAVA/Grdfsl/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grdfsl/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grdfsl/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkexamp.gph List.java GraphList.java Link.java ../DSJAVA/Grdfsl
+
+mkdir ../DSJAVA/Grbfsm
+cat Gmain1m.txt Grbfs.txt Grbfs.x Gmain2.txt > ../DSJAVA/Grbfsm/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grbfsm/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkexamp.gph Queue.java AQueue.java ../DSJAVA/Grbfsm
+
+mkdir ../DSJAVA/Grbfsl
+cat Gmain1l.txt Grbfs.txt Grbfs.x Gmain2.txt > ../DSJAVA/Grbfsl/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grbfsl/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grbfsl/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkexamp.gph List.java GraphList.java Link.java Queue.java AQueue.java ../DSJAVA/Grbfsl
+
+mkdir ../DSJAVA/Grcon
+cat Gmain1m.txt Grconcom.txt Gmain2.txt > ../DSJAVA/Grcon/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grcon/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkconcom.gph ../DSJAVA/Grcon
+
+mkdir ../DSJAVA/Grtopdm
+cat Gmain1m.txt Grtop.txt Grtopd.x Gmain2.txt > ../DSJAVA/Grtopdm/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grtopdm/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bktsort.gph ../DSJAVA/Grtopdm
+
+mkdir ../DSJAVA/Grtopdl
+cat Gmain1l.txt Grtop.txt Grtopd.x Gmain2.txt > ../DSJAVA/Grtopdl/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grtopdl/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grtopdl/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bktsort.gph List.java GraphList.java Link.java ../DSJAVA/Grtopdl
+
+mkdir ../DSJAVA/Grtopbm
+cat Gmain1m.txt Grtop.txt Grtopb.x Gmain2.txt > ../DSJAVA/Grtopbm/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grtopbm/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bktsort.gph Queue.java AQueue.java ../DSJAVA/Grtopbm
+
+mkdir ../DSJAVA/Grtopbl
+cat Gmain1l.txt Grtop.txt Grtopb.x Gmain2.txt > ../DSJAVA/Grtopbl/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grtopbl/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grtopbl/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bktsort.gph List.java GraphList.java Link.java Queue.java AQueue.java ../DSJAVA/Grtopbl
+
+mkdir ../DSJAVA/Grdijk1m
+cat Gmain1m.txt Grdijk.txt MinVert.x Grdijk1.x Gmain2.txt > ../DSJAVA/Grdijk1m/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grdijk1m/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkdijk.gph ../DSJAVA/Grdijk1m
+
+mkdir ../DSJAVA/Grdijk1l
+cat Gmain1l.txt Grdijk.txt MinVert.x Grdijk1.x Gmain2.txt > ../DSJAVA/Grdijk1l/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grdijk1l/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grdijk1l/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkdijk.gph List.java GraphList.java Link.java ../DSJAVA/Grdijk1l
+
+mkdir ../DSJAVA/Grdijk2m
+cat Gmain1m.txt Grdijk.txt Grdijk2.x Gmain2.txt > ../DSJAVA/Grdijk2m/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grdijk2m/Graphm.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Grdijk2m/DSutil.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkdijk.gph Elem.java DijkElem.java MinHeap.java ../DSJAVA/Grdijk2m
+
+mkdir ../DSJAVA/Grdijk2l
+cat Gmain1l.txt Grdijk.txt Grdijk2.x Gmain2.txt > ../DSJAVA/Grdijk2l/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grdijk2l/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grdijk2l/LList.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Grdijk2l/DSutil.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkdijk.gph List.java GraphList.java Link.java Elem.java DijkElem.java MinHeap.java ../DSJAVA/Grdijk2l
+
+mkdir ../DSJAVA/GrFloydm
+cat Gmain1m.txt GrFloyd.txt GrFloyd.x Gmain2.txt > ../DSJAVA/GrFloydm/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/GrFloydm/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkfloyd.gph ../DSJAVA/GrFloydm
+
+mkdir ../DSJAVA/GrFloydl
+cat Gmain1l.txt GrFloyd.txt GrFloyd.x Gmain2.txt > ../DSJAVA/GrFloydl/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/GrFloydl/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/GrFloydl/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkfloyd.gph List.java GraphList.java Link.java ../DSJAVA/GrFloydl
+
+mkdir ../DSJAVA/Grprim1m
+cat Gmain1m.txt Grprim.txt MinVert.x Grprim1.x Gmain2.txt > ../DSJAVA/Grprim1m/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grprim1m/Graphm.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkexamp.gph ../DSJAVA/Grprim1m
+
+mkdir ../DSJAVA/Grprim1l
+cat Gmain1l.txt Grprim.txt MinVert.x Grprim1.x Gmain2.txt > ../DSJAVA/Grprim1l/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grprim1l/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grprim1l/LList.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkexamp.gph List.java GraphList.java Link.java ../DSJAVA/Grprim1l
+
+mkdir ../DSJAVA/Grprim2m
+cat Gmain1m.txt Grprim.txt Grprim2.x Gmain2.txt > ../DSJAVA/Grprim2m/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grprim2m/Graphm.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Grprim2m/DSutil.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkexamp.gph Elem.java DijkElem.java MinHeap.java ../DSJAVA/Grprim2m
+
+mkdir ../DSJAVA/Grprim2l
+cat Gmain1l.txt Grprim.txt Grprim2.x Gmain2.txt > ../DSJAVA/Grprim2l/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grprim2l/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grprim2l/LList.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Grprim2l/DSutil.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkexamp.gph List.java GraphList.java Link.java Elem.java DijkElem.java MinHeap.java ../DSJAVA/Grprim2l
+
+mkdir ../DSJAVA/Grkrusm
+cat Gmain1m.txt Grkruskal.txt Grkrusk.x Gmain2.txt > ../DSJAVA/Grkrusm/Gmain.java
+cat Graphm1.x Graphm2.x > ../DSJAVA/Grkrusm/Graphm.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Grkrusm/DSutil.java
+cat UFgtree.x UFfind.x UFgtree2.x > ../DSJAVA/Grkrusm/GenTree.java
+cp Graph.java Edge.java Edgem.java Assert.java Bkexamp.gph Elem.java KruskalElem.java MinHeap.java ../DSJAVA/Grkrusm
+cp UFNode.java ../DSJAVA/Grkrusm/GTNode.java
+
+mkdir ../DSJAVA/Grkrusl
+cat Gmain1l.txt Grkruskal.txt Grkrusk.x Gmain2.txt > ../DSJAVA/Grkrusl/Gmain.java
+cat Graphl1.x Graphl2.x > ../DSJAVA/Grkrusl/Graphl.java
+cat Llist1.x Llist2.x > ../DSJAVA/Grkrusl/LList.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Grkrusl/DSutil.java
+cat UFgtree.x UFfind.x UFgtree2.x > ../DSJAVA/Grkrusl/GenTree.java
+cp Graph.java Edge.java Edgel.java Assert.java Bkexamp.gph List.java GraphList.java Link.java Elem.java KruskalElem.java MinHeap.java ../DSJAVA/Grkrusl
+cp UFNode.java ../DSJAVA/Grkrusl/GTNode.java
+
+
+# Chapter 8
+
+mkdir ../DSJAVA/Inssort
+cat Smain1.txt Inssort.txt Inssort.x Smain2.txt > ../DSJAVA/Inssort/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Inssort/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Inssort
+
+mkdir ../DSJAVA/Bubsort
+cat Smain1.txt Bubsort.txt Bubsort.x Smain2.txt > ../DSJAVA/Bubsort/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Bubsort/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Bubsort
+
+mkdir ../DSJAVA/Selsort
+cat Smain1.txt Selsort.txt Selsort.x Smain2.txt > ../DSJAVA/Selsort/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Selsort/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Selsort
+
+mkdir ../DSJAVA/Shsort
+cat Smain1.txt Shsort.txt Shsort.x Smain2.txt > ../DSJAVA/Shsort/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Shsort/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Shsort
+
+mkdir ../DSJAVA/Qsort1
+cat Smain1.txt Qsort.txt Qsort1.x Partit.x Findpiv.x Smain2.txt > ../DSJAVA/Qsort1/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Qsort1/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Qsort1
+
+mkdir ../DSJAVA/Qsort4
+cat Smain1.txt Qsort.txt Inssort.x Qsort4.x Smain2.txt > ../DSJAVA/Qsort4/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Qsort4/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Qsort4
+
+mkdir ../DSJAVA/Mrgsort1
+cat Smain1.txt Mrgsort.txt Mrgsort1.x Smain2.txt > ../DSJAVA/Mrgsort1/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Mrgsort1/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Mrgsort1
+
+mkdir ../DSJAVA/Mrgsort2
+cat Smain1.txt Mrgsort.txt Inssortt.x Mrgsort2.x Smain2.txt > ../DSJAVA/Mrgsort2/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Mrgsort2/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Mrgsort2
+
+mkdir ../DSJAVA/Heapsort
+cat Smain1.txt Heapsort.txt Heapsort.x Smain2.txt > ../DSJAVA/Heapsort/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Heapsort/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Heapsort
+cat MaxHeap1.x MaxHeap2.x > ../DSJAVA/Heapsort/MaxHeap.java
+
+mkdir ../DSJAVA/Radix
+cat Smain1.txt Radix.txt Radix.x Smain2.txt > ../DSJAVA/Radix/Sortmain.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Radix/DSutil.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Radix
+
+# Chapter 9
+
+mkdir ../DSJAVA/Genfile
+cp Genfile.java Assert.java ../DSJAVA/Genfile
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Genfile/DSutil.java
+
+mkdir ../DSJAVA/Test
+cp Test.java Assert.java ../DSJAVA/Test
+
+mkdir ../DSJAVA/Test2
+cp Test2.java Assert.java ../DSJAVA/Test2
+
+mkdir ../DSJAVA/Exmrg1
+cp Exmrg1.java Assert.java ../DSJAVA/Exmrg1
+
+mkdir ../DSJAVA/Exmrg2
+cp Exmrg2.java Assert.java ../DSJAVA/Exmrg2
+
+mkdir ../DSJAVA/Exmrg3
+cp Exmrg3.java Assert.java ../DSJAVA/Exmrg3
+
+
+# Chapter 10
+
+mkdir ../DSJAVA/Hash
+cat Hashtab1.txt HashIns.x HashSch.x Hashtab2.txt > ../DSJAVA/Hash/HashTable.java
+cat Hash1.txt ELFhash.x Hstring.x Hint.x Hprobe.x Hash2.txt > ../DSJAVA/Hash/Hashmain.java
+cp Elem.java IElem.java Assert.java ../DSJAVA/Hash
+
+
+# Chapter 11
+
+mkdir ../DSJAVA/TTTree
+cat TTtree1.txt TTins.x TTfind.x TTtree2.txt > ../DSJAVA/TTTree/TTtree.java
+cp Assert.java Elem.java IElem.java TTmain.java TTNode.java ../DSJAVA/TTTree
+
+
+# Chapter 12
+
+mkdir ../DSJAVA/Skiplist
+cat Skipl1.txt Skiprand.x Skipins.x Skipsch.x Skipl2.txt > ../DSJAVA/Skiplist/SkipList.java
+cat DSutil1.txt permute.x DSutil2.txt > ../DSJAVA/Skiplist/DSutil.java
+cp Skipmain.java Elem.java IElem.java SkipNode.java ../DSJAVA/Skiplist
+
+mkdir ../DSJAVA/Mem
+cat MemMan1.x MemMan2.x > ../DSJAVA/Mem/MemManager.java
+cp Assert.java MemManADT.java MemMain.java MemHandle.java ../DSJAVA/Mem
+
+
+# Chapter 13
+
+mkdir ../DSJAVA/KDtree
+cat KDtree1.txt KDfind.x KDfindmin.x KDrshelp.x KDtree2.txt > ../DSJAVA/KDtree/KDtree.java
+cp DElem.java BinNode.java BinNodePtr.java KDmain.java Assert.java ../DSJAVA/KDtree
+

@@ -1,0 +1,44 @@
+  private void printhelp(KDNode<E> rt, int level) {
+    for(int i=1; i<=level; i++) System.out.print(" ");
+    if (rt == null) {
+      System.out.println("null");
+      return;
+    }
+    System.out.println(rt.element());
+    printhelp(rt.left(), level+1);
+    printhelp(rt.right(), level+1);
+  }
+
+  private KDNode<E> removehelp(KDNode<E> rt, int[] key, int level) {
+    if (rt == null) return null;
+    int[] rtkey = rt.key();
+    if (key[level] < rtkey[level])
+      rt.setLeft(removehelp(rt.left(), key, (level+1)%D));
+    else if (key[level] > rtkey[level])
+      rt.setRight(removehelp(rt.right(), key, (level+1)%D));
+    else {  // Found it
+      if (rt.right() == null)
+        if (rt.left() == null) // Just drop element
+	  return null;
+	else { // Switch subtree to right
+	  rt.setRight(rt.left());
+	  rt.setLeft(null);
+        }
+      KDNode<E> temp = findmin(rt.right(), level, (level+1)%D);
+      rt.setRight(removehelp(rt.right(), temp.key(), (level+1)%D));
+      rt.setElement(temp.element());
+    }
+    return rt;
+  }
+
+
+  private boolean InCircle(int[] point, int radius, int[] coord) {
+    assert point.length == coord.length : "Bad InCircle";
+    System.out.println("Test against " + coord[0] + ", " + coord[1]);
+    int sum = 0;
+    for (int i=0; i<point.length; i++)
+      sum += (point[i] - coord[i]) * (point[i] - coord[i]);
+    return sum < (radius * radius);
+  }
+
+}

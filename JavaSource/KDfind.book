@@ -1,0 +1,11 @@
+private E findhelp(KDNode<E> rt, int[] key, int level) {
+  if (rt == null) return null;
+  E it = rt.element();
+  int[] itkey = rt.key();
+  if ((itkey[0] == key[0]) && (itkey[1] == key[1]))
+    return rt.element();
+  if (itkey[level] > key[level])
+    return findhelp(rt.left(), key, (level+1)%D);
+  else
+    return findhelp(rt.right(), key, (level+1)%D);
+}

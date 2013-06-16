@@ -1,0 +1,14 @@
+/** A JUnit test class for the general tree. */
+
+import java.io.*;
+
+public class GenTreeTest
+    extends junit.framework.TestCase
+{
+
+  static private StringBuffer out;
+
+  static private <E> void PrintNode(GTNode<E> it) {
+    if (it == null) out.append("NULL");
+    else out.append(it.value() + " ");
+  }

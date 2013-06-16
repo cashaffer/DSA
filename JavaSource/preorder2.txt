@@ -1,0 +1,57 @@
+
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+    out = new StringBuffer(100);
+  }
+
+
+  public void testPreorder() {
+    BSTNode<Integer,Integer> root = new BSTNode<Integer,Integer>(10,10);
+    root.setLeft(new BSTNode<Integer,Integer>(15,15));
+    root.setRight(new BSTNode<Integer,Integer>(20,20));
+    preorder(root);
+    assertEquals(out.toString(), "10 15 20 ");
+  }
+
+  public void testPreorder2() {
+    BSTNode<Integer,Integer> root = new BSTNode<Integer,Integer>(10,10);
+    root.setLeft(new BSTNode<Integer,Integer>(15,15));
+    root.setRight(new BSTNode<Integer,Integer>(20,20));
+    preorder2(root);
+    assertEquals(out.toString(), "10 15 20 ");
+  }
+
+  public void testCount() {
+    BSTNode<Integer,Integer> root = new BSTNode<Integer,Integer>(10,10);
+    root.setLeft(new BSTNode<Integer,Integer>(15,15));
+    root.setRight(new BSTNode<Integer,Integer>(20,20));
+    assertEquals(3, count(root));
+  }
+
+  // The following tests for checkBST are a little dicey. The book
+  // code uses a simple BinNode abstract class. Syntactically, this
+  // works fine since the function uses only base class
+  // functionality. But logically, this works only so long as the key
+  // and element of the BSTNode are the same (since BinNode.element()
+  // returns the element, not the key). 
+
+  public void testBSTa() {
+    BSTNode<Integer,Integer> root = new BSTNode<Integer,Integer>(10,10);
+    root.setLeft(new BSTNode<Integer,Integer>(15,15));
+    root.setRight(new BSTNode<Integer,Integer>(20,20));
+    assertEquals(false, checkBST(root, -1, 1000));
+  }
+
+  public void testBSTb() {
+    BSTNode<Integer,Integer> root = new BSTNode<Integer,Integer>(10,10);
+    root.setLeft(new BSTNode<Integer,Integer>(5,5));
+    root.setRight(new BSTNode<Integer,Integer>(20,20));
+    assertEquals(true, checkBST(root, -1, 1000));
+  }
+
+}

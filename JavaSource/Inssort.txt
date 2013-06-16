@@ -1,0 +1,5 @@
+
+static <E extends Comparable<? super E>> void Sort(E[] A) {
+  inssort(A);
+}
+

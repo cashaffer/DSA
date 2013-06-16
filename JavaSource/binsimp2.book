@@ -1,0 +1,3 @@
+for (i=0; i<n; i++)
+  while (A[i] != i) // Swap element A[i] with A[A[i]]
+    DSutil.swap(A, i, A[i]);

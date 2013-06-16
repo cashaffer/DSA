@@ -1,0 +1,9 @@
+/** A JUnit test class for the fibonacci implementations. */
+
+import java.io.*;
+
+public class FibTest
+    extends junit.framework.TestCase
+{
+
+TODO: NEED TO INCLUDE fibrt.book AND TESTS FOR IT.

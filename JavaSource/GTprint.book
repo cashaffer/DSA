@@ -1,0 +1,11 @@
+/** Preorder traversal for general trees */
+static <E> void preorder(GTNode<E> rt) {
+  PrintNode(rt);
+  if (!rt.isLeaf()) {
+    GTNode<E> temp = rt.leftmostChild();
+    while (temp != null) {
+      preorder(temp);
+      temp = temp.rightSibling();
+    }
+  }
+}

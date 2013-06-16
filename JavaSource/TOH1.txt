@@ -1,0 +1,14 @@
+/** A JUnit test class for Towers of Hanoi */
+
+import java.io.*;
+
+public class ToHTest
+    extends junit.framework.TestCase
+{
+
+/** Compute the moves for Tower of Hanoi
+    @param n The number of disks
+    @param start The start pole
+    @param goal The goal pole
+    @param temp The other pole
+*/

@@ -1,0 +1,5 @@
+/** Extend the standard Dictionary to 2D spatial point data */
+public interface SpatialDictionary<E> extends Dictionary<int[], E> {
+  /** Visit all records within rad distance of point k */
+  public void regionSearch(int[] k, int rad);
+}

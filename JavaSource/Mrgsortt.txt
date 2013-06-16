@@ -1,0 +1,9 @@
+SORRY, THIS IS CURRENTLY BROKEN! Need to deal with allocating temp
+array correctly.
+
+static Elem[] temp = new Elem[ARRAYSIZE];
+
+static void sort(Elem[] array, int start, int len) {
+  mergesort(array, temp, start, start+len-1);
+}
+

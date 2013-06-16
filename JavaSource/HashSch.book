@@ -1,0 +1,10 @@
+/** Search in hash table HT for the record with key k */
+E hashSearch(Key k) {
+  int home;              // Home position for k
+  int pos = home = h(k); // Initial position
+  for (int i = 1; (HT[pos] != null) &&
+                  (HT[pos].key().compareTo(k) != 0); i++)
+    pos = (home + p(k, i)) % M;     // Next probe position
+  if (HT[pos] == null) return null; // Key not in hash table
+  else return HT[pos].value();      // Found it
+}

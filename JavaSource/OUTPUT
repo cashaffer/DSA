@@ -1,0 +1,795 @@
+mkdir ../DSJAVA/Rfact
+cat Copyright.txt fact1.txt rfact.book fact2.txt > ../DSJAVA/Rfact/FactTest.java
+cd ../DSJAVA/Rfact; \
+	javac -Xlint -cp .:../junit-4.5.jar FactTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore FactTest
+JUnit version 4.5
+...
+Time: 0.007
+
+OK (3 tests)
+
+mkdir ../DSJAVA/Permute
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Permute/DSutil.java
+cat Copyright.txt PermuteTest.java > ../DSJAVA/Permute/PermuteTest.java
+cd ../DSJAVA/Permute; \
+	javac -Xlint -cp .:../junit-4.5.jar PermuteTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore PermuteTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Largest
+cat Copyright.txt large1.txt largest.book large2.txt > ../DSJAVA/Largest/LargeTest.java
+cd ../DSJAVA/Largest; \
+	javac -Xlint -cp .:../junit-4.5.jar LargeTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore LargeTest
+JUnit version 4.5
+.
+Time: 0.007
+
+OK (1 test)
+
+mkdir ../DSJAVA/ToH
+cat Copyright.txt TOH1.txt TOH.book TOH2.txt > ../DSJAVA/ToH/ToHTest.java
+cat Copyright.txt Pole.java > ../DSJAVA/ToH/Pole.java
+cd ../DSJAVA/ToH; \
+	javac -Xlint -cp .:../junit-4.5.jar ToHTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore ToHTest
+JUnit version 4.5
+.1: Move 1 to 2
+2: Move 1 to 3
+3: Move 2 to 3
+4: Move 1 to 2
+5: Move 3 to 1
+6: Move 3 to 2
+7: Move 1 to 2
+
+Time: 0.007
+
+OK (1 test)
+
+mkdir ../DSJAVA/Fib
+cat Copyright.txt fib1.txt fibi.book fibr.book fib2.txt > ../DSJAVA/Fib/FibTest.java
+cd ../DSJAVA/Fib; \
+	javac -Xlint -cp .:../junit-4.5.jar FibTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore FibTest
+JUnit version 4.5
+...
+Time: 0.008
+
+OK (3 tests)
+
+mkdir ../DSJAVA/Terminate
+cat Copyright.txt term1.txt terminate.book term2.txt > ../DSJAVA/Terminate/TerminateTest.java
+cd ../DSJAVA/Terminate; \
+	javac -Xlint -cp .:../junit-4.5.jar TerminateTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore TerminateTest
+JUnit version 4.5
+.
+Time: 0.007
+
+OK (1 test)
+
+mkdir ../DSJAVA/Flag
+cat Copyright.txt Flag.java > ../DSJAVA/Flag/Flag.java
+cd ../DSJAVA/Flag; \
+	javac Flag.java;
+mkdir ../DSJAVA/Ch3
+cat Copyright.txt ch3a.txt c3p1.book ch3b.txt c3p2.book ch3c.txt c3p3.book ch3d.txt c3p4.book ch3e.txt c3p5.book ch3f.txt c3p6.book ch3n.txt c3p16.book ch3g.txt c3p7.book ch3h.txt c3p8.book ch3i.txt c3p9.book ch3j.txt c3p10.book ch3k.txt c3p11.book ch3l.txt c3p12.book c3p13.book ch3o.txt c3p14.book c3p15.book c3p16.book ch3m.txt > ../DSJAVA/Ch3/Ch3.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Ch3/DSutil.java
+cd ../DSJAVA/Ch3; \
+	javac Ch3.java
+mkdir ../DSJAVA/Bsearch
+cat Copyright.txt bsearch1.txt bsearch.book bsearch2.txt > ../DSJAVA/Bsearch/BsearchTest.java
+cd ../DSJAVA/Bsearch; \
+	javac -Xlint -cp .:../junit-4.5.jar BsearchTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore BsearchTest
+JUnit version 4.5
+.
+Time: 0.007
+
+OK (1 test)
+
+mkdir ../DSJAVA/Collatz
+cat Copyright.txt collatz1.txt collatz.book collatz2.txt > ../DSJAVA/Collatz/Collatz.java
+cd ../DSJAVA/Collatz; \
+	javac Collatz.java;
+mkdir ../DSJAVA/Binsimp
+cat Copyright.txt binsimpstart.txt binsort.book binsimpa.txt binsimp1.book binsimpb.txt binsimp2.book binsimpc.txt > ../DSJAVA/Binsimp/Binsimp.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Binsimp/DSutil.java
+cat Copyright.txt List.book > ../DSJAVA/Binsimp/List.java
+cat Copyright.txt Link.book > ../DSJAVA/Binsimp/Link.java
+cat Copyright.txt Llist1.book Llist2.book Alist3.txt> ../DSJAVA/Binsimp/LList.java
+cd ../DSJAVA/Binsimp; \
+	javac Binsimp.java
+mkdir ../DSJAVA/Alist
+cat Copyright.txt Lmain1.txt listfind.book ALmain.txt Lmain2.txt > ../DSJAVA/Alist/ListTest.java
+cat Copyright.txt List.book > ../DSJAVA/Alist/List.java
+cat Copyright.txt Alist1.book Alist2.book Alist3.txt > ../DSJAVA/Alist/AList.java
+cat Copyright.txt KVpair.book > ../DSJAVA/Alist/KVpair.java
+cat Copyright.txt Payroll.book > ../DSJAVA/Alist/Payroll.java
+cd ../DSJAVA/Alist; \
+	javac -Xlint -cp .:../junit-4.5.jar ListTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore ListTest
+JUnit version 4.5
+.......
+Time: 0.012
+
+OK (7 tests)
+
+mkdir ../DSJAVA/Llist
+cat Copyright.txt Lmain1.txt listfind.book LLmain.txt Lmain2.txt > ../DSJAVA/Llist/ListTest.java
+cat Copyright.txt List.book > ../DSJAVA/Llist/List.java
+cat Copyright.txt Link.book > ../DSJAVA/Llist/Link.java
+cat Copyright.txt Llist1.book Llist2.book Alist3.txt> ../DSJAVA/Llist/LList.java
+cd ../DSJAVA/Llist; \
+	javac -Xlint -cp .:../junit-4.5.jar ListTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore ListTest
+JUnit version 4.5
+.....
+Time: 0.011
+
+OK (5 tests)
+
+mkdir ../DSJAVA/Flist
+cat Copyright.txt Lmain1.txt listfind.book LLmain.txt Lmain2.txt > ../DSJAVA/Flist/ListTest.java
+cat Copyright.txt List.book > ../DSJAVA/Flist/List.java
+cat Copyright.txt Flink.book > ../DSJAVA/Flist/Link.java
+cat Copyright.txt Flist1.txt Flist.book Flist2.txt Alist3.txt > ../DSJAVA/Flist/LList.java
+cd ../DSJAVA/Flist; \
+	javac -Xlint -cp .:../junit-4.5.jar ListTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore ListTest
+JUnit version 4.5
+.....
+Time: 0.011
+
+OK (5 tests)
+
+mkdir ../DSJAVA/Dlist
+cat Lmain1.txt listfind.book DLmain.txt Lmain2.txt > ../DSJAVA/Dlist/ListTest.java
+cat Copyright.txt List.book > ../DSJAVA/Dlist/List.java
+cat Copyright.txt DLink.book > ../DSJAVA/Dlist/DLink.java
+cat Copyright.txt Dlist1.txt Dlist.book Dlist2.txt Alist3.txt > ../DSJAVA/Dlist/LList.java
+cd ../DSJAVA/Dlist; \
+	javac -Xlint -cp .:../junit-4.5.jar ListTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore ListTest
+JUnit version 4.5
+.....
+Time: 0.011
+
+OK (5 tests)
+
+mkdir ../DSJAVA/Astack
+cat Copyright.txt Stack.book > ../DSJAVA/Astack/Stack.java
+cat Copyright.txt AStack.book AStack.txt > ../DSJAVA/Astack/AStack.java
+cat Copyright.txt Stkmain1.txt ASmain.txt Stkmain2.txt > ../DSJAVA/Astack/StackTest.java
+cd ../DSJAVA/Astack; \
+	javac -Xlint -cp .:../junit-4.5.jar StackTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore StackTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Lstack
+cat Copyright.txt Stack.book > ../DSJAVA/Lstack/Stack.java
+cat Copyright.txt Link.book > ../DSJAVA/Lstack/Link.java
+cat Copyright.txt LStack.book LStack.txt > ../DSJAVA/Lstack/LStack.java
+cat Stkmain1.txt LSmain.txt Stkmain2.txt > ../DSJAVA/Lstack/StackTest.java
+cd ../DSJAVA/Lstack; \
+	javac -Xlint -cp .:../junit-4.5.jar StackTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore StackTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Aqueue
+cat Copyright.txt Queue.book > ../DSJAVA/Aqueue/Queue.java
+cat Copyright.txt AQueue.book AQueue.txt > ../DSJAVA/Aqueue/AQueue.java
+cat Copyright.txt Qmain1.txt AQmain.txt Qmain2.txt > ../DSJAVA/Aqueue/QueueTest.java
+cd ../DSJAVA/Aqueue; \
+	javac -Xlint -cp .:../junit-4.5.jar QueueTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore QueueTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Lqueue
+cat Copyright.txt Link.book > ../DSJAVA/Lqueue/Link.java
+cat Copyright.txt Queue.book > ../DSJAVA/Lqueue/Queue.java
+cat Copyright.txt LQueue.book LQueue.txt> ../DSJAVA/Lqueue/LQueue.java
+cat Qmain1.txt LQmain.txt Qmain2.txt > ../DSJAVA/Lqueue/QueueTest.java
+cd ../DSJAVA/Lqueue; \
+	javac -Xlint -cp .:../junit-4.5.jar QueueTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore QueueTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Ch4
+cat Copyright.txt Ch4a.txt ch4p2.book ch4p3.book listiter.book ch4p1.book ch4p4.book Ch4fin.txt > ../DSJAVA/Ch4/Ch4.java
+cat Copyright.txt List.book > ../DSJAVA/Ch4/List.java
+cat Copyright.txt Alist1.book Alist2.book Alist3.txt > ../DSJAVA/Ch4/AList.java
+cat Copyright.txt Dictionary.book > ../DSJAVA/Ch4/Dictionary.java
+cat Copyright.txt UALdict1.book UALdict2.book> ../DSJAVA/Ch4/UALdictionary.java
+cat Copyright.txt KVpair.book > ../DSJAVA/Ch4/KVpair.java
+cd ../DSJAVA/Ch4; \
+	javac Ch4.java
+mkdir ../DSJAVA/Sfact
+cat Copyright.txt fact1.txt sfact.book fact2.txt > ../DSJAVA/Sfact/FactTest.java
+cat Copyright.txt Stack.book > ../DSJAVA/Sfact/Stack.java
+cat Copyright.txt AStack.book AStack.txt > ../DSJAVA/Sfact/AStack.java
+cd ../DSJAVA/Sfact; \
+	javac -Xlint -cp .:../junit-4.5.jar FactTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore FactTest
+JUnit version 4.5
+...
+Time: 0.009
+
+OK (3 tests)
+
+mkdir ../DSJAVA/ToHstack
+cat Copyright.txt operation.book > ../DSJAVA/ToHstack/operation.java
+cat Copyright.txt Pole.java > ../DSJAVA/ToHstack/Pole.java
+cat Copyright.txt TOHobj.book > ../DSJAVA/ToHstack/TOHobj.java
+cat Copyright.txt TOH1.txt TOHstack.book TOH2.txt > ../DSJAVA/ToHstack/ToHTest.java
+cat Copyright.txt Stack.book > ../DSJAVA/ToHstack/Stack.java
+cat Copyright.txt AStack.book AStack.txt > ../DSJAVA/ToHstack/AStack.java
+cd ../DSJAVA/ToHstack; \
+	javac -Xlint -cp .:../junit-4.5.jar ToHTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore ToHTest
+JUnit version 4.5
+.1: Move 1 to 2
+2: Move 1 to 3
+3: Move 2 to 3
+4: Move 1 to 2
+5: Move 3 to 1
+6: Move 3 to 2
+7: Move 1 to 2
+
+Time: 0.009
+
+OK (1 test)
+
+mkdir ../DSJAVA/UALdict
+cat Copyright.txt Dictionary.book > ../DSJAVA/UALdict/Dictionary.java
+cat Copyright.txt UALdict1.book UALdict2.book> ../DSJAVA/UALdict/UALdictionary.java
+cat Copyright.txt KVpair.book > ../DSJAVA/UALdict/KVpair.java
+cat Copyright.txt UALdictTest.java > ../DSJAVA/UALdict/DictTest.java
+cat Copyright.txt List.book > ../DSJAVA/UALdict/List.java
+cat Copyright.txt Alist1.book Alist2.book Alist3.txt> ../DSJAVA/UALdict/AList.java
+cd ../DSJAVA/UALdict; \
+	javac -Xlint -cp .:../junit-4.5.jar DictTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore DictTest
+JUnit version 4.5
+.
+Time: 0.009
+
+OK (1 test)
+
+mkdir ../DSJAVA/Payroll
+cat Copyright.txt Dictionary.book > ../DSJAVA/Payroll/Dictionary.java
+cat Copyright.txt UALdict1.book UALdict2.book> ../DSJAVA/Payroll/UALdictionary.java
+cat Copyright.txt KVpair.book > ../DSJAVA/Payroll/KVpair.java
+cat Copyright.txt List.book > ../DSJAVA/Payroll/List.java
+cat Copyright.txt Payroll.book > ../DSJAVA/Payroll/Payroll.java
+cat Copyright.txt PayrollMain1.txt PayrollMain.book PayrollMain2.txt > ../DSJAVA/Payroll/PayrollTest.java
+cat Copyright.txt Alist1.book Alist2.book Alist3.txt > ../DSJAVA/Payroll/AList.java
+cd ../DSJAVA/Payroll; \
+	javac -Xlint -cp .:../junit-4.5.jar PayrollTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore PayrollTest
+JUnit version 4.5
+..
+Time: 0.01
+
+OK (2 tests)
+
+mkdir ../DSJAVA/SAlist
+cat Copyright.txt SLmain.java > ../DSJAVA/SAlist/SortedTest.java
+cat Copyright.txt KVpair.book > ../DSJAVA/SAlist/KVpair.java
+cat Copyright.txt Payroll.book > ../DSJAVA/SAlist/Payroll.java
+cat Copyright.txt SortedList.book > ../DSJAVA/SAlist/SortedList.java
+cat Copyright.txt SAlist.book > ../DSJAVA/SAlist/SAList.java
+cd ../DSJAVA/SAlist; \
+	javac -Xlint -cp .:../junit-4.5.jar SortedTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortedTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/GenericTest
+cat Copyright.txt KVpair.book > ../DSJAVA/GenericTest/KVpair.java
+cat Copyright.txt GenericTest.java >  ../DSJAVA/GenericTest/GenericTest.java
+cd ../DSJAVA/GenericTest; \
+	javac GenericTest.java
+mkdir ../DSJAVA/Preorder
+cat Copyright.txt preorder1.txt preorder.book preorder2.book count.book checkBST.book preorder2.txt > ../DSJAVA/Preorder/PreorderTest.java
+cat Copyright.txt BinNode.java > ../DSJAVA/Preorder/BinNode.java
+cat Copyright.txt BSTNode.java > ../DSJAVA/Preorder/BSTNode.java
+cd ../DSJAVA/Preorder; \
+	javac -Xlint -cp .:../junit-4.5.jar PreorderTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore PreorderTest
+JUnit version 4.5
+.....
+Time: 0.01
+
+OK (5 tests)
+
+mkdir ../DSJAVA/Var
+cat Copyright.txt Visit.java > ../DSJAVA/Var/Visit.java
+cat Copyright.txt VarBinNode.java > ../DSJAVA/Var/VarBinNode.java
+cat Copyright.txt VarLeafNode.java > ../DSJAVA/Var/VarLeafNode.java
+cat Copyright.txt VarIntlNode.java > ../DSJAVA/Var/VarIntlNode.java
+cat Copyright.txt VarMain1.txt traverse.book VarMain2.txt > ../DSJAVA/Var/VarTest.java
+cd ../DSJAVA/Var; \
+	javac -Xlint -cp .:../junit-4.5.jar VarTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore VarTest
+JUnit version 4.5
+.
+Time: 0.007
+
+OK (1 test)
+
+mkdir ../DSJAVA/VarC
+cat Copyright.txt Visit.java > ../DSJAVA/VarC/Visit.java
+cat Copyright.txt VarBinNodeC.java > ../DSJAVA/VarC/VarBinNode.java
+cat Copyright.txt VarLeafNodeC.java > ../DSJAVA/VarC/VarLeafNode.java
+cat Copyright.txt VarIntlNodeC.java > ../DSJAVA/VarC/VarIntlNode.java
+cat Copyright.txt VarMain1.txt traverseC.book VarMain2.txt > ../DSJAVA/VarC/VarTest.java
+cd ../DSJAVA/VarC; \
+	javac -Xlint -cp .:../junit-4.5.jar VarTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore VarTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Huffman
+cat Copyright.txt Link.book > ../DSJAVA/Huffman/Link.java
+cat Copyright.txt List.book > ../DSJAVA/Huffman/List.java
+cat Copyright.txt Llist1.book Llist2.book Alist3.txt> ../DSJAVA/Huffman/LList.java
+cat Copyright.txt Code.java > ../DSJAVA/Huffman/Code.java
+cat Copyright.txt BinNode.java > ../DSJAVA/Huffman/BinNode.java
+cat Copyright.txt HuffNode.java > ../DSJAVA/Huffman/HuffNode.java
+cat Copyright.txt LettFreq.java > ../DSJAVA/Huffman/LettFreq.java
+cat Copyright.txt HuffTree.java > ../DSJAVA/Huffman/HuffTree.java
+cp huffex.dat hufftest.dat huffbook.dat ../DSJAVA/Huffman
+cat Huffm1.txt Huffbld.book Huffm2.txt > ../DSJAVA/Huffman/Huffman.java
+cd ../DSJAVA/Huffman; \
+	javac Huffman.java
+mkdir ../DSJAVA/BST
+cat Copyright.txt Dictionary.book > ../DSJAVA/BST/Dictionary.java
+cat Copyright.txt BinNode.java > ../DSJAVA/BST/BinNode.java
+cat Copyright.txt BSTNode.java > ../DSJAVA/BST/BSTNode.java
+cat Copyright.txt BST1.book BSTfind.book BSTinsert.book BSTremove.book BSTgetmin.book BSTdeletemin.book BSTprint.book BST.txt BST2.book > ../DSJAVA/BST/BST.java
+cat Copyright.txt BSTTest.java > ../DSJAVA/BST/BSTTest.java
+cd ../DSJAVA/BST; \
+	javac -Xlint -cp .:../junit-4.5.jar BSTTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore BSTTest
+JUnit version 4.5
+..
+Time: 0.01
+
+OK (2 tests)
+
+mkdir ../DSJAVA/MaxHeap
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/MaxHeap/DSutil.java
+cat Copyright.txt MaxHeapTest.java > ../DSJAVA/MaxHeap/MaxHeapTest.java
+cat Copyright.txt MaxHeap1.book MaxHeap2.book > ../DSJAVA/MaxHeap/MaxHeap.java
+cd ../DSJAVA/MaxHeap; \
+	javac -Xlint -cp .:../junit-4.5.jar MaxHeapTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore MaxHeapTest
+JUnit version 4.5
+...
+Time: 0.01
+
+OK (3 tests)
+
+mkdir ../DSJAVA/MinHeap
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/MinHeap/DSutil.java
+cat Copyright.txt MinHeapTest.java > ../DSJAVA/MinHeap/MinHeapTest.java
+cat Copyright.txt MinHeap.java > ../DSJAVA/MinHeap/MinHeap.java
+cd ../DSJAVA/MinHeap; \
+	javac -Xlint -cp .:../junit-4.5.jar MinHeapTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore MinHeapTest
+JUnit version 4.5
+..
+Time: 0.01
+
+OK (2 tests)
+
+mkdir ../DSJAVA/GenTree
+cat Copyright.txt GTNode.java > ../DSJAVA/GenTree/GTNode.java
+cat Copyright.txt GTNodeImpl.java > ../DSJAVA/GenTree/GTNodeImpl.java
+cat Copyright.txt GenTree.java > ../DSJAVA/GenTree/GenTree.java
+cat Copyright.txt GenTreeImpl.java > ../DSJAVA/GenTree/GenTreeImpl.java
+cat GTmain1.txt GTprint.book GTmain2.txt > ../DSJAVA/GenTree/GenTreeTest.java
+cd ../DSJAVA/GenTree; \
+	javac -Xlint -cp .:../junit-4.5.jar GenTreeTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore GenTreeTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Equiv
+cat Copyright.txt UFgtree.book UFfind.book UFgtree2.book > ../DSJAVA/Equiv/ParPtrTree.java
+cat Copyright.txt UFTest.java > ../DSJAVA/Equiv/UFTest.java
+cd ../DSJAVA/Equiv; \
+	javac -Xlint -cp .:../junit-4.5.jar UFTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore UFTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Equivpc
+cat Copyright.txt UFgtree.book UFpcfind.book UFgtree2.book > ../DSJAVA/Equivpc/ParPtrTree.java
+cat Copyright.txt UFTest.java > ../DSJAVA/Equivpc/UFTest.java
+cd ../DSJAVA/Equivpc; \
+	javac -Xlint -cp .:../junit-4.5.jar UFTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore UFTest
+JUnit version 4.5
+.
+Time: 0.007
+
+OK (1 test)
+
+mkdir ../DSJAVA/Inssort
+cat Copyright.txt SortTest1.txt Inssort.book SortTest2.txt > ../DSJAVA/Inssort/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Inssort/DSutil.java
+cat Copyright.txt Smain1.txt Inssort.book Smain2.txt > ../DSJAVA/Inssort/Sortmain.java
+cd ../DSJAVA/Inssort; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.02
+
+OK (1 test)
+
+mkdir ../DSJAVA/Bubsort
+cat Copyright.txt SortTest1.txt Bubsort.book SortTest2.txt > ../DSJAVA/Bubsort/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Bubsort/DSutil.java
+cat Copyright.txt Smain1.txt Bubsort.book Smain2.txt > ../DSJAVA/Bubsort/Sortmain.java
+cd ../DSJAVA/Bubsort; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.024
+
+OK (1 test)
+
+mkdir ../DSJAVA/Selsort
+cat Copyright.txt SortTest1.txt Selsort.book SortTest2.txt > ../DSJAVA/Selsort/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Selsort/DSutil.java
+cat Copyright.txt Smain1.txt Selsort.book Smain2.txt > ../DSJAVA/Selsort/Sortmain.java
+cd ../DSJAVA/Selsort; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.017
+
+OK (1 test)
+
+mkdir ../DSJAVA/Shsort
+cat Copyright.txt SortTest1.txt Shsort.book SortTest2.txt > ../DSJAVA/Shsort/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Shsort/DSutil.java
+cat Copyright.txt Smain1.txt Shsort.book Smain2.txt > ../DSJAVA/Shsort/Sortmain.java
+cd ../DSJAVA/Shsort; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.01
+
+OK (1 test)
+
+mkdir ../DSJAVA/Qsort1
+cat Copyright.txt SortTest1.txt Qsort.txt Qsort1.book Partit.book Findpiv.book SortTest2.txt > ../DSJAVA/Qsort1/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Qsort1/DSutil.java
+cat Copyright.txt Smain1.txt Qsort.txt Qsort1.book Partit.book Findpiv.book Smain2.txt > ../DSJAVA/Qsort1/Sortmain.java
+cd ../DSJAVA/Qsort1; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.011
+
+OK (1 test)
+
+mkdir ../DSJAVA/Qsort4
+cat Copyright.txt SortTest1.txt Qsort.txt Inssort3.txt Qsort4.book SortTest2.txt > ../DSJAVA/Qsort4/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Qsort4/DSutil.java
+cat Copyright.txt Smain1.txt Qsort.txt Inssort3.txt Qsort4.book Smain2.txt > ../DSJAVA/Qsort4/Sortmain.java
+cd ../DSJAVA/Qsort4; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.011
+
+OK (1 test)
+
+mkdir ../DSJAVA/Mrgsort1
+cat Copyright.txt SortTest1.txt Mrgsort.txt Mrgsort1.book SortTest2.txt > ../DSJAVA/Mrgsort1/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Mrgsort1/DSutil.java
+cat Copyright.txt Smain1.txt Mrgsort.txt Mrgsort1.book Smain2.txt > ../DSJAVA/Mrgsort1/Sortmain.java
+cd ../DSJAVA/Mrgsort1; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.011
+
+OK (1 test)
+
+mkdir ../DSJAVA/Mrgsort2
+cat Copyright.txt SortTest1.txt Mrgsort.txt Inssortt.txt Mrgsort2.book SortTest2.txt > ../DSJAVA/Mrgsort2/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Mrgsort2/DSutil.java
+cat Copyright.txt Smain1.txt Mrgsort.txt Inssortt.txt Mrgsort2.book Smain2.txt > ../DSJAVA/Mrgsort2/Sortmain.java
+cd ../DSJAVA/Mrgsort2; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.013
+
+OK (1 test)
+
+mkdir ../DSJAVA/Heapsort
+cat Copyright.txt SortTest1.txt Heapsort.txt Heapsort.book SortTest2.txt > ../DSJAVA/Heapsort/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Heapsort/DSutil.java
+cat Copyright.txt MaxHeap1.book MaxHeap2.book > ../DSJAVA/Heapsort/MaxHeap.java
+cat Copyright.txt Smain1.txt Heapsort.txt Heapsort.book Smain2.txt > ../DSJAVA/Heapsort/Sortmain.java
+cd ../DSJAVA/Heapsort; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.013
+
+OK (1 test)
+
+mkdir ../DSJAVA/Radix
+cat Copyright.txt SortTest1.txt Radix.txt Radix.book SortTest2.txt > ../DSJAVA/Radix/SortTest.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Radix/DSutil.java
+cat Copyright.txt Smain1.txt Radix.txt Radix.book Smain2.txt > ../DSJAVA/Radix/Sortmain.java
+cd ../DSJAVA/Radix; \
+	javac -Xlint -cp .:../junit-4.5.jar SortTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore SortTest; \
+	javac -Xlint Sortmain.java \
+
+JUnit version 4.5
+.
+Time: 0.009
+
+OK (1 test)
+
+mkdir ../DSJAVA/Genfile
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/Genfile/DSutil.java
+cat Copyright.txt Genfile.java > ../DSJAVA/Genfile/Genfile.java
+cd ../DSJAVA/Genfile; \
+	javac -Xlint Genfile.java
+mkdir ../DSJAVA/Test
+cat Copyright.txt Test.java > ../DSJAVA/Test/Test.java
+cd ../DSJAVA/Test; \
+	javac -Xlint Test.java
+mkdir ../DSJAVA/Test2
+cat Copyright.txt Test2.java > ../DSJAVA/Test2/Test2.java
+cd ../DSJAVA/Test2; \
+	javac -Xlint Test2.java
+mkdir ../DSJAVA/Exmrg1
+cat Copyright.txt Exmrg1.java > ../DSJAVA/Exmrg1/Exmrg1.java
+cd ../DSJAVA/Exmrg1; \
+	javac -Xlint Exmrg1.java
+mkdir ../DSJAVA/Exmrg2
+cat Copyright.txt Exmrg2.java > ../DSJAVA/Exmrg2/Exmrg2.java
+cd ../DSJAVA/Exmrg2; \
+	javac -Xlint Exmrg2.java
+mkdir ../DSJAVA/Exmrg3
+cat Copyright.txt Exmrg3.java > ../DSJAVA/Exmrg3/Exmrg3.java
+cd ../DSJAVA/Exmrg3; \
+	javac -Xlint Exmrg3.java
+mkdir ../DSJAVA/HashSim
+cat Copyright.txt HashSim.java > ../DSJAVA/HashSim/HashSim.java
+cat Copyright.txt DSutil1.txt permute.book DSutil2.txt > ../DSJAVA/HashSim/DSutil.java
+cd ../DSJAVA/HashSim; \
+	javac -Xlint HashSim.java
+mkdir ../DSJAVA/Hash
+cat Copyright.txt KVpair.book > ../DSJAVA/Hash/KVpair.java
+cat Copyright.txt Hashtab1.txt HashIns.book HashSch.book Hashtab2.txt > ../DSJAVA/Hash/HashTable.java
+cat Copyright.txt Hash1.txt Sfold.book Hchar.book Hint.book Hash2.txt > ../DSJAVA/Hash/HashTest.java
+cd ../DSJAVA/Hash; \
+	javac -Xlint -cp .:../junit-4.5.jar HashTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore HashTest
+JUnit version 4.5
+.Hello is 5
+Result of searching for 10 is null
+Result of searching for 11 is null
+.
+Time: 0.009
+
+OK (2 tests)
+
+mkdir ../DSJAVA/Hashdict
+cat Copyright.txt KVpair.book > ../DSJAVA/Hashdict/KVpair.java
+cat Copyright.txt Dictionary.book > ../DSJAVA/Hashdict/Dictionary.java
+cat Copyright.txt HashTable.java > ../DSJAVA/Hashdict/HashTable.java
+cat Copyright.txt HashDictionary.java > ../DSJAVA/Hashdict/HashDictionary.java
+cat Copyright.txt HashdictTest.java > ../DSJAVA/Hashdict/HashdictTest.java
+cd ../DSJAVA/Hashdict; \
+	javac -Xlint -cp .:../junit-4.5.jar HashdictTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore HashdictTest
+JUnit version 4.5
+....
+Time: 0.011
+
+OK (4 tests)
+
+mkdir ../DSJAVA/TTTree
+cat Copyright.txt TTTest.java > ../DSJAVA/TTTree/TTTest.java
+cat Copyright.txt Dictionary.book > ../DSJAVA/TTTree/Dictionary.java
+cat Copyright.txt TTNode.book TTNodeAdd.book TTNode.txt > ../DSJAVA/TTTree/TTNode.java
+cat Copyright.txt TTTree.txt TTins.book TTfind.book close.txt > ../DSJAVA/TTTree/TTTree.java
+cd ../DSJAVA/TTTree; \
+	javac -Xlint -cp .:../junit-4.5.jar TTTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore TTTest
+JUnit version 4.5
+.10
+null
+10
+10 15
+35
+  10
+  15
+  null
+30
+  19
+    1
+    17
+    null
+  35 100
+    10
+    90 95
+    15
+  null
+
+Time: 0.011
+
+OK (1 test)
+
+mkdir ../DSJAVA/BPTree
+cat Copyright.txt BPTest.java > ../DSJAVA/BPTree/BPTest.java
+cat Copyright.txt Dictionary.book > ../DSJAVA/BPTree/Dictionary.java
+cat Copyright.txt BPNode.java > ../DSJAVA/BPTree/BPNode.java
+cat Copyright.txt BPLeaf.java > ../DSJAVA/BPTree/BPLeaf.java
+cat Copyright.txt BPInternal.java > ../DSJAVA/BPTree/BPInternal.java
+cat Copyright.txt BPTree.txt BPinsert.book BPfind.book BPremove.book close.txt> ../DSJAVA/BPTree/BPTree.java
+cd ../DSJAVA/BPTree; \
+	javac -Xlint -cp .:../junit-4.5.jar BPTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore BPTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Grtestm
+cat Copyright.txt Graph.java > ../DSJAVA/Grtestm/Graph.java
+cp Bkexamp.gph ../DSJAVA/Grtestm/testfile.gph
+cat Copyright.txt GraphTest1.txt Grtestm.txt > ../DSJAVA/Grtestm/GraphTest.java
+cat Copyright.txt Graphm.java > ../DSJAVA/Grtestm/Graphm.java
+cd ../DSJAVA/Grtestm; \
+	javac -Xlint -cp .:../junit-4.5.jar GraphTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore GraphTest
+JUnit version 4.5
+.
+Time: 0.007
+
+OK (1 test)
+
+mkdir ../DSJAVA/Grtestl
+cat Copyright.txt Graph.java > ../DSJAVA/Grtestl/Graph.java
+cat Copyright.txt Edge.java > ../DSJAVA/Grtestl/Edge.java
+cp Bkexamp.gph ../DSJAVA/Grtestl/testfile.gph
+cat Copyright.txt GraphTest1.txt Grtestl.txt > ../DSJAVA/Grtestl/GraphTest.java
+cat Copyright.txt Graphl1.book Graphl2.book > ../DSJAVA/Grtestl/Graphl.java
+cat Copyright.txt GraphList.java > ../DSJAVA/Grtestl/GraphList.java
+cat Copyright.txt List.book > ../DSJAVA/Grtestl/List.java
+cat Copyright.txt Link.book > ../DSJAVA/Grtestl/Link.java
+cat Copyright.txt Llist1.book Llist2.book Alist3.txt> ../DSJAVA/Grtestl/LList.java
+cd ../DSJAVA/Grtestl; \
+	javac -Xlint -cp .:../junit-4.5.jar GraphTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore GraphTest
+JUnit version 4.5
+.
+Time: 0.01
+
+OK (1 test)
+
+mkdir ../DSJAVA/Grdfsm
+cat Copyright.txt Graph.java > ../DSJAVA/Grdfsm/Graph.java
+cp Bkexamp.gph ../DSJAVA/Grdfsm/testfile.gph
+cat Copyright.txt GraphTest1.txt Grdfs.txt Grgentrav.book Grdfs.book GrdfsTestm.txt > ../DSJAVA/Grdfsm/GraphTest.java
+cat Copyright.txt Graphm.java > ../DSJAVA/Grdfsm/Graphm.java
+cd ../DSJAVA/Grdfsm; \
+	javac -Xlint -cp .:../junit-4.5.jar GraphTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore GraphTest
+JUnit version 4.5
+.
+Time: 0.008
+
+OK (1 test)
+
+mkdir ../DSJAVA/Grdfsl
+cat Copyright.txt Graph.java > ../DSJAVA/Grdfsl/Graph.java
+cat Copyright.txt Edge.java > ../DSJAVA/Grdfsl/Edge.java
+cp Bkexamp.gph ../DSJAVA/Grdfsl/testfile.gph
+cat Copyright.txt GraphTest1.txt Grdfs.txt Grdfs.book GrdfsTestl.txt > ../DSJAVA/Grdfsl/GraphTest.java
+cat Copyright.txt Graphl1.book Graphl2.book > ../DSJAVA/Grdfsl/Graphl.java
+cat Copyright.txt GraphList.java > ../DSJAVA/Grdfsl/GraphList.java
+cat Copyright.txt List.book > ../DSJAVA/Grdfsl/List.java
+cat Copyright.txt Link.book > ../DSJAVA/Grdfsl/Link.java
+cat Copyright.txt Llist1.book Llist2.book Alist3.txt> ../DSJAVA/Grdfsl/LList.java
+cd ../DSJAVA/Grdfsl; \
+	javac -Xlint -cp .:../junit-4.5.jar GraphTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore GraphTest
+JUnit version 4.5
+.
+Time: 0.011
+
+OK (1 test)
+
+mkdir ../DSJAVA/Grbfsm
+cat Copyright.txt Graph.java > ../DSJAVA/Grbfsm/Graph.java
+cp Bkexamp.gph ../DSJAVA/Grbfsm/testfile.gph
+cat Copyright.txt GraphTest1.txt Grdfs.txt Grbfs.book GrbfsTestm.txt > ../DSJAVA/Grbfsm/GraphTest.java
+cat Copyright.txt Graphm.java > ../DSJAVA/Grbfsm/Graphm.java
+cat Copyright.txt Queue.book > ../DSJAVA/Grbfsm/Queue.java
+cat Copyright.txt AQueue.book AQueue.txt > ../DSJAVA/Grbfsm/AQueue.java
+cd ../DSJAVA/Grbfsm; \
+	javac -Xlint -cp .:../junit-4.5.jar GraphTest.java; \
+	java -ea -cp .:../junit-4.5.jar org.junit.runner.JUnitCore GraphTest
+JUnit version 4.5
+Could not find class: GraphTest
+
+Time: 0.002
+
+OK (0 tests)
+

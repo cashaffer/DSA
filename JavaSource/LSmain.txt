@@ -1,0 +1,9 @@
+  /**
+   * This method is automatically called once before each test case method,
+   * so that all the variables are cleanly initialized for each test.
+   */
+  public void setUp()
+  {
+    S1 = new LStack<Integer>();
+    S2 = new LStack<Integer>(15);
+  }

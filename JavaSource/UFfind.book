@@ -1,0 +1,6 @@
+/** @return The root of curr's tree */
+public Integer FIND(Integer curr) {
+  if (array[curr] == null) return curr;  // At root
+  while (array[curr] != null) curr = array[curr];
+  return curr;
+}

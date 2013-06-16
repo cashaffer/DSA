@@ -1,0 +1,9 @@
+  /** @return an edge's weight */
+  public int weight(int i, int j) {
+    return matrix[i][j];
+  }
+
+  /** Set/Get the mark value for a vertex */
+  public void setMark(int v, int val) { Mark[v] = val; }
+  public int getMark(int v) { return Mark[v]; }
+}

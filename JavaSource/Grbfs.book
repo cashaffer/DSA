@@ -1,0 +1,16 @@
+/** Breadth first (queue-based) search */
+static void BFS(Graph G, int start) {
+  Queue<Integer> Q = new AQueue<Integer>(G.n());
+  Q.enqueue(start);
+  G.setMark(start, VISITED);
+  while (Q.length() > 0) {    // Process each vertex on Q
+    int v = Q.dequeue();
+    PreVisit(G, v);           // Take appropriate action
+    for (int w = G.first(v); w < G.n(); w = G.next(v, w))
+      if (G.getMark(w) == UNVISITED) { // Put neighbors on Q
+        G.setMark(w, VISITED);
+        Q.enqueue(w);
+      }
+    PostVisit(G, v);          // Take appropriate action
+  }
+}

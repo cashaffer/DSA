@@ -1,0 +1,30 @@
+/** Test program for various preorder traversals of a binary tree.
+    This includes two implementations for preorder traversal,
+    a traversal that counts the number of nodes in the tree,
+    and a traversal that verifies that a given tree is a BST. */
+
+import java.io.*;
+
+public class PreorderTest
+    extends junit.framework.TestCase
+{
+
+static private StringBuffer out;
+
+// Stick this in to test the preorder routine
+static void visit (BinNode X) {
+  out.append(X.element());
+  out.append(" ");
+}
+
+// The first version of preorder
+// is the preferred structure for preorder traversal.
+// It tests the pointer to the current node before visiting it,
+// but does not test that children are NULL before calling a
+// visit on them. This version does not rely on the caller
+// to test the root for safety.
+
+// The second version of preorder does "look ahead" to test if
+// a child should be visited before doing the visit.
+// This requires an external test of the root to make it safe
+// from calls on an empty tree.

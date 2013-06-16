@@ -1,0 +1,12 @@
+/** Memory Manager interface */
+interface MemManADT {
+
+  /** Store a record and return a handle to it */
+  public MemHandle insert(byte[] info);
+
+  /** Get back a copy of a stored record */
+  public byte[] get(MemHandle h);
+
+  /** Release the space associated with a record */
+  public void release(MemHandle h);
+}

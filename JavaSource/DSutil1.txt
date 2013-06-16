@@ -1,0 +1,34 @@
+import java.util.*;
+import java.math.*;
+
+/** A bunch of utility functions. */
+class DSutil<E> {
+
+  /** Swap two Objects in an array
+      @param A The array
+      @param p1 Index of one Object in A
+      @param p2 Index of another Object A
+  */
+  public static <E> void swap(E[] A, int p1, int p2) {
+    E temp = A[p1];
+	A[p1] = A[p2];
+	A[p2] = temp;
+  }
+
+  /** Randomly permute the Objects in an array.
+      @param A The array
+  */
+
+// int version
+// Randomly permute the values of array "A"
+static void permute(int[] A) {
+  for (int i = A.length; i > 0; i--) // for each i
+    swap(A, i-1, DSutil.random(i));  //   swap A[i-1] with
+}                                    //   a random element
+
+  public static void swap(int[] A, int p1, int p2) {
+    int temp = A[p1];
+	A[p1] = A[p2];
+	A[p2] = temp;
+  }
+

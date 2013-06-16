@@ -1,0 +1,10 @@
+
+System.out.println("Test 6: For " + n +
+				   ", the sum of n taken log n times is: " + sum1);
+System.out.println("For " + n + ", the sum of 2^j is: " + sum2);
+
+  int c = 1;
+  int d = 2;
+  int e = 3;
+
+/// c3p7.x

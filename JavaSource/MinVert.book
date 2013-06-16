@@ -1,0 +1,9 @@
+static int minVertex(Graph G, int[] D) {
+  int v = 0;  // Initialize v to any unvisited vertex;
+  for (int i=0; i<G.n(); i++)
+    if (G.getMark(i) == UNVISITED) { v = i; break; }
+  for (int i=0; i<G.n(); i++)  // Now find smallest value
+    if ((G.getMark(i) == UNVISITED) && (D[i] < D[v]))
+      v = i;
+  return v;
+}

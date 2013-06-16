@@ -1,0 +1,4 @@
+
+int[] p = new int[5];
+int[] q = new int[10];
+p = q;

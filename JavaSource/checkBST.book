@@ -1,0 +1,10 @@
+boolean checkBST(BinNode<Integer> rt,
+                 int low, int high) {
+  if (rt == null) return true; // Empty subtree
+  int rootkey = rt.element();
+  if ((rootkey < low) || (rootkey > high))
+    return false; // Out of range
+  if (!checkBST(rt.left(), low, rootkey))
+    return false; // Left side failed
+  return checkBST(rt.right(), rootkey, high);
+}

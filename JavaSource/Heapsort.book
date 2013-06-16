@@ -1,0 +1,7 @@
+static <E extends Comparable<? super E>>
+void heapsort(E[] A) {
+  // The heap constructor invokes the buildheap method
+  MaxHeap<E> H = new MaxHeap<E>(A, A.length, A.length);
+  for (int i=0; i<A.length; i++)  // Now sort
+    H.removemax(); // Removemax places max at end of heap
+}

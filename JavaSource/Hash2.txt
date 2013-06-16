@@ -1,0 +1,35 @@
+
+
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+  }
+
+
+  public void testHash() {
+    HashTable<Integer,String> T = new HashTable<Integer,String>(101);
+
+    System.out.println("Hello is " + h(101));
+    System.out.println("Result of searching for 10 is " + T.hashSearch(10));
+    System.out.println("Result of searching for 11 is " + T.hashSearch(11));
+  }
+
+  public void testStringHash1() {
+    assertEquals(65, sfold("A", 256));
+    assertEquals(66, sfold("B", 256));
+    assertEquals(65, sfold("ABC", 256));
+    assertEquals(130, sfold("ABCDA", 256));
+    assertEquals(97, sfold("a", 256));
+    assertEquals(98, sfold("b", 256));
+    assertEquals(162, sfold("ABCDa", 0x100));
+    assertEquals(16961, sfold("ABC", 0x10000));
+    assertEquals(17058, sfold("ABCDa", 0x10000));
+    assertEquals(42211, sfold("ABCDabcdA", 0x10000));
+    assertEquals(75, sfold("aaaabbbb", 101));  // Example in book
+  }
+
+}

@@ -1,0 +1,12 @@
+/** A JUnit test class for the convergence termination test */
+
+import java.io.*;
+
+public class TerminateTest
+    extends junit.framework.TestCase
+{
+
+/** See if repeatedly dividing by 2 reaches termination
+    @param val The start value
+*/
+

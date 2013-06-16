@@ -1,0 +1,7 @@
+
+@SuppressWarnings("unchecked") // Generic array allocation
+static <E extends Comparable<? super E>> void Sort(E[] A) {
+  E[] temp = (E[])new Comparable[A.length];
+  mergesort(A, temp, 0, A.length-1);
+}
+

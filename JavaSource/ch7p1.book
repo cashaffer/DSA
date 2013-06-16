@@ -1,0 +1,2 @@
+for (i=0; i<L.length; i++)
+  qsort(L, 0, i);

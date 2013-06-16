@@ -1,0 +1,47 @@
+/** Max-heap implementation */
+public class MaxHeap<E extends Comparable<? super E>> {
+  private E[] Heap;   // Pointer to the heap array
+  private int size;   // Maximum size of the heap
+  private int n;      // Number of things in heap
+
+/** Constructor supporting preloading of heap contents */
+public MaxHeap(E[] h, int num, int max)
+{ Heap = h;  n = num;  size = max;  buildheap(); }
+
+/** @return Current size of the heap */
+public int heapsize() { return n; }
+
+/** @return True if pos a leaf position, false otherwise */
+public boolean isLeaf(int pos)
+{ return (pos >= n/2) && (pos < n); }
+
+/** @return Position for left child of pos */
+public int leftchild(int pos) {
+  assert pos < n/2 : "Position has no left child";
+  return 2*pos + 1;
+}
+
+/** @return Position for right child of pos */
+public int rightchild(int pos) {
+  assert pos < (n-1)/2 : "Position has no right child";
+  return 2*pos + 2;
+}
+
+/** @return Position for parent */
+public int parent(int pos) {
+  assert pos > 0 : "Position has no parent";
+  return (pos-1)/2;
+}
+
+/** Insert val into heap */
+public void insert(E val) {
+  assert n < size : "Heap is full";
+  int curr = n++;
+  Heap[curr] = val;             // Start at end of heap
+  // Now sift up until curr's parent's key > curr's key
+  while ((curr != 0)  &&
+         (Heap[curr].compareTo(Heap[parent(curr)]) > 0)) {
+    DSutil.swap(Heap, curr, parent(curr));
+    curr = parent(curr);
+  }
+}

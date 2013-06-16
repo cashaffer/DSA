@@ -1,0 +1,15 @@
+
+private void printhelp(TTNode rt, int level) {
+  for (int i=1; i<=level; i++) System.out.print("  ");
+  if (rt == null) {
+	System.out.println("null");
+	return;
+  }
+  System.out.println(rt);
+  if (rt.isLeaf()) return;
+  printhelp(rt.lchild(), level+1);
+  printhelp(rt.cchild(), level+1);
+  printhelp(rt.rchild(), level+1);
+}
+
+}

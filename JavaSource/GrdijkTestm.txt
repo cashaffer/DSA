@@ -1,0 +1,22 @@
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+    out = new StringBuffer(100);
+  }
+
+  public void testGraph()
+  throws IOException {
+    BufferedReader f;
+    f = new BufferedReader(new InputStreamReader(new FileInputStream("testfile.gph")));
+    Graph G = new Graphm();
+    createGraph(f, G);
+    Dijkstra(G, 0, D);
+    for (int i=0; i< G.n(); i++) out.append(D[i] + " ");
+    assertEquals(out.toString(), "0 5 3 10 18 ");
+  }
+
+}

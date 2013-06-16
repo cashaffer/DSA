@@ -1,0 +1,48 @@
+/** Binary Search Tree implementation for Dictionary ADT */
+class BST<Key extends Comparable<? super Key>, E>
+         implements Dictionary<Key, E> {
+  private BSTNode<Key,E> root; // Root of the BST
+  private int nodecount;       // Number of nodes in the BST
+
+  /** Constructor */
+  BST() { root = null; nodecount = 0; }
+
+  /** Reinitialize tree */
+  public void clear() { root = null; nodecount = 0; }
+
+  /** Insert a record into the tree.
+      @param k Key value of the record.
+      @param e The record to insert. */
+  public void insert(Key k, E e) {
+    root = inserthelp(root, k, e);
+    nodecount++;
+  }
+
+  /** Remove a record from the tree.
+      @param k Key value of record to remove.
+      @return The record removed, null if there is none. */
+  public E remove(Key k) {
+    E temp = findhelp(root, k);   // First find it
+    if (temp != null) {
+      root = removehelp(root, k); // Now remove it
+      nodecount--;
+    }
+    return temp;
+  }
+
+  /** Remove and return the root node from the dictionary.
+      @return The record removed, null if tree is empty. */
+  public E removeAny() {
+    if (root == null) return null;
+    E temp = root.element();
+    root = removehelp(root, root.key());
+    nodecount--;
+    return temp;
+  }
+
+  /** @return Record with key value k, null if none exist.
+      @param k The key value to find. */
+  public E find(Key k) { return findhelp(root, k); }
+
+  /** @return The number of records in the dictionary. */
+  public int size() { return nodecount; }

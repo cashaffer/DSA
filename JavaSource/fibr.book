@@ -1,0 +1,8 @@
+/** Recursively generate and return the n'th Fibonacci
+    number */
+static long fibr(int n) {
+  // fibr(91) is the largest value that fits in a long
+  assert (n > 0) && (n <= 91) : "n out of range";
+  if ((n == 1) || (n == 2)) return 1;     // Base case
+  return fibr(n-1) + fibr(n-2);      // Recursive call
+}

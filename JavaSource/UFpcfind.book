@@ -1,0 +1,5 @@
+public Integer FIND(Integer curr) {
+  if (array[curr] == null) return curr; // At root
+  array[curr] = FIND(array[curr]);
+  return array[curr];
+}

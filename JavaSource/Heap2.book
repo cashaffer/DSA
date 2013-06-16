@@ -1,0 +1,44 @@
+/** Heapify contents of Heap */
+public void buildheap()
+  { for (int i=n/2-1; i>=0; i--) siftdown(i); }
+
+/** Put element in its correct place */
+private void siftdown(int pos) {
+  assert (pos >= 0) && (pos < n) : "Illegal heap position";
+  while (!isLeaf(pos)) {
+    int j = leftchild(pos);
+    if ((j<(n-1)) && (Heap[j].compareTo(Heap[j+1]) < 0)) 
+      j++; // j is now index of child with greater value
+    if (Heap[pos].compareTo(Heap[j]) >= 0) return;
+    DSutil.swap(Heap, pos, j);
+    pos = j;  // Move down
+  }
+}
+
+/** Remove and return maximum value */
+public E removemax() {
+  assert n > 0 : "Removing from empty heap";
+  DSutil.swap(Heap, 0, --n); // Swap maximum with last value
+  if (n != 0)      // Not on last element
+    siftdown(0);   // Put new heap root val in correct place
+  return Heap[n];
+}
+
+/** Remove and return element at specified position */
+public E remove(int pos) {
+  assert (pos >= 0) && (pos < n) : "Illegal heap position";
+  if (pos == (n-1)) n--; // Last element, no work to be done
+  else
+  {
+    DSutil.swap(Heap, pos, --n); // Swap with last value
+    // If we just swapped in a big value, push it up
+    while ((pos > 0) &&
+           (Heap[pos].compareTo(Heap[parent(pos)]) > 0)) {
+      DSutil.swap(Heap, pos, parent(pos));
+      pos = parent(pos);
+    }
+    if (n != 0) siftdown(pos); // If it is little, push down
+  }
+  return Heap[n];
+}
+}

@@ -1,0 +1,17 @@
+/* This version of parition is simpler than the "standard" version.
+   However, it is slower (makes the entire quicksort about 10% slower)
+   because it requires more swaps than the standard version.
+
+   WARNING: This makes different assumptions about l and r than does
+   the standard version, so it required a different version of the
+   main quicksort routine.
+*/
+static <E extends Comparable<? super E>>
+int partition(E[] A, int l, int r, E pivot) {
+  int split = l;
+  while (A[split].compareTo(pivot)<0) split++;
+  for (int curr = split+1; curr <= r; curr++)
+    if (A[curr].compareTo(pivot)<0)
+      DSutil.swap(A, split++, curr);
+  return split;
+}

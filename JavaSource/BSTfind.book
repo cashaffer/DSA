@@ -1,0 +1,7 @@
+private E findhelp(BSTNode<Key,E> rt, Key k) {
+  if (rt == null) return null;
+  if (rt.key().compareTo(k) > 0)
+    return findhelp(rt.left(), k);
+  else if (rt.key().compareTo(k) == 0) return rt.element();
+  else return findhelp(rt.right(), k);
+}

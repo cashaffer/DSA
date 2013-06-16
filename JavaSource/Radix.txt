@@ -1,0 +1,14 @@
+static int[] POW2 = {1, 2, 4, 8, 16, 32, 64, 128, 256};
+
+@SuppressWarnings("unchecked") // Generic array allocation
+static void Sort(Integer[] A) {
+  assert THRESHOLD > 0 :
+         "Usage: Sortmain [+/-] <size> <threshold>, " +
+         "MUST SET THRESHOLD AS NUMBER OF BITS IN RADIX";
+
+  Integer[] temp = new Integer[A.length];
+  int[] count = new int[POW2[THRESHOLD]];
+
+  radix(A, temp, 16/THRESHOLD, POW2[THRESHOLD], count);
+}
+

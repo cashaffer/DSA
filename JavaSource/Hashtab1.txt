@@ -1,0 +1,19 @@
+import java.io.*;
+
+public class HashTable<Key extends Comparable<? super Key>, E> {
+  private int M;
+  private KVpair<Key,E>[] HT;
+
+  private int h(Key key) {
+    return M - 1;
+  }
+
+  private int p(Key key, int slot) {
+    return slot;
+  } 
+
+  @SuppressWarnings("unchecked") // Generic array allocation
+  HashTable(int m) {
+    M = m;
+    HT = (KVpair<Key,E>[])new KVpair[M];
+  }

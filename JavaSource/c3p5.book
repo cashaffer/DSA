@@ -1,0 +1,9 @@
+sum1 = 0;
+for (i=1; i<=n; i++)     // First double loop
+   for (j=1; j<=n; j++)  //   do n times
+      sum1++;
+
+sum2 = 0;
+for (i=1; i<=n; i++)     // Second double loop
+   for (j=1; j<=i; j++)  //   do i times
+      sum2++;

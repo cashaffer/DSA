@@ -1,0 +1,15 @@
+// Sorting main function for testing correctness of sort algorithm.
+// To use: <sortname> [+/-] <size_of_array> <threshold>
+//  + means increasing values, - means decreasing value and no
+//    parameter means random values;
+// where <size_of_array> controls the number of objects to be sorted;
+// and <threshold> controls the threshold parameter for certain sorts, e.g.,
+//   cutoff point for quicksort sublists.
+
+import java.io.*;
+
+public class Sortmain {
+
+static int THRESHOLD = 0;
+
+static int ARRAYSIZE = 0;

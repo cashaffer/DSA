@@ -1,0 +1,5 @@
+static StringBuffer out;
+
+static void printout(int v) {
+  out.append(v + " ");
+}

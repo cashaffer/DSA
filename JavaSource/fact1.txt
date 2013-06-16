@@ -1,0 +1,12 @@
+/** A JUnit test class for the factorial function. */
+
+import java.io.*;
+
+public class FactTest
+    extends junit.framework.TestCase
+{
+
+/** Compute the factorial function.
+    @param n The value to compute factorial of
+    @return The factorial of {@link n}
+*/

@@ -1,0 +1,29 @@
+  static int counter;
+  static Pole start;
+  static Pole goal;
+  static Pole temp;
+
+  /** Implement a move... print out what happens */
+  static void move(Pole start, Pole goal) {
+    System.out.println(counter + ": Move " + start + " to " + goal);
+    counter++;
+  }
+
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+    counter = 1;
+    start = new Pole(1);
+    goal = new Pole(2);
+    temp = new Pole(3);
+  }
+
+  /** Successful call to TOH */
+  public void testGood() {
+    TOH(3, start, goal, temp);
+  }
+}

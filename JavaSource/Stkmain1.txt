@@ -1,0 +1,10 @@
+/** A JUnit test class for stacks. */
+
+import java.io.*;
+
+public class StackTest
+    extends junit.framework.TestCase
+{
+  private Stack<Integer> S1;
+  private Stack<Integer> S2;
+

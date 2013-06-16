@@ -1,0 +1,35 @@
+
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+    out = new StringBuffer(100);
+  }
+
+  public void testGraph()
+  throws IOException {
+    int i,j;
+    BufferedReader f;
+    f = new BufferedReader(new InputStreamReader(new FileInputStream("testfile.gph")));
+    Graph G = new Graphm();
+    createGraph(f, G);
+    int[][] D = new int[G.n()][G.n()];
+    for (i=0; i< G.n(); i++)
+      for (j=0; j< G.n(); j++)
+        D[i][j] = Integer.MAX_VALUE;
+    for (i=0; i< G.n(); i++)
+      D[i][i] = 0;
+
+    Floyd(G, D);
+    for (i=0; i< G.n(); i++)
+      for (j=0; j< G.n(); j++)
+         if (D[i][j] == Integer.MAX_VALUE)
+           out.append("-1 ");
+         else out.append(D[i][j] + " ");
+    assertEquals(out.toString(), "0 1 -1 8 4 0 -1 7 2 3 0 10 7 3 -1 0 ");
+  }
+
+}

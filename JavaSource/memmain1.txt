@@ -1,0 +1,11 @@
+import java.io.*;
+
+public class BSTmain {
+
+private static final int MINEXTRA = 6;
+private static final int RESERVED = 1;
+private static final int FREE = 0;
+
+public Integer pick_free_block(int x) { return NULL; }
+int MemoryPool[1];
+

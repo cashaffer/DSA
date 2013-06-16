@@ -1,0 +1,17 @@
+/** Compute a minimal-cost spanning tree */
+static void Prim(Graph G, int s, int[] D, int[] V) {
+  for (int i=0; i<G.n(); i++)   // Initialize
+    D[i] = Integer.MAX_VALUE;
+  D[s] = 0;
+  for (int i=0; i<G.n(); i++) { // Process the vertices
+    int v = minVertex(G, D);
+    G.setMark(v, VISITED);
+    if (v != s) AddEdgetoMST(V[v], v);
+    if (D[v] == Integer.MAX_VALUE) return; // Unreachable
+    for (int w = G.first(v); w < G.n(); w = G.next(v, w))
+      if (D[w] > G.weight(v, w)) {
+        D[w] = G.weight(v, w);
+        V[w] = v;
+      }
+  }
+}

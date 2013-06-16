@@ -1,0 +1,19 @@
+/** A JUnit test class for the payroll dictionary. */
+
+import java.io.*;
+
+public class PayrollTest
+    extends junit.framework.TestCase
+{
+
+  /**
+   * This method is automatically called once before each test case method,
+   * so that all the variables are cleanly initialized for each test.
+   */
+  public void setUp()
+  {
+  }
+
+  /** Test syntax of what appears in the book */
+  public void testBook()
+  {

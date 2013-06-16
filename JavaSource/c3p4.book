@@ -1,0 +1,6 @@
+sum = 0;
+for (j=1; j<=n; j++)     // First for loop
+   for (i=1; i<=j; i++)  //   is a double loop
+      sum++;
+for (k=0; k<n; k++)      // Second for loop
+   A[k] = k;

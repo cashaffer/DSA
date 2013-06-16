@@ -1,0 +1,11 @@
+/** A JUnit test class for lists. */
+
+import java.io.*;
+
+public class ListTest
+    extends junit.framework.TestCase
+{
+
+  private List<Integer> L1;
+  private List<Integer> L2;
+  private List<Object> L3;

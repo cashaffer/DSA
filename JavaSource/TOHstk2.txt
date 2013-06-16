@@ -1,0 +1,8 @@
+
+  static int counter = 1;
+
+  static void move(Pole start, Pole goal) {
+    System.out.println(counter + ": Move " + start + " to " + goal);
+    counter++;
+  }
+

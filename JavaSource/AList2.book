@@ -1,0 +1,23 @@
+  public void moveToStart() { curr = 0; } // Set to front
+  public void moveToEnd() { curr = listSize; } // Set at end
+  public void prev() { if (curr != 0) curr--; }   // Back up
+  public void next() { if (curr < listSize) curr++; }
+
+  /** @return List size */
+  public int length() { return listSize; }
+
+  /** @return Current position */
+  public int currPos() { return curr; }
+  
+  /** Set current list position to "pos" */
+  public void moveToPos(int pos) {
+    assert (pos>=0) && (pos<=listSize) : "Pos out of range";
+    curr = pos;
+  }
+
+  /** @return Current element */
+  public E getValue() {
+    assert (curr>=0) && (curr<listSize) :
+           "No current element";
+    return listArray[curr];
+  }

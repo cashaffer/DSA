@@ -1,0 +1,8 @@
+int fibrt(int n) {
+  // Assume Values has at least n slots, and all
+  // slots are initialized to 0
+  if (n <= 2) return 1;             // Base case
+  if (Values[n] == 0)
+    Values[n] = fibrt(n-1) + fibrt(n-2);
+  return Values[n];
+}

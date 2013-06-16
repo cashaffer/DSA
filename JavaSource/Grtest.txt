@@ -1,0 +1,4 @@
+static void graphOp(Graph G) {
+  Gprint(G);
+}
+

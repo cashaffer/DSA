@@ -1,0 +1,21 @@
+
+// Extra stuff not printed in the book.
+
+  /**
+   * Generate a human-readable representation of this queue's contents
+   * that looks something like this: < 1 2 3 >.
+   * This method uses toString() on the individual elements.
+   * @return The string representation of this queue
+   */
+  public String toString()
+  {
+    StringBuffer out = new StringBuffer((length() + 1) * 4);
+    out.append("< ");
+    for (Link<E> i = front.next(); i != null; i = i.next()) {
+      out.append(i.element());
+      out.append(" ");
+    }
+    out.append(">");
+    return out.toString();
+  }
+}

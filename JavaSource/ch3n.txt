@@ -1,0 +1,6 @@
+int P, C;
+P = 10;
+C = 10;
+int[] count = new int[C];
+
+// c3p16.book

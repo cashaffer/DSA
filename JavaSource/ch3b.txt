@@ -1,0 +1,5 @@
+
+System.out.println("Test 1: For n = " + n +", sum is " + sum);
+System.out.println("It should be n^2.");
+
+/// c3p2.book

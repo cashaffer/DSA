@@ -1,0 +1,21 @@
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+    out = new StringBuffer(100);
+  }
+
+  public void testGraph()
+  throws IOException {
+    BufferedReader f;
+    f = new BufferedReader(new InputStreamReader(new FileInputStream("testfile.gph")));
+    Graph G = new Graphm();
+    createGraph(f, G);
+    Kruskal(G);
+    assertEquals(out.toString(), "5 4 3 2 2 5 2 1 0 2 ");
+  }
+
+}

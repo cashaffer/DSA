@@ -1,0 +1,5 @@
+private BSTNode<Key,E> deletemin(BSTNode<Key,E> rt) {
+  if (rt.left() == null) return rt.right();
+  rt.setLeft(deletemin(rt.left()));
+  return rt;
+}

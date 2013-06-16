@@ -1,0 +1,7 @@
+static <E extends Comparable<? super E>>
+void bubblesort(E[] A) {
+  for (int i=0; i<A.length-1; i++) // Bubble up i'th record
+    for (int j=A.length-1; j>i; j--)
+      if ((A[j].compareTo(A[j-1]) < 0))
+        DSutil.swap(A, j, j-1);
+}

@@ -1,0 +1,65 @@
+public class KDtree<E> implements SpatialDictionary<E> {
+  private KDNode<E> root;
+  private int D = 2; // Only supporting 2D points
+  int nodecount;     // Number of nodes in the KD tree
+
+  public KDtree() { root = null; }
+
+  public void clear() { root = null; }
+
+  public void insert(int[] pt, E val) {
+    root = inserthelp(root, pt, val, 0);
+    nodecount++;
+  }
+
+  public E remove(int[] key) {
+    E temp = findhelp(root, key, 0);   // First find it
+    if (temp != null) {
+      root = removehelp(root, key, 0); // Now remove it
+      nodecount--;
+    }
+    return temp;
+  }
+
+  /** Remove and return the root node from the dictionary.
+      @return The record removed, null if tree is empty. */
+  public E removeAny() {
+    if (root != null) {
+      E temp = root.element();
+      root = removehelp(root, root.key(), 0);
+      nodecount--;
+      return temp;
+    }
+    else return null;
+  }
+
+  public E find(int key[]) { return findhelp(root, key, 0); }
+  
+  public void regionSearch(int[] point, int radius)
+    { rshelp(root, point, radius, 0); }
+
+  public boolean isEmpty() { return root == null; }
+
+  public void print() {
+    if (root == null)
+      System.out.println("The k-d tree is empty.");
+    else {
+      printhelp(root, 0);
+      System.out.println();
+    }
+  }
+
+  public int size() {
+    return nodecount;
+  }
+
+  private KDNode<E> inserthelp(KDNode<E> rt, int[] key, E val, int level) {
+    if (rt == null) return new KDNode<E>(key, val);
+    int[] rtkey = rt.key();
+    if (rtkey[level] > key[level])
+      rt.setLeft(inserthelp(rt.left(), key, val, (level+1)%D));
+    else
+      rt.setRight(inserthelp(rt.right(), key, val, (level+1)%D));
+    return rt;
+  }
+

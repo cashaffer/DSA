@@ -1,0 +1,208 @@
+echo "Inssort"
+cd ../Inssort
+java Sortmain 10
+java Sortmain 100
+java Sortmain 1000
+java Sortmain 10000
+
+echo ""
+echo "Bubsort"
+cd ../Bubsort
+java Sortmain 10
+java Sortmain 100
+java Sortmain 1000
+java Sortmain 10000
+
+echo ""
+echo "Selsort"
+cd ../Selsort
+java Sortmain 10
+java Sortmain 100
+java Sortmain 1000
+java Sortmain 10000
+
+echo ""
+echo "Shell sort"
+cd ../Shsort
+java Sortmain 10
+java Sortmain 100
+java Sortmain 1000
+java Sortmain 10000
+
+java Sortmain + 10000
+java Sortmain - 10000
+
+echo ""
+echo "Qsort1"
+cd ../Qsort1
+java Sortmain 10
+java Sortmain 100
+java Sortmain 1000
+java Sortmain 10000
+java Sortmain 100000
+
+java Sortmain + 10000
+java Sortmain - 10000
+
+echo ""
+echo "Qsort4"
+cd ../Qsort4
+java Sortmain 10 7
+java Sortmain 10 8
+java Sortmain 10 9
+java Sortmain 10 10
+java Sortmain 10 11
+
+echo ""
+java Sortmain 100 7
+java Sortmain 100 8
+java Sortmain 100 9
+java Sortmain 100 10
+java Sortmain 100 11
+
+echo ""
+java Sortmain 1000 7
+java Sortmain 1000 8
+java Sortmain 1000 9
+java Sortmain 1000 10
+java Sortmain 1000 11
+
+echo ""
+java Sortmain 10000 7
+java Sortmain 10000 8
+java Sortmain 10000 9
+java Sortmain 10000 10
+java Sortmain 10000 11
+
+echo ""
+java Sortmain 100000 7
+java Sortmain 100000 8
+java Sortmain 100000 9
+java Sortmain 100000 10
+java Sortmain 100000 11
+
+java Sortmain + 10000 7
+java Sortmain - 10000 7
+
+echo ""
+echo "Mrgsort1"
+cd ../Mrgsort1
+java Sortmain 10
+java Sortmain 100
+java Sortmain 1000
+java Sortmain 10000
+java Sortmain 100000
+
+java Sortmain + 10000
+java Sortmain - 10000
+
+echo ""
+echo "Mrgsort2"
+cd ../Mrgsort2
+java Sortmain 10 7
+java Sortmain 10 8
+java Sortmain 10 9
+java Sortmain 10 10
+java Sortmain 10 11
+
+echo ""
+java Sortmain 100 7
+java Sortmain 100 8
+java Sortmain 100 9
+java Sortmain 100 10
+java Sortmain 100 11
+
+echo ""
+java Sortmain 1000 7
+java Sortmain 1000 8
+java Sortmain 1000 9
+java Sortmain 1000 10
+java Sortmain 1000 11
+
+echo ""
+java Sortmain 10000 7
+java Sortmain 10000 8
+java Sortmain 10000 9
+java Sortmain 10000 10
+java Sortmain 10000 11
+
+echo ""
+java Sortmain 100000 7
+java Sortmain 100000 8
+java Sortmain 100000 9
+java Sortmain 100000 10
+java Sortmain 100000 11
+
+echo ""
+java Sortmain + 10000
+java Sortmain - 10000
+
+echo ""
+echo "Heapsort"
+cd ../Heapsort
+java Sortmain 10
+java Sortmain 100
+java Sortmain 1000
+java Sortmain 10000
+java Sortmain 100000
+
+java Sortmain + 10000
+java Sortmain - 10000
+
+echo ""
+echo "Radixsort"
+cd ../Radix
+java Sortmain 10 1
+java Sortmain 10 2
+java Sortmain 10 4
+java Sortmain 10 8
+
+echo ""
+java Sortmain 100 1
+java Sortmain 100 2
+java Sortmain 100 4
+java Sortmain 100 8
+
+echo ""
+java Sortmain 1000 1
+java Sortmain 1000 2
+java Sortmain 1000 4
+java Sortmain 1000 8
+
+echo ""
+java Sortmain 10000 1
+java Sortmain 10000 2
+java Sortmain 10000 4
+java Sortmain 10000 8
+
+echo ""
+java Sortmain 100000 1
+java Sortmain 100000 2
+java Sortmain 100000 4
+java Sortmain 100000 8
+
+echo ""
+java Sortmain + 10000 1
+java Sortmain - 10000 1
+java Sortmain + 10000 2
+java Sortmain - 10000 2
+java Sortmain + 10000 4
+java Sortmain - 10000 4
+java Sortmain + 10000 8
+java Sortmain - 10000 8
+
+echo ""
+cd ..\Inssort
+echo "Inssort"
+java Sortmain 100000
+
+cd ..\Bubsort
+echo "Bubsort"
+java Sortmain 100000
+
+cd ..\Selsort
+echo "Selsort"
+java Sortmain 100000
+
+echo ""
+echo "Sort timing done"

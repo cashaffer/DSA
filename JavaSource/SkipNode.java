@@ -1,0 +1,17 @@
+public class SkipNode<Key,E> {
+  private E element;
+  private Key key;
+
+  public SkipNode<Key,E>[] forward;
+
+  public E element() { return element; }
+  public Key key() { return key; }
+
+  public SkipNode(Key k, E r, int level) {
+    key = k;
+    element = r;
+    forward = (SkipNode<Key,E>[])new SkipNode[level+1];
+    for (int i=0; i<level; i++)
+      forward[i] = null;
+  }
+}

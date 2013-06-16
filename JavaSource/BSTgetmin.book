@@ -1,0 +1,4 @@
+private BSTNode<Key,E> getmin(BSTNode<Key,E> rt) {
+  if (rt.left() == null) return rt;
+  return getmin(rt.left());
+}

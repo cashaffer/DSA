@@ -1,0 +1,10 @@
+import java.io.*;
+
+public class Incrmain {
+
+final static int MAXSIZE = 10;
+final static int POWN = 1024;
+
+static void increment(int[] A) {
+int i;
+

@@ -1,0 +1,51 @@
+/// End binsimp2.x
+
+System.out.println("Now, what is temp?");
+for (i=0; i<n; i++)
+  System.out.print(temp[i] + " ");
+System.out.println();
+
+  System.out.println("Let's check to be sure this works.");
+  for(i=0; i<n; i++)
+    System.out.print(A[i] + "  ");
+  System.out.println();
+  for(i=0; i<n; i++)
+    System.out.print(B[i] + "  ");
+  System.out.println();
+
+  System.out.println("OK, now for timings.");
+
+long time1 = System.currentTimeMillis();
+for (j=0; j<num; j++)
+  for (i=0; i<n; i++)
+    B[A[i]] = A[i];
+long time2 = System.currentTimeMillis();
+System.out.println("Time for binsimp1 is " + (time2-time1));
+
+
+// Factor out overhead
+time1 = System.currentTimeMillis();
+for (j=0; j<num; j++)
+  for (i=0; i<n; i++)
+    A[i] = temp[i];
+time2 = System.currentTimeMillis();
+long temptime = time2-time1;
+System.out.println("Overhead time is " + (time2-time1));
+
+time1 = System.currentTimeMillis();
+for (j=0; j<num; j++)
+{
+  for (i=0; i<n; i++)
+    A[i] = temp[i];
+
+  for (i=0; i<n; i++)
+    while (A[i] != i) // Swap element A[i] with A[A[i]]
+      DSutil.swap(A, i, A[i]);
+}
+time2 = System.currentTimeMillis();
+System.out.println("Raw time is " + (time2-time1));
+System.out.println("Time for binsimp2 is " + (time2-time1-temptime));
+
+  System.in.read();
+}
+}

@@ -1,0 +1,13 @@
+static StringBuffer out;
+
+static void PreVisit(Graph G, int v) {
+  out.append(v + " ");
+}
+
+static void PostVisit(Graph G, int v) {
+  out.append(v + " ");
+}
+
+static void doTraverse(Graph G, int v) {
+  BFS(G, v);
+}

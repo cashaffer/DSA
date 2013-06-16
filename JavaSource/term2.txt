@@ -1,0 +1,16 @@
+
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+  }
+
+  /** Successful calls to foo */
+  public void testGood() {
+    foo(8.0);
+    foo(5.0);
+  }
+}

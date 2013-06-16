@@ -1,0 +1,6 @@
+sum = 0;
+if (EVEN(n))
+  for (i=0; i<n; i++)
+    sum++;
+else
+  sum = sum + n;

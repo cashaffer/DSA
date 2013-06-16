@@ -1,0 +1,35 @@
+// Move curr one step left; no change if at front
+public void prev() {
+  if (curr == head) return; // No previous element
+  Link<E> temp = head;
+  // March down list until we find the previous element
+  while (temp.next() != curr) temp = temp.next();
+  curr = temp;
+}
+
+// Move curr one step right; no change if at end
+public void next()
+  { if (curr != tail) curr = curr.next(); }
+
+public int length() { return cnt; }
+
+// Return the position of the current element
+public int currPos() {
+  Link<E> temp = head;
+  int i;
+  for (i=0; curr != temp; i++)
+    temp = temp.next();
+  return i;
+}
+
+// Move down list to "pos" position
+public void moveToPos(int pos) {
+  assert (pos>=0) && (pos <= cnt) : "Position out of range";
+  curr = head;
+  for(int i=0; i<pos; i++) curr = curr.next();
+}
+
+public E getValue() {   // Return current element
+  assert curr.next() != null : "Nothing to get";
+  return curr.next().element();
+}

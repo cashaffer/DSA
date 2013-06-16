@@ -1,0 +1,7 @@
+import java.io.*;
+
+class Binsimp {
+
+static final int MaxKey = 10;
+
+static void output(Integer it) {}

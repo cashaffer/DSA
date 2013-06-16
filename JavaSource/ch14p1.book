@@ -1,0 +1,2 @@
+/** pop k elements from stack */
+void multipop(int k);

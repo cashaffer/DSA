@@ -1,0 +1,7 @@
+L2.append(10);
+L2.append(20);
+L2.append(15);
+L2.moveToStart();
+L2.insert(39);
+L2.next();
+L2.insert(12);

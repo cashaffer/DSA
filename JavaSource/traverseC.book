@@ -1,0 +1,4 @@
+/** Preorder traversal */
+public static void traverse(VarBinNode rt) {
+  if (rt != null) rt.traverse();
+}

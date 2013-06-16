@@ -1,0 +1,27 @@
+  }
+
+  /** Here is an actual test to verify that the dictionary works. */
+  public void testPayroll()
+  {
+    // IDdict organizes Payroll records by ID
+    Dictionary<Integer, Payroll> IDdict =
+         new UALdictionary<Integer, Payroll>();
+
+    // namedict organizes Payroll records by name
+    Dictionary<String, Payroll> namedict =
+         new UALdictionary<String, Payroll>();
+
+    Payroll foo1 = new Payroll(5, "Joe", "Anytown");
+    Payroll foo2 = new Payroll(10, "John", "Mytown");
+
+    IDdict.insert(foo1.getID(), foo1);
+    IDdict.insert(foo2.getID(), foo2);
+    namedict.insert(foo1.getname(), foo1);
+    namedict.insert(foo2.getname(), foo2);
+
+    Payroll findfoo1 = IDdict.find(5);
+    assertEquals(findfoo1.getname(),"Joe");
+    Payroll findfoo2 = namedict.find("John");
+    assertEquals(findfoo2.getID(),new Integer(10));
+  }
+}

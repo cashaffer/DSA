@@ -1,0 +1,12 @@
+/** A JUnit test class for finding the largest value in an array */
+
+import java.io.*;
+
+public class LargeTest
+    extends junit.framework.TestCase
+{
+
+/** Find the largest value in an array.
+    @param A The array (of type int)
+    @return The position of the largest value
+*/

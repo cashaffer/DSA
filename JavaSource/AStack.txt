@@ -1,0 +1,21 @@
+
+// Extra stuff not printed in the book.
+
+  /**
+   * Generate a human-readable representation of this stack's contents
+   * that looks something like this: < 1 2 3 >.
+   * This method uses toString() on the individual elements.
+   * @return The string representation of this stack
+   */
+  public String toString()
+  {
+    StringBuffer out = new StringBuffer((length() + 1) * 4);
+    out.append("< ");
+    for (int i = top-1; i >= 0; i--) {
+      out.append(listArray[i]);
+      out.append(" ");
+    }
+    out.append(">");
+    return out.toString();
+  }
+}

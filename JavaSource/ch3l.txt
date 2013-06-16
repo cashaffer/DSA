@@ -1,0 +1,4 @@
+
+System.out.println("Sum should be about 1/2 n^2: " + sum);
+
+/// c3p12.book

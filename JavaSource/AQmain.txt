@@ -1,0 +1,10 @@
+  /**
+   * This method is automatically called once before each test case method,
+   * so that all the variables are cleanly initialized for each test.
+   */
+  public void setUp()
+  {
+    Q1 = new AQueue<Integer>();
+    Q2 = new AQueue<Integer>(15);
+  }
+

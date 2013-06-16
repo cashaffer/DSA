@@ -1,0 +1,14 @@
+/** A JUnit test class for sort algorithms */
+
+import java.io.*;
+
+public class SortTest
+    extends junit.framework.TestCase
+{
+
+  final static int testsize = 1000;
+
+  static Integer A[];
+
+  static int THRESHOLD = 8;
+

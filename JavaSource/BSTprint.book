@@ -1,0 +1,6 @@
+  private void printhelp(BSTNode<Key,E> rt) {
+    if (rt == null) return;
+    printhelp(rt.left());
+    printVisit(rt.element());
+    printhelp(rt.right());
+  }

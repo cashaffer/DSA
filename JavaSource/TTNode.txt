@@ -1,0 +1,6 @@
+
+  public String toString() {
+    if (rkey == null) return lkey.toString();
+    else return lkey.toString() + " " + rkey.toString();
+  }
+}

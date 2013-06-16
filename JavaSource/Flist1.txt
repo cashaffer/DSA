@@ -1,0 +1,25 @@
+// Linked list implementation -- Freelist
+class LList<E> implements List<E> {
+private Link<E> head;         // Pointer to list header
+private Link<E> tail;         // Pointer to last element in list 
+protected Link<E> curr;       // Pointer one ahead of current element
+int cnt;		      // Size of list
+
+//Constructors
+LList(int size) { this(); }   // Constructor -- Ignore size
+LList() {
+  curr = tail = head = new Link<E>(null); // Create header
+  cnt = 0;
+}
+
+public void clear() {         // Remove all elements
+  head.setNext(null);         // Drop access to links
+  curr = tail = head = new Link<E>(null); // Create header
+  cnt = 0;
+}
+
+public void moveToStart()  // Set curr at list start
+{ curr = head; }
+
+public void moveToEnd()  // Set curr at list end
+{ curr = tail; }

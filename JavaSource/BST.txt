@@ -1,0 +1,12 @@
+
+  private StringBuffer out;
+
+  public String toString() {
+    out = new StringBuffer(100);
+    printhelp(root);
+    return out.toString();
+  }
+  private void printVisit(E it) {
+    out.append(it + " ");
+  }
+

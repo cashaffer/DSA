@@ -1,0 +1,10 @@
+/** A JUnit test class for queues. */
+
+import java.io.*;
+
+public class QueueTest
+    extends junit.framework.TestCase
+{
+  private Queue<Integer> Q1;
+  private Queue<Integer> Q2;
+

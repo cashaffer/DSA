@@ -1,0 +1,3 @@
+static <E extends Comparable<? super E>>
+int findpivot(E[] A, int i, int j)
+  { return (i+j)/2; }

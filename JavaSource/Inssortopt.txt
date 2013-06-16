@@ -1,0 +1,19 @@
+/* This seems like a good idea! Save time on the inner loop by not
+   doing a true swap, which would repeatedly move the value into and
+   out of the temporary. Instead, copy only the first value into the
+   temporary, and just shift elements up the array.
+
+   The reality is that this does not save any time. Why? I do not know
+   for certain, but my guess is that the compiler already makes this
+   optimization for you.
+*/
+static <E extends Comparable<? super E>>
+void Sort(E[] A) {
+  int j;
+  for (int i=1; i<A.length; i++) { // Insert i'th record
+    E temp = A[i];
+    for (j=i; (j>0) && (temp.compareTo(A[j-1])<0); j--)
+      A[j] = A[j-1];
+    A[j] = temp;
+  }
+}

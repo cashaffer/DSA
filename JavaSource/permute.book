@@ -1,0 +1,5 @@
+/** Randomly permute the values in array A */
+static <E> void permute(E[] A) {
+  for (int i = A.length; i > 0; i--) // for each i
+    swap(A, i-1, DSutil.random(i));  //   swap A[i-1] with
+}                                    //   a random element

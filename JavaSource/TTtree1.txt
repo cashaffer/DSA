@@ -1,0 +1,29 @@
+public class TTtree {
+  private TTNode root;
+
+  public TTtree() { root = null; }
+  public void clear() { root = null; }
+
+  public void insert(Elem it) {
+	System.out.println("Insert: " + it);
+    int retval;             // Smallest value in newly created node
+    TTNode retptr = null;    // Newly created node
+    Object[] temp = inserthelp(root, it);
+	if (root == null) root = (TTNode)temp[0];
+    else if (temp != null)    // Root overflowed: make new root
+      root = new TTNode((Elem)temp[0], null, root, (TTNode)temp[1], null);
+  }
+
+  public void remove(int key) { }
+
+  public Elem find(int key) {
+	return findhelp(root, key);
+  }
+
+  public boolean isEmpty() { return root == null; }
+
+  public void print() {
+    if (root == null) System.out.print("The 2-3 Tree is empty.");
+    else printhelp(root, 0);
+  }
+

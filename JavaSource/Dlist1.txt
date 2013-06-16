@@ -1,0 +1,29 @@
+// Doubly linked list implementation
+class LList<E> implements List<E> {
+private DLink<E> head;        // Pointer to list header
+private DLink<E> tail;        // Pointer to last element in list 
+protected DLink<E> curr;      // Pointer ahead of current element
+int cnt;		      // Size of list
+
+//Constructors
+LList(int size) { this(); }  // Ignore size
+LList() {
+  curr = head = new DLink<E>(null, null); // Create header node
+  tail = new DLink<E>(head, null);
+  head.setNext(tail);
+  cnt = 0;
+}
+
+public void clear() {         // Remove all elements from list
+  head.setNext(null);         // Drop access to rest of links
+  curr = head = new DLink<E>(null, null); // Create header node
+  tail = new DLink<E>(head, null);
+  head.setNext(tail);
+  cnt = 0;
+}
+
+public void moveToStart()  // Set curr at list start
+{ curr = head; }
+
+public void moveToEnd()  // Set curr at list end
+{ curr = tail.prev(); }

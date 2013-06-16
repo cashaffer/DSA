@@ -1,0 +1,17 @@
+
+  String print() {
+    StringBuffer out = new StringBuffer(100);
+    for (int i=0; i<array.length; i++) {
+      if (array[i] == null) out.append("-1 ");
+      else {
+        Integer temp = array[i];
+        for (int j=0; j<array.length; j++)
+          if (temp == array[j]) {
+            out.append(j + " ");
+            break;
+          }
+      } 
+   }
+    return out.toString();
+  }
+}

@@ -1,0 +1,5 @@
+/// End binsimp1.x
+
+System.out.println("Do binsimp2");
+
+/// binsimp2.x

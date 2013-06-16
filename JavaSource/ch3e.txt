@@ -1,0 +1,5 @@
+
+System.out.println("Test 4: For n = " + n +
+				   ", the sum from 1 to n is " + sum);
+
+// c3p5.book

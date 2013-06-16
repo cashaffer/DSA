@@ -1,0 +1,60 @@
+cat Smain1.txt Inssortt.txt Inssortt.x Smain2t.txt > ../Inssort/Sortmain.java
+cp Elem.java ../Inssort
+cp IElem.java ../Inssort
+cat DSutil1.txt permute.x DSutil2.txt > ../Inssort/DSutil.java
+cp Assert.java ../Inssort
+
+cat Smain1.txt Bubsortt.txt Bubsortt.x Smain2t.txt > ../Bubsort/Sortmain.java
+cp Elem.java ../Bubsort
+cp IElem.java ../Bubsort
+cat DSutil1.txt permute.x DSutil2.txt > ../Bubsort/DSutil.java
+cp Assert.java ../Bubsort
+
+cat Smain1.txt Selsortt.txt Selsortt.x Smain2t.txt > ../Selsort/Sortmain.java
+cp Elem.java ../Selsort
+cp IElem.java ../Selsort
+cat DSutil1.txt permute.x DSutil2.txt > ../Selsort/DSutil.java
+cp Assert.java ../Selsort
+
+cat Smain1.txt Shsortt.txt Shsortt.x Smain2t.txt > ../Shsort/Sortmain.java
+cp Elem.java ../Shsort
+cp IElem.java ../Shsort
+cat DSutil1.txt permute.x DSutil2.txt > ../Shsort/DSutil.java
+cp Assert.java ../Shsort
+
+cat Smain1.txt Qsortt.txt Qsort1.x Partit.x Findpiv.x Smain2t.txt > ../Qsort1/Sortmain.java
+cp Elem.java ../Qsort1
+cp IElem.java ../Qsort1
+cat DSutil1.txt permute.x DSutil2.txt > ../Qsort1/DSutil.java
+cp Assert.java ../Qsort1
+
+cat Smain1.txt Qsortt.txt Inssortt.x Qsort4t.x Smain2t.txt > ../Qsort4/Sortmain.java
+cp Elem.java ../Qsort4
+cp IElem.java ../Qsort4
+cat DSutil1.txt permute.x DSutil2.txt > ../Qsort4/DSutil.java
+cp Assert.java ../Qsort4
+
+cat Smain1.txt Mrgsortt.txt Mrgsort1.x Smain2t.txt > ../Mrgsort1/Sortmain.java
+cp Elem.java ../Mrgsort1
+cp IElem.java ../Mrgsort1
+cat DSutil1.txt permute.x DSutil2.txt > ../Mrgsort1/DSutil.java
+cp Assert.java ../Mrgsort1
+
+cat Smain1.txt Mrgsortt.txt Inssortt.x Mrgsort2.x Smain2t.txt > ../Mrgsort2/Sortmain.java
+cp Elem.java ../Mrgsort2
+cp IElem.java ../Mrgsort2
+cat DSutil1.txt permute.x DSutil2.txt > ../Mrgsort2/DSutil.java
+cp Assert.java ../Mrgsort2
+
+cat Smain1.txt Heapsort.txt Heapsort.x Smain2.txt > ../Heapsort/Sortmain.java
+cp Elem.java ../Heapsort
+cp IElem.java ../Heapsort
+cat DSutil1.txt permute.x DSutil2.txt > ../Heapsort/DSutil.java
+cp Assert.java ../Heapsort
+cat MaxHeap1.x MaxHeap2.x > ../Heapsort/MaxHeap.java
+
+cat Smain1.txt Radixt.txt Radixt.x Smain2t.txt > ../Radix/Sortmain.java
+cp Elem.java ../Radix
+cp IElem.java ../Radix
+cat DSutil1.txt permute.x DSutil2.txt > ../Radix/DSutil.java
+cp Assert.java ../Radix

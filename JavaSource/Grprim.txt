@@ -1,0 +1,4 @@
+static int[] D = new int[100];
+static StringBuffer out;
+
+static void AddEdgetoMST(int v1, int v2) {}

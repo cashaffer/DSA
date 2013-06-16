@@ -1,0 +1,39 @@
+Java generics present a couple of problems.
+
+1. Consider these lines from Alist1.book:
+
+private E[] listArray;          // Array holding list elements
+listArray = (E[])new Object[size];   // Create listArray
+
+Ideally, this would be done more like:
+listArray = new E[size];   // Create listArray
+
+But Java generics won't permit this. It is a known design
+issue. Unfortunately, I have yet to see a decent alternative. So I
+just declare it ans an Object and cast it. This means that the
+compiler will throw a warning, since this violates type
+safety. However, it otherwise works well. In particular, the use of
+listArray otherwise appears to be type safe, in that you cannot (for
+instance) do something like:
+listArray[3] = new Object;
+
+That would throw a compiler error, since its a type mismatch.
+
+
+2. Static members and methods of a class are shared by all instances
+of that class, even in the context of generics. This is problematic
+for the link class that uses freelists. The freelist member needs to
+be static to the class (i.e., only one copy for the class, not a copy
+for each link object). But you cannot qualify the freelist to be of a
+particular type (such as a freelist for links with Integer data
+members, and another freelist for links with String data members,
+etc.).
+
+So I just leave the freelist data member unqualified. What this means
+is that the link class generates compiler warnings every time I use
+the freelist variable, because qualified pointers are being assigned
+to the freelist. Not good, but I don't see a better alternative. This
+certainly has the potential for trouble if I were to have a program
+with multiple list types. They would all share the same freelist. What
+happens when the lists mix-and-match their link objects? Nothing good,
+for sure.

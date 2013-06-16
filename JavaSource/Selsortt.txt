@@ -1,0 +1,5 @@
+
+static void sort(Elem[] array, int start, int len) {
+  selsort(array, start, len);
+}
+

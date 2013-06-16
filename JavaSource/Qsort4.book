@@ -1,0 +1,45 @@
+/** Non-recursive Quicksort */
+static <E extends Comparable<? super E>>
+void qsort(E[] A, int oi, int oj) {
+  int[] Stack = new int[MAXSTACKSIZE]; // Stack for array bounds
+  int listsize = oj-oi+1;
+  int top = -1;
+  E pivot;
+  int pivotindex, l, r;
+
+  Stack[++top] = oi;  // Initialize stack
+  Stack[++top] = oj;
+
+  while (top > 0) {   // While there are unprocessed subarrays
+    // Pop Stack
+    int j = Stack[top--];
+    int i = Stack[top--];
+
+    // Findpivot
+    pivotindex = (i+j)/2;
+    pivot = A[pivotindex];
+    DSutil.swap(A, pivotindex, j); // Stick pivot at end
+
+    // Partition
+    l = i-1;
+    r = j;
+    do {
+      while (A[++l].compareTo(pivot)<0);
+      while ((r!=0) && (A[--r].compareTo(pivot)>0));
+      DSutil.swap(A, l, r);
+    } while (l < r);
+    DSutil.swap(A, l, r);  // Undo final swap
+    DSutil.swap(A, l, j);  // Put pivot value in place
+
+    // Put new subarrays onto Stack if they are small
+    if ((l-i) > THRESHOLD) {   // Left partition
+      Stack[++top] = i;
+      Stack[++top] = l-1;
+    }
+    if ((j-l) > THRESHOLD) {   // Right partition
+      Stack[++top] = l+1;
+      Stack[++top] = j;
+    }
+  }
+  inssort(A);             // Final Insertion Sort
+}

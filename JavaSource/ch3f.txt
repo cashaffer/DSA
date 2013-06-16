@@ -1,0 +1,5 @@
+
+System.out.println("Test 5: This should be n^2: " + sum1);
+System.out.println("Again, the sum from 1 to n is " + sum2);
+
+/// c3p6.x

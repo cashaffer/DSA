@@ -1,0 +1,13 @@
+class TOHobj {
+  public operation op;
+  public int num;
+  public Pole start, goal, temp;
+
+  /** Recursive call operation */
+  TOHobj(operation o, int n, Pole s, Pole g, Pole t)
+  { op = o; num = n; start = s; goal = g; temp = t; }
+
+  /** MOVE operation */
+  TOHobj(operation o, Pole s, Pole g)
+  { op = o; start = s; goal = g; }
+}

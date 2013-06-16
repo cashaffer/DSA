@@ -1,0 +1,20 @@
+/** Remove a node with key value k
+    @return The tree with the node removed */
+private BSTNode<Key,E> removehelp(BSTNode<Key,E> rt,Key k) {
+  if (rt == null) return null;
+  if (rt.key().compareTo(k) > 0)
+    rt.setLeft(removehelp(rt.left(), k));
+  else if (rt.key().compareTo(k) < 0)
+    rt.setRight(removehelp(rt.right(), k));
+  else { // Found it
+    if (rt.left() == null) return rt.right();
+    else if (rt.right() == null) return rt.left();
+    else { // Two children
+      BSTNode<Key,E> temp = getmin(rt.right());
+      rt.setElement(temp.element());
+      rt.setKey(temp.key());
+      rt.setRight(deletemin(rt.right()));
+    }
+  }
+  return rt;
+}

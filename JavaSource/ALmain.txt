@@ -1,0 +1,34 @@
+  private List<KVpair<Integer,Integer>> L4;
+  private List<KVpair<String,Payroll>> L5;
+
+  /**
+   * This method is automatically called once before each test case method,
+   * so that all the variables are cleanly initialized for each test.
+   */
+  public void setUp()
+  {
+    L1 = new AList<Integer>();
+    L2 = new AList<Integer>(15);
+    L3 = new AList<Object>();
+    L4 = new AList<KVpair<Integer,Integer>>();
+    L5 = new AList<KVpair<String,Payroll>>();
+  }
+
+
+  public void testKVpairInList1()
+  {
+    KVpair<Integer,Integer> dum = new KVpair<Integer,Integer>(3, 3);
+
+    L4.insert(dum);
+    assertEquals(1, L4.length());
+  }
+
+  public void testKVpairInList2()
+  {
+    KVpair<String,Payroll> dum2 =
+        new KVpair<String,Payroll>("Hello", new Payroll(5, "Hello", "Joe"));
+
+    L5.insert(dum2);
+    assertEquals(1, L5.length());
+  }
+

@@ -1,0 +1,25 @@
+
+    private int size = 20;
+    private int[] A = new int[size];
+
+  /**
+   * This method is automatically called once before each test case
+   * method, so that all the variables are cleanly initialized for
+   * each test.
+   */
+  public void setUp()
+  {
+    for (int i=0; i<size; i++)
+      A[i] = i;
+  }
+
+  /** Various successful and unsuccessful searches */
+  public void testGood() {
+    assertEquals(0, binary(A, 0));
+    assertEquals(1, binary(A, 1));
+    assertEquals(size-1, binary(A, size-1));
+    assertEquals(size, binary(A, size));
+    assertEquals(size, binary(A, size+1));
+  }
+}
+

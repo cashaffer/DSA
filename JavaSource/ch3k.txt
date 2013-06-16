@@ -1,0 +1,8 @@
+/// End c3p10.book
+
+System.out.println("Finally, do part 11.");
+
+  for (i=0; i<n; i++)
+    A[i] = i;
+
+/// c3p11.book

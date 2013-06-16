@@ -1,0 +1,11 @@
+  /**
+   * This method is automatically called once before each test case method,
+   * so that all the variables are cleanly initialized for each test.
+   */
+  public void setUp()
+  {
+    L1 = new LList<Integer>();
+    L2 = new LList<Integer>(15);
+    L3 = new LList<Object>();
+  }
+

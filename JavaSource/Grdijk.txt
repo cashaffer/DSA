@@ -1,0 +1,3 @@
+static int[] D = new int[100];
+static StringBuffer out;
+
