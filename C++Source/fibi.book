@@ -1,0 +1,12 @@
+long fibi(int n) { // Iterative Fibonacci generator
+  // fibi(46) is largest value that fits in a long
+  Assert((n > 0) && (n < 47), "Input out of range");
+  long past, prev, curr;  // Store temporary values
+  past = prev = curr = 1;    // initialize
+  for (int i=3; i<=n; i++) { // Compute next value
+    past = prev;             // past holds fibi(i-2)
+    prev = curr;             // prev holds fibi(i-1)
+    curr = past + prev;      // curr now holds fibi(i)
+  }
+  return curr;
+}

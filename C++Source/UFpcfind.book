@@ -1,0 +1,6 @@
+// FIND with path compression
+int ParPtrTree::FIND(int curr) const {
+  if (array[curr] == ROOT) return curr; // At root
+  array[curr] = FIND(array[curr]);
+  return array[curr];
+}

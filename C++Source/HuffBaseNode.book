@@ -1,0 +1,7 @@
+// Huffman tree node abstract base class
+template <typename E> class HuffNode {
+public:
+  virtual ~HuffNode() {}                // Base destructor
+  virtual int weight() = 0;             // Return frequency
+  virtual bool isLeaf() = 0;            // Determine type
+};

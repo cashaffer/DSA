@@ -1,0 +1,12 @@
+// General tree representation for UNION/FIND
+class ParPtrTree {
+private:
+  int* array;                    // Node array
+  int size;                      // Size of node array
+  int FIND(int) const;           // Find root
+public:
+  ParPtrTree(int);                   // Constructor
+  ~ParPtrTree() { delete [] array; } // Destructor
+  void UNION(int, int);          // Merge equivalences
+  bool differ(int, int);         // True if not in same tree
+};

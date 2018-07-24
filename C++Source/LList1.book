@@ -1,0 +1,55 @@
+// Linked list implementation
+template <typename E> class LList: public List<E> {
+private:
+  Link<E>* head;       // Pointer to list header
+  Link<E>* tail;       // Pointer to last element
+  Link<E>* curr;       // Access to current element
+  int listSize;        // Size of list
+
+  void init() {        // Intialization helper method
+    curr = tail = new Link<E>;
+    head = new Link<E>(tail);
+    listSize = 0;
+  }
+
+  void removeall() {   // Return link nodes to free store
+    while(head != NULL) {
+      curr = head;
+      head = head->next;
+      delete curr;
+    }
+  }
+
+public:
+  LList(int size=defaultSize) { init(); }    // Constructor
+  ~LList() { removeall(); }                  // Destructor
+  void print() const;                // Print list contents
+  void clear() { removeall(); init(); }      // Clear list
+
+  // Insert "it" at current position
+  void insert(const E& it) {
+    curr->next = new Link<E>(curr->element, curr->next);  
+    curr->element = it;
+    if (tail == curr) tail = curr->next;  // New tail
+    listSize++;
+  }
+
+  void append(const E& it) { // Append "it" to list
+    tail->next = new Link<E>;
+    tail->element = it;
+    tail = tail->next;
+    listSize++;
+  }
+
+  // Remove and return current element
+  E remove() {
+    Assert(curr != tail, "No element");
+    E it = curr->element;            // Remember value
+    curr->element = curr->next->element; // Pull forward
+    Link<E>* ltemp = curr->next;     // Remember link node
+    if (curr->next == tail) tail = curr; // Reset tail
+    curr->next = curr->next->next;   // Remove from list
+    delete ltemp;                    // Reclaim space
+    listSize--;			     // Decrement the count
+    return it;
+  }

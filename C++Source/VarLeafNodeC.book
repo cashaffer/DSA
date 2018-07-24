@@ -1,0 +1,11 @@
+class LeafNode : public VarBinNode { // Leaf node
+private:
+  Operand var;                       // Operand value
+
+public:
+  LeafNode(const Operand& val) { var = val; } // Constructor
+  bool isLeaf() { return true; }     // isLeaf for Leafnode
+  Operand value() { return var; }    // Return node value
+  void traverse() { cout << "Leaf: " << value() << endl; }
+};
+

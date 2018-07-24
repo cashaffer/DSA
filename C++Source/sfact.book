@@ -1,0 +1,9 @@
+long fact(int n, Stack<int>& S) { // Compute n!
+  // To fit n! in a long variable, require n <= 12
+  Assert((n >= 0) && (n <= 12), "Input out of range");
+  while (n > 1) S.push(n--);  // Load up the stack
+  long result = 1;            // Holds final result
+  while(S.length() > 0)
+     result = result * S.pop();   // Compute
+  return result;
+}

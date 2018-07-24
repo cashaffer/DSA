@@ -1,0 +1,11 @@
+// The bufferpool
+class BufferPool {
+public:
+  // Constructor: The bufferpool has "numbuff" buffers that
+  // each contain "buffsize" bytes of data.
+  BufferPool(int numbuff, int buffsize) = 0;
+
+  // Relate a block to a buffer, returning a pointer to a
+  // buffer object
+  Buffer *acquireBuffer(int block) = 0;
+}

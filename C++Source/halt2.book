@@ -1,0 +1,13 @@
+// Return true if "prog" halts when given itself as input
+bool selfhalt(char *prog) {
+  if (halt(prog, prog))
+    return true;
+  else
+    return false;
+}
+
+// Return the reverse of what selfhalt returns on "prog"
+void contrary(char *prog) {
+  if (selfhalt(prog))
+    while (true); // Go into an infinite loop
+}

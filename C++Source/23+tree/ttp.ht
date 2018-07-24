@@ -1,0 +1,530 @@
+// Source code Copyright (C) 2006 by Clifford A. Shaffer.
+
+// 2-3+ tree class implementation
+
+#include "dictionary.h"
+
+#include "ttpnode.h"
+
+// 2-3+ Tree implementation for the Dictionary ADT
+template <typename Key, typename Elem, typename Comp, typename getKey>
+class TTTree : public Dictionary<Key, Elem, Comp, getKey> {
+private:
+  // Data members
+  TTPNode<Elem, Key>* root;   // Root of the tree
+  int reccount;               // Number of records stored
+
+  // Private "helper" functions
+  void clearhelp(TTPNode<Elem, Key>*);
+  bool inserthelp(TTPNode<Elem, Key>*&, const Elem&, Key&,
+		  TTPNode<Elem, Key>*&);
+  bool findfirsthelp(TTPNode<Elem, Key>*, const Key&, Elem&) const;
+  void printhelp(TTPNode<Elem, Key>*, int) const;
+  void splitleaf(TTPLeafNode<Elem, Key>*, const Elem&,
+                 Key&, TTPNode<Elem, Key>*&);
+  void splitintl(TTPIntlNode<Elem, Key>*, const Key&,
+                 TTPNode<Elem, Key>*, Key&, TTPNode<Elem, Key>*&);
+  bool removeRechelp(TTPNode<Elem, Key>*, Elem, bool&);
+  void underflowLeaf(TTPIntlNode<Elem, Key>*, int, bool&);
+  void underflowIntl(TTPIntlNode<Elem, Key>*, int, bool&);
+  bool removeLeaf(TTPLeafNode<Elem, Key>*, Elem, bool&);
+
+public:
+  TTTree() { root = NULL; reccount = 0; }  // Constructor
+  ~TTTree() { clearhelp(root); }           // Destructor
+
+  // Clear out the tree
+  void clear()
+    { clearhelp(root);  root = NULL; reccount = 0; }
+
+  bool insert(const Elem& e) { // Insert node with value val
+    Key retval;               // Smallest value in newly created node
+    TTPNode<Elem, Key>* retptr = NULL; // Newly created node
+    bool isSuccess = inserthelp(root, e, retval, retptr);
+    if (retptr != NULL) {      // Root overflowed: make new root
+      TTPIntlNode<Elem, Key>* temp = new TTPIntlNode<Elem, Key>;
+      temp->keys[0] = retval;
+      temp->children[0] = root; temp->children[1] = retptr;
+      temp->keycount = 1; root = temp;
+    }
+    if (isSuccess) reccount++;
+    return isSuccess;
+  }
+
+  // Remove a specific record from the tree
+  bool removeRec(const Elem e) {
+    bool underflow = false; // Will be true if delete caused node to underflow
+    bool isSuccess = removeRechelp(root, e, underflow);
+    if (isSuccess) reccount--;
+    if (underflow) { // Collapse root
+      if (root->isLeaf()) // The last record went away
+        root = NULL;
+      else
+        root = ((TTPIntlNode<Elem, Key> *)root)->children[0];
+    }
+  }
+
+  bool remove(const Key& K, Elem& e) {
+    cout << "Remove not implemented\n";
+    return false;
+  }
+
+  bool removeAny(Elem& e) {
+    cout << "RemoveAny not implemented\n";
+    return false;
+  }
+
+  // Return (in e) the first occurance of a record with key value K
+  // if any exists. This function can handle duplicates.
+  bool find(const Key& K, Elem& e) const
+    { return findfirsthelp(root, K, e); }
+
+  int size() { return reccount; }
+
+  void print() const {
+    cout << "Print tree: \n";
+    if (root == NULL) cout << "The 2-3+ Tree is empty.\n";
+    else printhelp(root, 0);
+  }
+};
+
+
+// Delete all the nodes of the tree
+template <typename Key, typename Elem, typename Comp, typename getKey>
+void TTTree<Key, Elem, Comp, getKey>::
+clearhelp(TTPNode<Elem, Key>* root) {
+  if (root == NULL) return; // Nothing to clear
+  if (!root->isLeaf()) {    // Internal node: delete children
+    clearhelp(((TTPIntlNode<Elem, Key> *)root)->children[0]);
+    clearhelp(((TTPIntlNode<Elem, Key> *)root)->children[1]);
+    if (((TTPIntlNode<Elem, Key> *)root)->keycount == 2) // Three children
+      clearhelp(((TTPIntlNode<Elem, Key> *)root)->children[2]);
+  }
+  delete root;              // Now delete the root node
+}
+
+// Print out a 2-3 Tree
+template <typename Key, typename Elem, typename Comp, typename getKey>
+void TTTree<Key, Elem, Comp, getKey>::
+printhelp(TTPNode<Elem, Key>* root, int level) const {
+  if (root == NULL) return;
+  for (int i=0; i<level; i++) cout << "   "; // indent
+  if (root->isLeaf()) {  // Print a leaf node
+    cout << ((TTPLeafNode<Elem, Key> *)root)->recs[0];
+    if (((TTPLeafNode<Elem, Key> *)root)->reccount == 2) {
+      cout << ";  " << ((TTPLeafNode<Elem, Key> *)root)->recs[1];
+    }
+    cout << endl;
+  }
+  else {// Internal node. Print keys and visit chilren
+    cout << ((TTPIntlNode<Elem, Key> *)root)->keys[0];
+    if (((TTPIntlNode<Elem, Key> *)root)->keycount == 2)
+      cout << ", " << ((TTPIntlNode<Elem, Key> *)root)->keys[1];
+    cout << endl;
+    printhelp(((TTPIntlNode<Elem, Key> *)root)->children[0], level+1);
+    printhelp(((TTPIntlNode<Elem, Key> *)root)->children[1], level+1);
+    if (((TTPIntlNode<Elem, Key> *)root)->keycount == 2)
+      printhelp(((TTPIntlNode<Elem, Key> *)root)->children[2], level+1);
+  }
+}
+
+// Insert an Elem into the 2-3+ tree.  Root is the current
+// node, e is the Elem to be inserted, retval and retptr are
+// return values for promoted element and child node when
+// current node is split. 
+template <typename Key, typename Elem, typename Comp, typename getKey>
+bool TTTree<Key, Elem, Comp, getKey>::
+inserthelp(TTPNode<Elem, Key>*& root, const Elem& e,
+           Key& retval, TTPNode<Elem, Key>*& retptr) {
+  Key eKey = getKey::key(e); // Key of the record being inserted
+  if (root == NULL) {        // Empty tree: make new leaf node
+    root = new TTPLeafNode<Elem, Key>();
+    ((TTPLeafNode<Elem, Key> *)root)->recs[0] = e;
+    ((TTPLeafNode<Elem, Key> *)root)->reccount = 1;
+  }
+  else if (root->isLeaf()) { // Deal with leaf node
+    TTPLeafNode<Elem, Key> *myRoot = (TTPLeafNode<Elem, Key>*)root;
+    if (myRoot->reccount == 1) { // Room to add new record here
+      if (Comp::lt(eKey, getKey::key(myRoot->recs[0]))) {
+        myRoot->recs[1] = myRoot->recs[0];
+        myRoot->recs[0] = e;
+      }
+      else
+        myRoot->recs[1] = e;
+      myRoot->reccount = 2;
+    }
+    else splitleaf(myRoot, e, retval, retptr);
+  }
+  else { // This is an internal node
+    TTPIntlNode<Elem, Key> *myRoot = (TTPIntlNode<Elem, Key> *)root;
+    Key myretv;                         // Local copies
+    TTPNode<Elem, Key>* myretp = NULL;  //  to hold for processing
+    // If eKey is smaller, go left
+    if (Comp::lt(eKey, myRoot->keys[0]))
+      inserthelp(((TTPIntlNode<Elem, Key> *)root)->children[0],
+                 e, myretv, myretp);
+    // If only one key, go center
+    else if (myRoot->keycount == 1)
+      inserthelp(((TTPIntlNode<Elem, Key> *)root)->children[1],
+                 e, myretv, myretp);
+    // If eKey is smaller than right key, go center
+    else if (Comp::lt(eKey, myRoot->keys[1]))
+      inserthelp(((TTPIntlNode<Elem, Key> *)root)->children[1],
+                 e, myretv, myretp);
+    // If eKey and both keys in node are the same, put in center
+    else if (Comp::eq(myRoot->keys[0], myRoot->keys[1]) &&
+	     Comp::eq(myRoot->keys[0], eKey))
+      inserthelp(((TTPIntlNode<Elem, Key> *)root)->children[1],
+                 e, myretv, myretp);
+    // Insert to right
+    else
+      inserthelp(((TTPIntlNode<Elem, Key> *)root)->children[2],
+                 e, myretv, myretp);
+    if (myretp != NULL) // child split; receive promoted value
+      if (myRoot->keycount == 2) // Full: split
+        splitintl(myRoot, myretv, myretp, retval, retptr);
+      else { // Not full: add to this node
+        if (Comp::lt(myretv, myRoot->keys[0])) { // new one goes left
+          myRoot->keys[1] = myRoot->keys[0];
+          myRoot->keys[0] = myretv;
+          myRoot->children[2] = myRoot->children[1];
+          myRoot->children[1] = myretp;
+        }
+        else {
+          myRoot->keys[1] = myretv;
+          myRoot->children[2] = myretp;
+        }
+        myRoot->keycount = 2;
+      }
+  }
+  return true;
+}
+
+// Split a leaf node. We put one record on the left (the old node)
+// and two records on the right (the new node), and promote the low
+// key on the right;
+template <typename Key, typename Elem, typename Comp, typename getKey>
+void TTTree<Key, Elem, Comp, getKey>::
+splitleaf(TTPLeafNode<Elem, Key>* root, const Elem& e,
+           Key& retval, TTPNode<Elem, Key>*& retptr) {
+  TTPLeafNode<Elem,Key> *myRetptr = new TTPLeafNode<Elem, Key>();
+  myRetptr->next = root->next;
+  myRetptr->prev = root;
+  root->next = myRetptr;
+  if (Comp::lt(getKey::key(e), getKey::key(root->recs[0]))) {
+    // Add at left
+    myRetptr->recs[0] = root->recs[0];
+    myRetptr->recs[1] = root->recs[1];
+    root->recs[0] = e;
+  }
+  else if (Comp::lt(getKey::key(e), getKey::key(root->recs[1]))) {
+    // Add to middle
+    myRetptr->recs[0] = e;
+    myRetptr->recs[1] = root->recs[1];
+  }
+  else {
+    // Add to right
+    myRetptr->recs[0] = root->recs[1];
+    myRetptr->recs[1] = e;
+  }
+  root->reccount = 1;
+  myRetptr->reccount = 2;
+  root->next = myRetptr;
+  myRetptr->prev = root;
+  retval = getKey::key(myRetptr->recs[0]);
+  retptr = myRetptr;
+}
+
+// Split an internal node. We put one record on the left (the old node),
+// one record on the right (the new node), and promote the middle value.
+template <typename Key, typename Elem, typename Comp, typename getKey>
+void TTTree<Key, Elem, Comp, getKey>::
+splitintl(TTPIntlNode<Elem, Key>* root, const Key& e,
+          TTPNode<Elem, Key>*inptr,
+           Key& retval, TTPNode<Elem, Key>*& retptr) {
+  TTPIntlNode<Elem, Key> *myRetptr = new TTPIntlNode<Elem, Key>();
+  myRetptr->next = root->next;
+  myRetptr->prev = root;
+  root->next = myRetptr;
+  if (Comp::lt(e, root->keys[0])) {
+    // Add at left
+    retval = root->keys[0];
+    root->keys[0] = e;
+    myRetptr->keys[0] = root->keys[1];
+    myRetptr->children[0] = root->children[1];
+    myRetptr->children[1] = root->children[2];
+    root->children[1] = inptr;
+  }
+  else if ((Comp::lt(e, root->keys[1])) ||
+           // If they are all equal, then put it in the middle
+           (Comp::eq(e, root->keys[0]) && Comp::eq(e, root->keys[1]))) {
+    // Add at center
+    retval = e;
+    myRetptr->keys[0] = root->keys[1];
+    myRetptr->children[0] = inptr;
+    myRetptr->children[1] = root->children[2];
+  }
+  else {
+    // Add at right
+    retval = root->keys[1];
+    myRetptr->keys[0] = e;
+    myRetptr->children[0] = root->children[2];
+    myRetptr->children[1] = inptr;
+  }
+  root->keycount = myRetptr->keycount = 1;
+  root->next = myRetptr;
+  myRetptr->prev = root;
+  retptr = myRetptr;
+}
+
+
+// Return the first occurance of a record in a 2-3 subtree that matches a
+// given key value. This function can handle duplicates.
+template <typename Key, typename Elem, typename Comp, typename getKey>
+bool TTTree<Key, Elem, Comp, getKey>::
+findfirsthelp(TTPNode<Elem, Key>* root, const Key& K, Elem& e) const {
+  if (root == NULL) return false;         // value not found
+  if (root->isLeaf()) { // This is a leaf node, its here or nowhere
+    TTPLeafNode<Elem, Key>* myRoot = (TTPLeafNode<Elem, Key> *)root;
+    if (Comp::eq(K, getKey::key(myRoot->recs[0])))
+      { e = myRoot->recs[0]; return true; } // Found it
+    if ((myRoot->reccount == 2) &&
+        (Comp::eq(K, getKey::key(myRoot->recs[1]))))
+      { e = myRoot->recs[1]; return true; } // Found it
+    else return false;  // Its not here
+  }
+  else { // Internal node. Note that we will check multiple branches
+         // if this node's key(s) match K.
+    bool isSuccess = false; // Used to properly control logic for duplicates
+    TTPIntlNode<Elem, Key>* myRoot = (TTPIntlNode<Elem, Key> *)root;
+    if (Comp::lt(K, myRoot->keys[0]))
+      return findfirsthelp(myRoot->children[0], K, e);  // Go left
+    if (Comp::eq(K, myRoot->keys[0])) {
+      isSuccess = findfirsthelp(myRoot->children[0], K, e);  // Go left
+      if (isSuccess) return true;
+    }
+    if (myRoot->keycount == 1)              // 2 children
+      return findfirsthelp(myRoot->children[1], K, e);     // Center
+    if (Comp::lt(K, myRoot->keys[1]))
+      return findfirsthelp(myRoot->children[1], K, e);     // Center
+    if (Comp::eq(K, myRoot->keys[1])) {
+      isSuccess = findfirsthelp(myRoot->children[1], K, e);  // Go left
+      if (isSuccess) return true;
+    }
+    return findfirsthelp(myRoot->children[2], K, e);   // Right
+  }
+}
+
+
+// Helper function to remove a specific record from the tree
+// We assume that the element type stored is a pointer to a record,
+// so to determine if we have found the correct record, we merely test
+// that the (pointer) values are equal.
+template <typename Key, typename Elem, typename Comp, typename getKey>
+bool TTTree<Key, Elem, Comp, getKey>::
+removeRechelp(TTPNode<Elem, Key> *root, Elem e, bool& underflow) {
+  if (root->isLeaf())
+    return removeLeaf((TTPLeafNode<Elem, Key> *)root, e, underflow);
+
+  // We are deleting from an internal node.
+  TTPIntlNode<Elem, Key>* myRoot = (TTPIntlNode<Elem, Key> *)root;
+  bool kidUnderflow = false; // Does my child underflow?
+
+  // First step is to find it.
+  bool isSuccess = false; // Used to properly control logic for duplicates
+  int whichkid; // Which child did the record get deleted from?
+  Key K = getKey::key(e);
+  if (Comp::lt(K, myRoot->keys[0]))   // Check left
+    isSuccess = removeRechelp(myRoot->children[0], e, kidUnderflow);
+  if (isSuccess) whichkid = 0;
+  else if (Comp::eq(K, myRoot->keys[0])) {   // Check left
+    isSuccess = removeRechelp(myRoot->children[0], e, kidUnderflow);
+    if (isSuccess) whichkid = 0;
+  }
+  if (!isSuccess) {
+    if (myRoot->keycount == 1)        // 2 children; check center
+      isSuccess = removeRechelp(myRoot->children[1], e, kidUnderflow);
+    else if (!Comp::gt(K, myRoot->keys[1]))     // Check Center
+      isSuccess = removeRechelp(myRoot->children[1], e, kidUnderflow);
+    if (isSuccess) whichkid = 1;
+  }
+  if (!isSuccess) {
+    if ((myRoot->keycount == 2) && (!Comp::lt(K, myRoot->keys[1])))
+      // Check right
+      isSuccess = removeRechelp(myRoot->children[2], e, kidUnderflow);
+    if (isSuccess) whichkid = 2;
+  }
+
+  if (!isSuccess) return false;   // It doesn't exist in this subtree
+  if (kidUnderflow)
+    if ((myRoot->children[0])->isLeaf())
+      underflowLeaf(myRoot, whichkid, underflow);
+    else
+      underflowIntl(myRoot, whichkid, underflow);
+  return true;
+}
+
+
+// Helper function to handle underflow where children are leaves
+// Keep it simple: don't bother to shuffle keys, just get rid of
+// the leaf node that underflows
+template <typename Key, typename Elem, typename Comp, typename getKey>
+void TTTree<Key, Elem, Comp, getKey>::
+underflowLeaf(TTPIntlNode<Elem, Key> *root, int whichkid, bool& underflow) {
+  if ((root->children[whichkid])->prev != NULL)
+    ((root->children[whichkid])->prev)->next =
+          (root->children[whichkid])->next;
+  if ((root->children[whichkid])->next != NULL)
+    ((root->children[whichkid])->next)->prev =
+          (root->children[whichkid])->prev;
+  delete root->children[whichkid]; // get rid of the node
+  if (root->keycount == 2) {
+    if (whichkid == 0) {
+      root->children[0] = root->children[1];
+      root->children[1] = root->children[2];
+      root->keys[0] = root->keys[1];
+    }
+    else if (whichkid == 1) {
+      root->children[1] = root->children[2];
+    }
+    root->keycount = 1;
+  }
+  else { // Only one key, so we underflow too
+    underflow = true;
+    if (whichkid == 0) // Make sure the surviver is on left side
+      root->children[0] = root->children[1];
+  }
+}
+
+
+// Helper function to handle underflow where children are internal nodes
+// Since the child has a leftover pointer, we have to borrow or merge
+template <typename Key, typename Elem, typename Comp, typename getKey>
+void TTTree<Key, Elem, Comp, getKey>::
+underflowIntl(TTPIntlNode<Elem, Key> *root, int whichkid, bool& underflow) {
+  TTPIntlNode<Elem, Key>** children =
+      (TTPIntlNode<Elem, Key> **)(root->children);
+
+  if (whichkid == 0)   // Check right sibling, borrow or merge
+    if (children[1]->keycount == 2) { // Borrow
+cout << "Borrow right/0\n";
+      children[0]->children[1] = children[1]->children[0];
+      children[0]->keys[0] = root->keys[0];
+      root->keys[0] = children[1]->keys[0];
+      children[1]->keys[0] = children[1]->keys[1];
+      children[1]->children[0] = children[1]->children[1];
+      children[1]->children[1] = children[1]->children[2];
+      children[1]->keycount = 1;
+    }
+    else { // Merge
+cout << "Merge right/0\n";
+      children[1]->children[2] = children[1]->children[1];
+      children[1]->children[1] = children[1]->children[0];
+      children[1]->children[0] = children[0]->children[0];
+      children[1]->keys[1] = children[1]->keys[0];
+      children[1]->keys[0] = root->keys[0];
+      children[1]->keycount = 2;
+      if (children[0]->prev != NULL)
+        (children[0]->prev)->next = children[0]->next;
+      if (children[0]->next != NULL)
+        (children[0]->next)->prev = children[0]->prev;
+      delete children[0];
+      if (root->keycount == 1) {
+        underflow = true;
+	children[0] = children[1]; // Leave surviver at left
+      }
+      else {
+        children[0] = children[1];
+        children[1] = children[2];
+        root->keys[0] = root->keys[1];
+	root->keycount = 1;
+      }
+    }
+  else if (whichkid == 1) { // Middle might borrow/merge from either side
+    if (children[0]->keycount == 2) { // Borrow left
+cout << "Borrow left/1\n";
+      children[1]->children[1] = children[1]->children[0];
+      children[1]->children[0] = children[0]->children[2];
+      children[0]->keycount = 1;
+      children[1]->keys[0] = root->keys[0];
+      root->keys[0] = children[0]->keys[1];
+    }
+    else if ((root->keycount == 2) &&
+             (children[2]->keycount == 2)) { // Borrow right
+cout << "Borrow right/1\n";
+      children[1]->children[1] = children[2]->children[0];
+      children[2]->children[0] = children[2]->children[1];
+      children[2]->children[1] = children[2]->children[2];
+      children[1]->keys[0] = root->keys[1];
+      root->keys[1] = children[2]->keys[0];
+      children[2]->keys[0] = children[2]->keys[1];
+      children[2]->keycount = 1;
+    }
+    else { // Merge left
+cout << "Merge left/1\n";
+      children[0]->children[2] = children[1]->children[0];
+      children[0]->keys[1] = root->keys[0];
+      children[0]->keycount = 2;
+      if (children[1]->prev != NULL)
+        (children[1]->prev)->next = children[1]->next;
+      if (children[1]->next != NULL)
+        (children[1]->next)->prev = children[1]->prev;
+      delete children[1];
+      if (root->keycount == 1)
+        underflow = true;
+      else {
+        root->keycount = 1;
+	root->keys[0] = root->keys[1];
+        children[1] = children[2];
+      }
+    }
+  }
+  else { // Check left sibling, borrow or merge
+    if (children[1]->keycount == 2) { // Borrow
+cout << "Borrow left/2\n";
+      children[2]->children[1] = children[2]->children[0];
+      children[2]->children[0] = children[1]->children[2];
+      children[2]->keys[0] = root->keys[1];
+      root->keys[1] = children[1]->keys[1];
+      children[1]->keycount = 1;
+    }
+    else { // Merge
+cout << "Merge left/2\n";
+      children[1]->children[2] = children[2]->children[1];
+      children[1]->keys[1] = root->keys[1];
+      children[1]->keycount = 2;
+      if (children[2]->prev != NULL)
+        (children[2]->prev)->next = children[2]->next;
+      if (children[2]->next != NULL)
+        (children[2]->next)->prev = children[2]->prev;
+      delete children[2];
+      root->keycount = 1;
+    }
+  }
+}
+
+
+// Delete record e from a leaf node
+template <typename Key, typename Elem, typename Comp, typename getKey>
+bool TTTree<Key, Elem, Comp, getKey>::
+removeLeaf(TTPLeafNode<Elem, Key> *root, Elem e, bool& underflow) {
+  if (root->reccount == 1)
+    if (root->recs[0] == e) { // This is the one
+      underflow = true;         // We underflowed, so alert parent
+      return true;              // Deletion succeeded
+    }
+    else
+      return false; // Its not in here
+  // If here, then there are two records in the node
+  if (root->recs[0] == e) {      // Removing first record
+    root->recs[0] = root->recs[1];
+    root->reccount = 1;
+    return true;
+  }
+  else if (root->recs[1] == e) { // Removing second record
+    root->reccount = 1;
+    return true;
+  }
+  else  // Neither record matches
+    return false;
+}

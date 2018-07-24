@@ -1,0 +1,10 @@
+int minVertex(Graph* G, int* D) { // Find min cost vertex
+  int i, v = -1;
+  // Initialize v to some unvisited vertex
+  for (i=0; i<G->n(); i++)
+    if (G->getMark(i) == UNVISITED) { v = i; break; }
+  for (i++; i<G->n(); i++)  // Now find smallest D value
+    if ((G->getMark(i) == UNVISITED) && (D[i] < D[v]))
+      v = i;
+  return v;
+}

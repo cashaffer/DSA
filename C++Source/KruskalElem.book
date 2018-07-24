@@ -1,0 +1,7 @@
+class KruskElem {         // An element for the heap
+public:
+  int from, to, distance; // The edge being stored
+  KruskElem() { from = -1;  to = -1; distance = -1; }
+  KruskElem(int f, int t, int d)
+    { from = f; to = t; distance = d; }
+};

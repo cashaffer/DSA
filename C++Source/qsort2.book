@@ -1,0 +1,10 @@
+template <typename E, typename Comp>
+void qsort(E array[], int i, int j) {
+  if ((j-i) <= THRESHOLD) return; // Don't sort short list
+  int pivotindex = findpivot(array, i, j);
+  swap(array, pivotindex, j); // stick pivot at end
+  int k = partition<E,Comp>(array, i-1, j, array[j]);
+  swap(array, k, j);          // Put pivot value in place
+  qsort<E,Comp>(array, i, k-1);
+  qsort<E,Comp>(array, k+1, j);
+}

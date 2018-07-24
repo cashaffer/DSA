@@ -1,0 +1,6 @@
+int h(char* x) {
+  int i, sum;
+  for (sum=0, i=0; x[i] != '\0'; i++)
+    sum += (int) x[i];
+  return sum % M;
+}

@@ -1,0 +1,10 @@
+List SORTk(List L) {
+  List sub[k]; // To hold the sublists
+  if (L.length() > 1) {
+    SPLITk(L, sub); // SPLITk places sublists into sub
+    for (i=0; i<k; i++)
+      sub[i] = SORTk(sub[i]); // Sort each sublist
+    L = concatenation of k sublists in sub;
+    return L;
+  }
+}

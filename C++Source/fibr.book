@@ -1,0 +1,6 @@
+long fibr(int n) { // Recursive Fibonacci generator
+  // fibr(46) is largest value that fits in a long
+  Assert((n > 0) && (n < 47), "Input out of range");
+  if ((n == 1) || (n == 2)) return 1; // Base cases
+  return fibr(n-1) + fibr(n-2);       // Recursion
+}

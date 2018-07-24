@@ -1,0 +1,10 @@
+template <typename Key, typename E>
+BSTNode<Key, E>* BST<Key, E>::
+deletemin(BSTNode<Key, E>* rt) {
+  if (rt->left() == NULL) // Found min
+    return rt->right();
+  else {                      // Continue left
+    rt->setLeft(deletemin(rt->left()));
+    return rt;
+  }
+}

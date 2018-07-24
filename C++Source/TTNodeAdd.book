@@ -1,0 +1,41 @@
+// Add a new key/value pair to the node. There might be a
+// subtree associated with the record being added. This
+// information comes in the form of a 2-3 tree node with
+// one key and a (possibly NULL) subtree through the
+// center pointer field.
+template <typename Key, typename E>
+TTNode<Key,E>* TTNode<Key, E>::add(TTNode<Key,E>* it) {
+  if (rkey == EMPTYKEY) { // Only one key, add here
+    if (lkey < it->lkey) {
+      rkey = it->lkey; rval = it->lval;
+      right = center; center = it->center;
+    }
+    else {
+      rkey = lkey; rval = lval; right = center;
+      lkey = it->lkey; lval = it->lval;
+      center = it->center;
+    }
+    return this;
+  }
+  else if (lkey >= it->lkey) { // Add left
+    center = new TTNode<Key,E>(rkey, rval, EMPTYKEY, NULL,
+                                center, right, NULL);
+    rkey = EMPTYKEY; rval = NULL; right = NULL;
+    it->left = left; left = it;
+    return this;
+  }
+  else if (rkey > it->lkey) { // Add center
+    it->center = new TTNode<Key,E>(rkey, rval, EMPTYKEY,
+                            NULL, it->center, right, NULL);
+    it->left = this;
+    rkey = EMPTYKEY; rval = NULL; right = NULL;
+    return it;
+  }
+  else { // Add right
+    TTNode<Key,E>* N1 = new TTNode<Key,E>(rkey, rval,
+                           EMPTYKEY, NULL, this, it, NULL);
+    it->left = right;
+    right = NULL; rkey = EMPTYKEY; rval = NULL;
+    return N1;
+  }
+}

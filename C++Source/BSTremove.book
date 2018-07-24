@@ -1,0 +1,30 @@
+// Remove a node with key value k
+// Return: The tree with the node removed
+template <typename Key, typename E>
+BSTNode<Key, E>* BST<Key, E>::
+removehelp(BSTNode<Key, E>* rt, const Key& k) {
+  if (rt == NULL) return NULL;    // k is not in tree
+  else if (k < rt->key())
+    rt->setLeft(removehelp(rt->left(), k));
+  else if (k > rt->key())
+    rt->setRight(removehelp(rt->right(), k));
+  else {                            // Found: remove it
+    BSTNode<Key, E>* temp = rt;
+    if (rt->left() == NULL) {     // Only a right child
+      rt = rt->right();         //  so point to right
+      delete temp;
+    }
+    else if (rt->right() == NULL) { // Only a left child
+      rt = rt->left();          //  so point to left
+      delete temp;
+    }
+    else {                    // Both children are non-empty
+      BSTNode<Key, E>* temp = getmin(rt->right());
+      rt->setElement(temp->element());
+      rt->setKey(temp->key());
+      rt->setRight(deletemin(rt->right()));
+      delete temp;
+    }
+  }
+  return rt;
+}

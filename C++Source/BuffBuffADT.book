@@ -1,0 +1,12 @@
+// ADT for buffer pools using the buffer-passing style
+class BufferPool {
+public:
+  // Return pointer to the requested block
+  virtual void* getblock(int block) = 0;
+
+  // Set the dirty bit for the buffer holding "block"
+  virtual void dirtyblock(int block) = 0;
+
+  // Tell the size of a buffer
+  virtual int blocksize() = 0;
+};

@@ -1,0 +1,3 @@
+  int size() // Return list size
+    { return list->length(); }
+};

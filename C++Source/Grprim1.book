@@ -1,0 +1,19 @@
+void Prim(Graph* G, int* D, int s) { // Prim's MST algorithm
+  int V[G->n()];                     // Store closest vertex
+  int i, w;
+  for (int i=0; i<G->n(); i++)       // Initialize
+    D[i] = INFINITY;
+  D[0] = 0;
+  for (i=0; i<G->n(); i++) {         // Process the vertices
+    int v = minVertex(G, D);
+    G->setMark(v, VISITED);
+    if (v != s)
+      AddEdgetoMST(V[v], v);         // Add edge to MST
+    if (D[v] == INFINITY) return;    // Unreachable vertices
+    for (w=G->first(v); w<G->n(); w = G->next(v,w))
+      if (D[w] > G->weight(v,w)) {
+        D[w] = G->weight(v,w);       // Update distance
+        V[w] = v;                    // Where it came from
+      }
+  }
+}

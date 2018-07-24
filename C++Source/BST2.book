@@ -1,0 +1,27 @@
+  // Remove and return the root node from the dictionary.
+  // Return: The record removed, null if tree is empty.
+  E removeAny() {  // Delete min value
+    if (root != NULL) {
+      E temp = root->element();
+      root = removehelp(root, root->key());
+      nodecount--;
+      return temp;
+    }
+    else return NULL;
+  }
+
+  // Return Record with key value k, NULL if none exist.
+  // k: The key value to find. */
+  // Return some record matching "k".
+  // Return true if such exists, false otherwise. If
+  // multiple records match "k", return an arbitrary one.
+  E find(const Key& k) const { return findhelp(root, k); }
+
+  // Return the number of records in the dictionary.
+  int size() { return nodecount; }
+
+  void print() const { // Print the contents of the BST
+    if (root == NULL) cout << "The BST is empty.\n";
+    else printhelp(root, 0);
+  }
+};

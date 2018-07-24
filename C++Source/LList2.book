@@ -1,0 +1,43 @@
+
+  void moveToStart() // Place curr at list start
+    { curr = head->next; }
+
+  void moveToEnd()   // Place curr at list end
+    { curr = tail; }
+
+  // Move curr one step left; no change if already at front
+  void prev() {
+    if (head->next == curr) return;  // No previous element
+    Link<E>* temp = head;
+    // March down list until we find the previous element
+    while (temp->next != curr) temp = temp->next;
+    curr = temp;
+  }
+
+  // Move curr one step right; no change if already at end
+  void next()
+    { if (curr != tail) curr = curr->next; }
+
+  int length() const  { return listSize; } // Return length
+
+  // Return the position of the current element
+  int currPos() const {
+    Link<E>* temp = head->next;
+    int i;
+    for (i=0; curr != temp; i++)
+      temp = temp->next;
+    return i;
+  }
+
+  // Move down list to "pos" position
+  void moveToPos(int pos) {
+    Assert ((pos>=0)&&(pos<=listSize), "Position out of range");
+    curr = head->next;;
+    for(int i=0; i<pos; i++) curr = curr->next;
+  }
+
+  const E& getValue() const { // Return current element
+    Assert(curr != tail, "No value");
+    return curr->element;
+  }
+};

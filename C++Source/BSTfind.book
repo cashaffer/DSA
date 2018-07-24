@@ -1,0 +1,10 @@
+template <typename Key, typename E>
+E BST<Key, E>::findhelp(BSTNode<Key, E>* root,
+                              const Key& k) const {
+  if (root == NULL) return NULL;          // Empty tree
+  if (k < root->key())
+    return findhelp(root->left(), k);   // Check left
+  else if (k > root->key())
+    return findhelp(root->right(), k);  // Check right
+  else return root->element();  // Found it
+}

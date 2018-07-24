@@ -1,0 +1,21 @@
+void insert(const Key& k, const E& it) {
+  int i;
+  SkipNode<Key,E> *x = head;   // Start at header node
+  int newLevel = randomLevel(); // Select level for new node
+  if (newLevel > level) {     // New node is deepest in list
+    AdjustHead(newLevel);     // Add null pointers to header
+    level = newLevel;
+  }
+  SkipNode<Key,E>* update[level+1]; // Track level ends
+  for(i=level; i>=0; i--) {   // Search for insert position
+    while((x->forward[i] != NULL) && (x->forward[i]->k < k))
+      x = x->forward[i];
+    update[i] = x;           // Keep track of end at level i
+  }
+  x = new SkipNode<Key,E>(k, it, newLevel);   // New node
+  for (i=0; i<=newLevel; i++) {          // Splice into list
+    x->forward[i] = update[i]->forward[i]; // Where x points
+    update[i]->forward[i] = x;           // What points to x
+  }
+  reccount++;
+}

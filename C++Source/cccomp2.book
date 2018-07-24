@@ -1,0 +1,6 @@
+// Get the key for a character string.
+// The key is just the string itself.
+class getCKey {
+public:
+  static char* key(char* x) { return x; }
+};

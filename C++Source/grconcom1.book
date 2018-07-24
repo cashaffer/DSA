@@ -1,0 +1,8 @@
+for (i=0; i<G->n(); i++) // For n vertices in the graph
+  G->setMark(i, 0);   // Vertices start in no component
+compcount = 1;        // Counter for current component
+for (i=0; i<G->n(); i++)
+  if (G->getMark(i) == 0) { // Start a new component
+    DFS_component(G, i, compcount);
+    compcount++;
+  }

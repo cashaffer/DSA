@@ -1,0 +1,43 @@
+// Binary Search Tree implementation for the Dictionary ADT
+template <typename Key, typename E>
+class BST : public Dictionary<Key,E> {
+private:
+  BSTNode<Key,E>* root;   // Root of the BST
+  int nodecount;         // Number of nodes in the BST
+
+  // Private "helper" functions
+  void clearhelp(BSTNode<Key, E>*);
+  BSTNode<Key,E>* inserthelp(BSTNode<Key, E>*,
+                              const Key&, const E&);
+  BSTNode<Key,E>* deletemin(BSTNode<Key, E>*);
+  BSTNode<Key,E>* getmin(BSTNode<Key, E>*);
+  BSTNode<Key,E>* removehelp(BSTNode<Key, E>*, const Key&);
+  E findhelp(BSTNode<Key, E>*, const Key&) const;
+  void printhelp(BSTNode<Key, E>*, int) const;
+
+public:
+  BST() { root = NULL; nodecount = 0; }  // Constructor
+  ~BST() { clearhelp(root); }            // Destructor
+
+  void clear()   // Reinitialize tree
+    { clearhelp(root); root = NULL; nodecount = 0; }
+
+  // Insert a record into the tree.
+  // k Key value of the record.
+  // e The record to insert.
+  void insert(const Key& k, const E& e) {
+    root = inserthelp(root, k, e);
+    nodecount++;
+  }
+
+  // Remove a record from the tree.
+  // k Key value of record to remove.
+  // Return: The record removed, or NULL if there is none.
+  E remove(const Key& k) {
+    E temp = findhelp(root, k);   // First find it
+    if (temp != NULL) {
+      root = removehelp(root, k);
+      nodecount--;
+    }
+    return temp;
+  }

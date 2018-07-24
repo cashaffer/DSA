@@ -1,0 +1,16 @@
+class TOHobj { // An operation object
+public:
+  TOHop op;              // This operation type
+  int num;               // How many disks
+  Pole start, goal, tmp; // Define pole order
+
+  // DOTOH operation constructor
+  TOHobj(int n, Pole s, Pole g, Pole t) {
+    op = DOTOH; num = n;
+    start = s; goal = g; tmp = t;
+  }
+
+  // DOMOVE operation constructor
+  TOHobj(Pole s, Pole g)
+    { op = DOMOVE; start = s; goal = g; }
+};

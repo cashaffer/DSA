@@ -1,0 +1,7 @@
+
+void DFS_component(Graph* G, int v, int compcount) {
+  G->setMark(v, compcount);
+  for (int w=G->first(v); w<G->n(); w = G->next(v,w))
+    if (G->getMark(w) == 0)
+      DFS_component(G, w, compcount);
+}

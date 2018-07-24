@@ -1,0 +1,6 @@
+sum = 0; inc = 0;
+for (i=1; i<=n; i++)
+  for (j=1; j<=i; j++) {
+    sum = sum + inc;
+    inc++;
+  }

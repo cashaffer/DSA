@@ -1,0 +1,4 @@
+int ParPtrTree::FIND(int curr) const { // Find root
+  while (array[curr] != ROOT) curr = array[curr];
+  return curr;  // At root
+}

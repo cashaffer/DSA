@@ -1,0 +1,10 @@
+template <typename Key, typename E>
+bool checkBST(BSTNode<Key,E>* root, Key low, Key high) {
+  if (root == NULL) return true; // Empty subtree
+  Key rootkey = root->key();
+  if ((rootkey < low) || (rootkey > high))
+    return false; // Out of range
+  if (!checkBST<Key,E>(root->left(), low, rootkey))
+    return false; // Left side failed
+  return checkBST<Key,E>(root->right(), rootkey, high);
+}

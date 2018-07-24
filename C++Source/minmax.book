@@ -1,0 +1,21 @@
+// Return the minimum and maximum values in A
+// between positions l and r
+template <typename E>
+void MinMax(E A[], int l, int r, E& Min, E& Max) {
+  if (l == r) {        // n=1
+    Min = A[r];
+    Max = A[r];
+  }
+  else if (l+1 == r) { // n=2
+    Min = min(A[l], A[r]);
+    Max = max(A[l], A[r]);
+  }
+  else {               // n>2
+    int Min1, Min2, Max1, Max2;
+    int mid = (l + r)/2;
+    MinMax(A, l, mid, Min1, Max1);
+    MinMax(A, mid+1, r, Min2, Max2);
+    Min = min(Min1, Min2);
+    Max = max(Max1, Max2);
+  }
+}

@@ -1,0 +1,3 @@
+// Operation choices: DOMOVE will move a disk
+// DOTOH corresponds to a recursive call
+enum TOHop { DOMOVE, DOTOH };

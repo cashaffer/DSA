@@ -1,0 +1,11 @@
+template <typename E, typename Comp>
+void qsort(E A[], int i, int j) { // Quicksort
+  if (j <= i) return; // Don't sort 0 or 1 element
+  int pivotindex = findpivot(A, i, j);
+  swap(A, pivotindex, j);    // Put pivot at end
+  // k will be the first position in the right subarray
+  int k = partition<E,Comp>(A, i-1, j, A[j]);
+  swap(A, k, j);             // Put pivot in place
+  qsort<E,Comp>(A, i, k-1);
+  qsort<E,Comp>(A, k+1, j);
+}

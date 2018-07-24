@@ -1,0 +1,7 @@
+template <typename E>
+void preorder(BinNode<E>* root) {
+  if (root == NULL) return; // Empty subtree, do nothing
+  visit(root);              // Perform desired action
+  preorder(root->left());
+  preorder(root->right());
+}

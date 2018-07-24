@@ -1,0 +1,9 @@
+template <typename E, typename Comp>
+inline int partition(E A[], int l, int r, E& pivot) {
+  do {             // Move the bounds inward until they meet
+    while (Comp::prior(A[++l], pivot));  // Move l right and
+    while ((l < r) && Comp::prior(pivot, A[--r])); // r left
+    swap(A, l, r);              // Swap out-of-place values
+  } while (l < r);              // Stop when they cross
+  return l;      // Return first position in right partition
+}

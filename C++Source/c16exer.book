@@ -1,0 +1,3 @@
+for (int k=0; k<G.n(); k++)
+  for (int i=0; i<G.n(); i++)
+    for (int j=0; j<G.n(); j++)

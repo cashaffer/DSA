@@ -1,0 +1,10 @@
+// Abstract class definition for B+-trees
+template <typename Key, typename E>class BPNode {
+public:
+  BPNode* lftptr;  BPNode* rghtptr; // Links to siblings
+  virtual ~BPNode() {} // Base destructor
+  virtual bool isLeaf() const =0;  // True if node is a leaf
+  virtual bool isFull() const =0;  // True if node is full
+  virtual int numrecs() const =0;  // Current num of records
+  virtual Key* keys() const=0;     // Return array of keys
+};

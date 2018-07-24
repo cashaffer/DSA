@@ -1,0 +1,9 @@
+sum1 = 0;
+for (k=1; k<=n; k*=2)    // Do log n times
+   for (j=1; j<=n; j++)  // Do n times
+      sum1++;
+
+sum2 = 0;
+for (k=1; k<=n; k*=2)    // Do log n times
+   for (j=1; j<=k; j++)  // Do k times
+      sum2++;

@@ -1,0 +1,9 @@
+// General tree ADT
+template <typename E> class GenTree {
+public:
+  void clear();            // Send all nodes to free store
+  GTNode<E>* root();    // Return the root of the tree
+  // Combine two subtrees
+  void newroot(E&, GTNode<E>*, GTNode<E>*);
+  void print();            // Print a tree
+};

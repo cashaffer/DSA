@@ -1,0 +1,9 @@
+// Return true if "K" is in list "L", false otherwise
+bool find(List<int>& L, int K) {
+  int it;
+  for (L.moveToStart(); L.currPos()<L.length(); L.next()) {
+    it = L.getValue();
+    if (K == it) return true;  // Found K
+  }
+  return false;                // K not found
+}

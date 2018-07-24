@@ -1,0 +1,3 @@
+template <typename E>
+inline int findpivot(E A[], int i, int j)
+  { return (i+j)/2; }

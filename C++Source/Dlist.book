@@ -1,0 +1,33 @@
+// Insert "it" at current position
+void insert(const E& it) {
+  curr = new Link<E>(it, curr->prev, curr);  
+  curr->prev->next = curr->next->prev = curr;
+  listSize++;
+}
+
+// Append "it" to the end of the list.
+void append(const E& it) {
+  tail->prev = new Link<E>(it, tail->prev, tail);
+  tail->prev->prev->next = tail->prev;
+  if (curr == tail) curr = tail->prev;
+  listSize++;
+}
+
+// Remove and return current element
+E remove() {
+  if (curr == tail)              // Nothing to remove
+    return NULL;
+  E it = curr->element;          // Remember value
+  Link<E>* ltemp = curr;         // Remember link node
+  curr->next->prev = curr->prev;
+  curr = curr->prev->next = curr->next; // Remove from list
+  delete ltemp;                  // Reclaim space
+  listSize--;                    // Decrement list size
+  return it;
+}
+
+// Move fence one step left; no change if left is empty
+void prev() {
+  if (curr->prev != head)  // Can't back up from list head
+    curr = curr->prev;
+}

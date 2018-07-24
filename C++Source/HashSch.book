@@ -1,0 +1,13 @@
+// Search for the record with Key K
+template <typename Key, typename E>
+E hashdict<Key, E>::
+hashSearch(const Key& k) const {
+  int home;              // Home position for k
+  int pos = home = h(k); // Initial position is home slot
+  for (int i = 1; (k != (HT[pos]).key()) &&
+                  (EMPTYKEY != (HT[pos]).key()); i++)  
+    pos = (home + p(k, i)) % M; // Next on probe sequence
+  if (k == (HT[pos]).key())     // Found it
+    return (HT[pos]).value();
+  else return NULL;            // k not in hash table
+}

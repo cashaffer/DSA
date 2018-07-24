@@ -1,0 +1,9 @@
+class CCCompare { // Compare two character strings
+public:
+  static bool lt(char* x, char* y)
+    { return strcmp(x, y) < 0; }
+  static bool eq(char* x, char* y)
+    { return strcmp(x, y) == 0; }
+  static bool gt(char* x, char* y)
+    { return strcmp(x, y) > 0; }
+};

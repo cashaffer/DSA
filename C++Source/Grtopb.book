@@ -1,0 +1,21 @@
+// Topological sort: Queue
+void topsort(Graph* G, Queue<int>* Q) {
+  int Count[G->n()];
+  int v, w;
+  for (v=0; v<G->n(); v++) Count[v] = 0; // Initialize
+  for (v=0; v<G->n(); v++)   // Process every edge
+    for (w=G->first(v); w<G->n(); w = G->next(v,w))
+       Count[w]++;           // Add to v's prereq count
+  for (v=0; v<G->n(); v++)   // Initialize queue
+    if (Count[v] == 0)       // Vertex has no prerequisites
+      Q->enqueue(v);
+  while (Q->length() != 0) { // Process the vertices
+    v = Q->dequeue();
+    printout(v);             // PreVisit for "v"
+    for (w=G->first(v); w<G->n(); w = G->next(v,w)) {
+      Count[w]--;            // One less prerequisite
+      if (Count[w] == 0)     // This vertex is now free
+        Q->enqueue(w);
+    }
+  }
+}

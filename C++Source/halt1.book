@@ -1,0 +1,6 @@
+bool halt(string prog, string input) {
+  if (PROGRAM_HALTS(prog, input))
+    return true;
+  else
+    return false;
+}

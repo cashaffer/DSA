@@ -1,0 +1,16 @@
+void topsort(Graph* G) {   // Topological sort: recursive
+  int i;
+  for (i=0; i<G->n(); i++) // Initialize Mark array
+    G->setMark(i, UNVISITED);
+  for (i=0; i<G->n(); i++) // Process all vertices
+    if (G->getMark(i) == UNVISITED)
+      tophelp(G, i);       // Call recursive helper function
+}
+
+void tophelp(Graph* G, int v) { // Process vertex v
+  G->setMark(v, VISITED);
+  for (int w=G->first(v); w<G->n(); w = G->next(v,w))
+    if (G->getMark(w) == UNVISITED)
+      tophelp(G, w);
+  printout(v);                  // PostVisit for Vertex v
+}

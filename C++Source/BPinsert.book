@@ -1,0 +1,15 @@
+template <typename Key, typename E>
+BPNode<Key,E>* BPTree<Key, E>::inserthelp(BPNode<Key,E>* rt,
+                        const Key& k, const E& e) {
+  if (rt->isLeaf()) // At leaf node: insert here
+    return ((BPLeaf<Key,E>*)rt)->add(k, e);
+  // Add to internal node
+  int currec = binaryle(rt->keys(), rt->numrecs(), k);
+  BPNode<Key,E>* temp = inserthelp(
+        ((BPInternal<Key,E>*)root)->pointers(currec), k, e);
+  if (temp != ((BPInternal<Key,E>*)rt)->pointers(currec))
+    return ((BPInternal<Key,E>*)rt)->
+                   add(k, (BPInternal<Key,E>*)temp);
+  else
+    return rt;
+}

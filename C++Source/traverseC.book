@@ -1,0 +1,4 @@
+// Do a preorder traversal
+void traverse(VarBinNode *root) {
+  if (root != NULL) root->traverse();
+}

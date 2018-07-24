@@ -1,0 +1,6 @@
+// Pick a level using an exponential distribution
+int randomLevel(void) {
+  int level = 0;
+  while (Random(2) == 0) level++;
+  return level;
+}

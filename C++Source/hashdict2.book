@@ -1,0 +1,22 @@
+// I took this code out of the book, it doesn't add anything
+
+  // remove not implemented
+  E remove(const Key& K) { return NULL; }
+
+  E removeAny() {  // Remove the first element
+    Assert(currcnt != 0, "Hash table is empty");
+    int i;
+    for (i=0; i<M; i++)
+      if ((HT[i]).key() != EMPTYKEY) {
+        (HT[i]).setKey(EMPTYKEY);
+        currcnt--;
+	break;
+      }
+    return (HT[i]).value();
+  }
+
+  void clear() { // Clear the dictionary
+    for (int i=0; i<M; i++) (HT[i]).setKey(EMPTYKEY);
+    currcnt = 0;
+  }
+};

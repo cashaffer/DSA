@@ -1,0 +1,4 @@
+while (dict.size() > 0) {
+  it = dict.removeAny();
+  doSomething(it);
+}

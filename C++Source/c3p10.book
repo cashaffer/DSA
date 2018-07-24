@@ -1,0 +1,6 @@
+for (i=0; i < n-1; i++)
+  for (j=i+1; j < n; j++) {
+    tmp = A[i][j];
+    A[i][j] = A[j][i];
+    A[j][i] = tmp;
+  }

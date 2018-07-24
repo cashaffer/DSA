@@ -1,0 +1,11 @@
+void traverse(VarBinNode *root) {    // Preorder traversal
+  if (root == NULL) return;          // Nothing to visit
+  if (root->isLeaf())                // Do leaf node
+    cout << "Leaf: " << ((LeafNode *)root)->value() << endl;
+  else {                             // Do internal node
+    cout << "Internal: "
+         << ((IntlNode *)root)->value() << endl;
+    traverse(((IntlNode *)root)->leftchild());
+    traverse(((IntlNode *)root)->rightchild());
+  }
+}

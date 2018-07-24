@@ -1,0 +1,30 @@
+// Prim's MST algorithm: priority queue version
+void Prim(Graph* G, int* D, int s) {
+  int i, v, w;           // "v" is current vertex
+  int V[G->n()];         // V[I] stores I's closest neighbor
+  DijkElem temp;
+  DijkElem E[G->e()];    // Heap array with lots of space
+  temp.distance = 0; temp.vertex = s;
+  E[0] = temp;           // Initialize heap array
+  heap<DijkElem, DDComp> H(E, 1, G->e()); // Create heap
+  for (int i=0; i<G->n(); i++)         // Initialize
+    D[i] = INFINITY;
+  D[0] = 0;
+  for (i=0; i<G->n(); i++) {           // Now build MST
+    do {
+      if(H.size() == 0) return; // Nothing to remove
+      temp = H.removefirst();
+      v = temp.vertex;
+    } while (G->getMark(v) == VISITED);
+    G->setMark(v, VISITED);
+    if (v != s) AddEdgetoMST(V[v], v); // Add edge to MST
+    if (D[v] == INFINITY) return;      // Ureachable vertex
+    for (w=G->first(v); w<G->n(); w = G->next(v,w))
+      if (D[w] > G->weight(v, w)) {    // Update D
+        D[w] = G->weight(v, w);
+        V[w] = v;        // Update who it came from
+        temp.distance = D[w]; temp.vertex = w;
+        H.insert(temp);  // Insert new distance in heap
+      }
+  }
+}

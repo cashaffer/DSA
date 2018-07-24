@@ -1,0 +1,42 @@
+template <typename E, typename Comp>
+void qsort(E array[], int i, int j) {
+  static int stack[200];
+  int top = -1;
+  E pivot;
+  int pivotindex, l, r;
+
+  stack[++top] = i;
+  stack[++top] = j;
+
+  while (top > 0) {
+    // Pop stack
+    j = stack[top--];
+    i = stack[top--];
+
+    // Findpivot
+    pivotindex = (i+j)/2;
+    pivot = array[pivotindex];
+    swap(array, pivotindex, j); // stick pivot at end
+
+    // Partition
+    l = i-1;
+    r = j;
+    do {
+      while (Comp::prior(array[++l], pivot));
+      while (r && Comp::prior(pivot,array[--r]));
+      swap(array, l, r);
+    } while (l < r);
+    swap(array, l, r);          // Undo final swap
+    swap(array, l, j);          // Put pivot value in place
+
+    // Load up stack.  l is pivot point.
+    if ((l-1-i) > THRESHOLD) {
+      stack[++top] = i;
+      stack[++top] = l-1;
+    }
+    if ((j-l-1) > THRESHOLD) {
+      stack[++top] = l+1;
+      stack[++top] = j;
+    }
+  }
+}

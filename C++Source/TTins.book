@@ -1,0 +1,27 @@
+template <typename Key, typename E>
+TTNode<Key,E>* TTTree<Key, E>::
+inserthelp(TTNode<Key,E>* rt, const Key k, const E e) {
+  TTNode<Key,E>* retval;
+  if (rt == NULL) // Empty tree: create a leaf node for root
+    return new TTNode<Key,E>(k, e, EMPTYKEY, NULL,
+                             NULL, NULL, NULL);
+  if (rt->isLeaf()) // At leaf node: insert here
+    return rt->add(new TTNode<Key,E>(k, e, EMPTYKEY, NULL,
+                                     NULL, NULL, NULL));
+  // Add to internal node
+  if (k < rt->lkey) {
+    retval = inserthelp(rt->left, k, e);
+    if (retval == rt->left) return rt;
+    else return rt->add(retval);
+  }
+  else if((rt->rkey == EMPTYKEY) || (k < rt->rkey)) {
+    retval = inserthelp(rt->center, k, e);
+    if (retval == rt->center) return rt;
+    else return rt->add(retval);
+  }
+  else { // Insert right
+    retval = inserthelp(rt->right, k, e);
+    if (retval == rt->right) return rt;
+    else return rt->add(retval);
+  }
+}

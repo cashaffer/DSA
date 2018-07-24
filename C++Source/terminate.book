@@ -1,0 +1,4 @@
+void foo (double val) {
+  if (val != 0.0)
+    foo(val/2.0);
+}

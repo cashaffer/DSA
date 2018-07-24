@@ -1,0 +1,19 @@
+// A single buffer in the buffer pool
+class Buffer {
+public:
+  // Read the associated block from disk (if necessary) and
+  // return a pointer to the data
+  void *readBlock() = 0;
+
+  // Return a pointer to the buffer's data array
+  // (without reading from disk)
+  void *getDataPointer() = 0;
+
+  // Flag the buffer's contents as having changed, so that
+  // flushing the block will write it back to disk
+  void markDirty() = 0;
+
+  // Release the block's access to this buffer. Further
+  // accesses to this buffer are illegal.
+  void releaseBuffer() = 0;
+}
