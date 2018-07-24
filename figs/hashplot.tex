@@ -1,0 +1,27 @@
+\newcommand{\Cref}[1]{{\tt{#1}}}  % A bit of program text
+
+\newcommand{\epsfig}[1]{{\special{ps#1}}}
+\newcommand{\svar}[1]{{\rm{#1}}}
+
+\newcommand{\xfig}[1]{{\vspace{-\bigskipamount}\begin{center}
+\input{../figs/#1.pstex_t}\end{center}}}
+
+%%\documentclss{article}
+\documentstyle[c++3e,11pt]{report}
+
+\makeatletter
+\textwidth 6.75in
+\topmargin -0.75in
+\textheight 8.75in
+\pagestyle{empty}
+
+\begin{document}
+\begin{figure}
+\vspace{2.95in}
+\input{../figs/hashplot.latex}
+\special{psfile=../tex/hashplot.eps hscale=65 vscale=65 hoffset=-26 voffset=-146}
+\end{figure}
+
+
+\end{document}
+

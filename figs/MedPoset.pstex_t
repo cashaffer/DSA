@@ -1,0 +1,17 @@
+\begin{picture}(0,0)%
+\includegraphics{../figs/MedPoset.pdf}%
+\end{picture}%
+\setlength{\unitlength}{3947sp}%
+%
+\begingroup\makeatletter\ifx\SetFigFont\undefined%
+\gdef\SetFigFont#1#2#3#4#5{%
+  \reset@font\fontsize{#1}{#2pt}%
+  \fontfamily{#3}\fontseries{#4}\fontshape{#5}%
+  \selectfont}%
+\fi\endgroup%
+\begin{picture}(1220,1066)(743,-669)
+\put(1298,-593){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}...}}}}
+\put(1298,306){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}...}}}}
+\put(1779,262){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}i-1}}}}
+\put(1764,-623){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}n-i}}}}
+\end{picture}%

@@ -1,0 +1,257 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: PRexamp.pstex
+%%Creator: fig2dev Version 3.2 Patchlevel 3d
+%%CreationDate: Fri Feb  4 11:06:52 2005
+%%For: shaffer@shaffer.cs.vt.edu (Cliff Shaffer)
+%%BoundingBox: 0 0 363 177
+%%Magnification: 1.0000
+%%EndComments
+/$F2psDict 200 dict def
+$F2psDict begin
+$F2psDict /mtrx matrix put
+/col-1 {0 setgray} bind def
+/col0 {0.000 0.000 0.000 srgb} bind def
+/col1 {0.000 0.000 1.000 srgb} bind def
+/col2 {0.000 1.000 0.000 srgb} bind def
+/col3 {0.000 1.000 1.000 srgb} bind def
+/col4 {1.000 0.000 0.000 srgb} bind def
+/col5 {1.000 0.000 1.000 srgb} bind def
+/col6 {1.000 1.000 0.000 srgb} bind def
+/col7 {1.000 1.000 1.000 srgb} bind def
+/col8 {0.000 0.000 0.560 srgb} bind def
+/col9 {0.000 0.000 0.690 srgb} bind def
+/col10 {0.000 0.000 0.820 srgb} bind def
+/col11 {0.530 0.810 1.000 srgb} bind def
+/col12 {0.000 0.560 0.000 srgb} bind def
+/col13 {0.000 0.690 0.000 srgb} bind def
+/col14 {0.000 0.820 0.000 srgb} bind def
+/col15 {0.000 0.560 0.560 srgb} bind def
+/col16 {0.000 0.690 0.690 srgb} bind def
+/col17 {0.000 0.820 0.820 srgb} bind def
+/col18 {0.560 0.000 0.000 srgb} bind def
+/col19 {0.690 0.000 0.000 srgb} bind def
+/col20 {0.820 0.000 0.000 srgb} bind def
+/col21 {0.560 0.000 0.560 srgb} bind def
+/col22 {0.690 0.000 0.690 srgb} bind def
+/col23 {0.820 0.000 0.820 srgb} bind def
+/col24 {0.500 0.190 0.000 srgb} bind def
+/col25 {0.630 0.250 0.000 srgb} bind def
+/col26 {0.750 0.380 0.000 srgb} bind def
+/col27 {1.000 0.500 0.500 srgb} bind def
+/col28 {1.000 0.630 0.630 srgb} bind def
+/col29 {1.000 0.750 0.750 srgb} bind def
+/col30 {1.000 0.880 0.880 srgb} bind def
+/col31 {1.000 0.840 0.000 srgb} bind def
+
+end
+save
+newpath 0 177 moveto 0 0 lineto 363 0 lineto 363 177 lineto closepath clip newpath
+0.4 184.3 translate
+1 -1 scale
+
+/cp {closepath} bind def
+/ef {eofill} bind def
+/gr {grestore} bind def
+/gs {gsave} bind def
+/sa {save} bind def
+/rs {restore} bind def
+/l {lineto} bind def
+/m {moveto} bind def
+/rm {rmoveto} bind def
+/n {newpath} bind def
+/s {stroke} bind def
+/sh {show} bind def
+/slc {setlinecap} bind def
+/slj {setlinejoin} bind def
+/slw {setlinewidth} bind def
+/srgb {setrgbcolor} bind def
+/rot {rotate} bind def
+/sc {scale} bind def
+/sd {setdash} bind def
+/ff {findfont} bind def
+/sf {setfont} bind def
+/scf {scalefont} bind def
+/sw {stringwidth} bind def
+/tr {translate} bind def
+/tnt {dup dup currentrgbcolor
+  4 -2 roll dup 1 exch sub 3 -1 roll mul add
+  4 -2 roll dup 1 exch sub 3 -1 roll mul add
+  4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}
+  bind def
+/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul
+  4 -2 roll mul srgb} bind def
+ /DrawEllipse {
+	/endangle exch def
+	/startangle exch def
+	/yrad exch def
+	/xrad exch def
+	/y exch def
+	/x exch def
+	/savematrix mtrx currentmatrix def
+	x y tr xrad yrad sc 0 0 1 startangle endangle arc
+	closepath
+	savematrix setmatrix
+	} def
+
+/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def
+/$F2psEnd {$F2psEnteredState restore end} def
+
+$F2psBegin
+10 setmiterlimit
+ 0.06000 0.06000 sc
+%
+% Fig objects follow
+%
+% Polyline
+15.000 slw
+n 1580 300 m
+ 1580 2860 l gs col0 s gr 
+% Polyline
+n 300 1580 m
+ 2860 1580 l gs col0 s gr 
+% Polyline
+n 2220 300 m
+ 2220 1580 l gs col0 s gr 
+% Polyline
+n 1580 940 m
+ 2850 940 l gs col0 s gr 
+% Polyline
+n 2220 1580 m
+ 2220 2860 l gs col0 s gr 
+% Polyline
+n 1580 2220 m
+ 2860 2220 l gs col0 s gr 
+% Polyline
+n 1900 1580 m
+ 1900 2220 l gs col0 s gr 
+% Polyline
+n 1580 1900 m
+ 2220 1900 l gs col0 s gr 
+7.500 slw
+% Ellipse
+n 600 1700 30 30 0 360 DrawEllipse gs -0.00 setgray ef gr gs col-1 s gr
+
+% Ellipse
+n 1700 500 30 30 0 360 DrawEllipse gs -0.00 setgray ef gr gs col-1 s gr
+
+% Ellipse
+n 1100 1200 30 30 0 360 DrawEllipse gs -0.00 setgray ef gr gs col-1 s gr
+
+% Ellipse
+n 1680 1300 30 30 0 360 DrawEllipse gs -0.00 setgray ef gr gs col-1 s gr
+
+% Ellipse
+n 2000 2100 30 30 0 360 DrawEllipse gs -0.00 setgray ef gr gs col-1 s gr
+
+% Ellipse
+n 1620 2000 30 30 0 360 DrawEllipse gs -0.00 setgray ef gr gs col-1 s gr
+
+15.000 slw
+% Ellipse
+n 4548 447 125 125 0 360 DrawEllipse gs col-1 s gr
+
+% Ellipse
+n 3848 1035 125 125 0 360 DrawEllipse gs col-1 s gr
+
+% Ellipse
+n 5430 1020 125 125 0 360 DrawEllipse gs col-1 s gr
+
+% Ellipse
+n 4860 1702 125 125 0 360 DrawEllipse gs col-1 s gr
+
+% Polyline
+n 2860 2860 m 300 2860 l 300 300 l 2860 300 l
+ cp gs col-1 s gr 
+% Polyline
+7.500 slw
+n 4548 597 m
+ 3848 907 l gs col-1 s gr 
+% Polyline
+n 4548 597 m
+ 4845 885 l gs col-1 s gr 
+% Polyline
+n 4548 597 m
+ 5415 877 l gs col-1 s gr 
+% Polyline
+n 4530 589 m
+ 3273 892 l gs col-1 s gr 
+% Polyline
+15.000 slw
+n 3373 1147 m 3123 1147 l 3123 897 l 3373 897 l
+ cp gs col-1 s gr 
+% Polyline
+7.500 slw
+n 3840 1170 m
+ 3255 1582 l gs col-1 s gr 
+% Polyline
+n 3833 1162 m
+ 3593 1582 l gs col-1 s gr 
+% Polyline
+n 3855 1155 m
+ 3953 1567 l gs col-1 s gr 
+% Polyline
+n 3863 1170 m
+ 4275 1567 l gs col-1 s gr 
+% Polyline
+n 5400 1147 m
+ 4868 1575 l gs col-1 s gr 
+% Polyline
+n 4860 1845 m
+ 4740 2230 l gs col-1 s gr 
+% Polyline
+n 4868 1845 m
+ 5190 2230 l gs col-1 s gr 
+% Polyline
+n 4868 1830 m
+ 5640 2230 l gs col-1 s gr 
+% Polyline
+n 4853 1837 m
+ 4290 2230 l gs col-1 s gr 
+% Polyline
+n 5430 1140 m
+ 5550 1560 l gs col-1 s gr 
+% Polyline
+n 5423 1162 m
+ 5190 1567 l gs col-1 s gr 
+% Polyline
+n 5453 1147 m
+ 5888 1552 l gs col-1 s gr 
+% Polyline
+15.000 slw
+n 3385 1830 m 3135 1830 l 3135 1580 l 3385 1580 l
+ cp gs col-1 s gr 
+% Polyline
+n 4397 1822 m 4147 1822 l 4147 1572 l 4397 1572 l
+ cp gs col-1 s gr 
+% Polyline
+n 4075 1830 m 3825 1830 l 3825 1580 l 4075 1580 l
+ cp gs col-1 s gr 
+% Polyline
+n 3734 1837 m 3484 1837 l 3484 1587 l 3734 1587 l
+ cp gs col-1 s gr 
+% Polyline
+n 4968 1147 m 4718 1147 l 4718 897 l 4968 897 l
+ cp gs col-1 s gr 
+% Polyline
+n 5325 1822 m 5075 1822 l 5075 1572 l 5325 1572 l
+ cp gs col-1 s gr 
+% Polyline
+n 5680 1822 m 5430 1822 l 5430 1572 l 5680 1572 l
+ cp gs col-1 s gr 
+% Polyline
+n 6018 1815 m 5768 1815 l 5768 1565 l 6018 1565 l
+ cp gs col-1 s gr 
+% Polyline
+n 4398 2467 m 4148 2467 l 4148 2217 l 4398 2217 l
+ cp gs col-1 s gr 
+% Polyline
+n 4818 2467 m 4568 2467 l 4568 2217 l 4818 2217 l
+ cp gs col-1 s gr 
+% Polyline
+n 5260 2475 m 5010 2475 l 5010 2225 l 5260 2225 l
+ cp gs col-1 s gr 
+% Polyline
+n 5688 2467 m 5438 2467 l 5438 2217 l 5688 2217 l
+ cp gs col-1 s gr 
+$F2psEnd
+rs

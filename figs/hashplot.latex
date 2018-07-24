@@ -1,0 +1,18 @@
+%\begin{picture}(324,432)(28,284)
+\begin{picture}(0,0)(40, 295)
+\put( 60,310){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf 1}}}
+\put( 60,356){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf 2}}}
+\put( 60,403){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf 3}}}
+\put( 60,450){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf 4}}}
+\put( 60,497){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf 5}}}
+
+\put(335,460){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf Delete}}}
+\put(267,460){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf Insert}}}
+
+\put( 64,301){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf 0}}}
+\put(123,301){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf .2}}}
+\put(184,301){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf .4}}}
+\put(245,301){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf .6}}}
+\put(306,301){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf .8}}}
+\put(365,301){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf 1.0}}}
+\end{picture}

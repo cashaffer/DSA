@@ -1,0 +1,20 @@
+\begin{picture}(0,0)%
+\includegraphics{../figs/DblListF.pdf}%
+\end{picture}%
+\setlength{\unitlength}{3947sp}%
+%
+\begingroup\makeatletter\ifx\SetFigFont\undefined%
+\gdef\SetFigFont#1#2#3#4#5{%
+  \reset@font\fontsize{#1}{#2pt}%
+  \fontfamily{#3}\fontseries{#4}\fontshape{#5}%
+  \selectfont}%
+\fi\endgroup%
+\begin{picture}(5277,777)(976,-1333)
+\put(976,-661){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\ttdefault}{\mddefault}{\updefault}head}}}}
+\put(2171,-1161){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}20}}}}
+\put(3071,-1161){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}23}}}}
+\put(2776,-661){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\ttdefault}{\mddefault}{\updefault}curr}}}}
+\put(4036,-1161){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}12}}}}
+\put(4936,-1161){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}15}}}}
+\put(5556,-661){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\ttdefault}{\mddefault}{\updefault}tail}}}}
+\end{picture}%

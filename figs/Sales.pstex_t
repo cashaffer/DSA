@@ -1,0 +1,28 @@
+\begin{picture}(0,0)%
+\includegraphics{../figs/Sales.pdf}%
+\end{picture}%
+\setlength{\unitlength}{3947sp}%
+%
+\begingroup\makeatletter\ifx\SetFigFont\undefined%
+\gdef\SetFigFont#1#2#3#4#5{%
+  \reset@font\fontsize{#1}{#2pt}%
+  \fontfamily{#3}\fontseries{#4}\fontshape{#5}%
+  \selectfont}%
+\fi\endgroup%
+\begin{picture}(1830,1428)(286,-875)
+\put(801,334){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}A}}}}
+\put(525, 89){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}3}}}}
+\put(491,-256){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}E}}}}
+\put(1261,429){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}2}}}}
+\put(1470, 82){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}3}}}}
+\put(1931,104){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}6}}}}
+\put(906,-206){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}8}}}}
+\put(1226,-401){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}4}}}}
+\put(1576,-189){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}1}}}}
+\put(1701,334){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}B}}}}
+\put(2001,-256){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}C}}}}
+\put(1021, 74){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}2}}}}
+\put(721,-661){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}1}}}}
+\put(1779,-651){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}1}}}}
+\put(1261,-761){\makebox(0,0)[rb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}D}}}}
+\end{picture}%

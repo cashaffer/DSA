@@ -1,0 +1,35 @@
+\begin{picture}(0,0)%
+\includegraphics{../figs/DblListI.pdf}%
+\end{picture}%
+\setlength{\unitlength}{3947sp}%
+%
+\begingroup\makeatletter\ifx\SetFigFont\undefined%
+\gdef\SetFigFont#1#2#3#4#5{%
+  \reset@font\fontsize{#1}{#2pt}%
+  \fontfamily{#3}\fontseries{#4}\fontshape{#5}%
+  \selectfont}%
+\fi\endgroup%
+\begin{picture}(4589,2920)(378,-2733)
+\put(4293,-303){\makebox(0,0)[lb]{\smash{{\SetFigFont{12}{14.4}{\rmdefault}{\bfdefault}{\updefault}...}}}}
+\put(3498,-343){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}12}}}}
+\put(2608,-343){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}23}}}}
+\put(2878,-1663){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}5}}}}
+\put(843,-303){\makebox(0,0)[lb]{\smash{{\SetFigFont{12}{14.4}{\rmdefault}{\bfdefault}{\updefault}...}}}}
+\put(1628,-343){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}20}}}}
+\put(2578,-1188){\makebox(0,0)[lb]{\smash{{\SetFigFont{9}{10.8}{\sfdefault}{\mddefault}{\updefault}(a)}}}}
+\put(378,-1933){\makebox(0,0)[lb]{\smash{{\SetFigFont{12}{14.4}{\rmdefault}{\bfdefault}{\updefault}...}}}}
+\put(1198,-1968){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}20}}}}
+\put(1453,-1663){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}4}}}}
+\put(803,-1519){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\ttdefault}{\mddefault}{\updefault}curr}}}}
+\put(1118,-848){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\rmdefault}{\mddefault}{\updefault}Insert 10:}}}}
+\put(2118,-843){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}10}}}}
+\put(4783,-1933){\makebox(0,0)[lb]{\smash{{\SetFigFont{12}{14.4}{\rmdefault}{\bfdefault}{\updefault}...}}}}
+\put(3068,-1968){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}23}}}}
+\put(3958,-1968){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}12}}}}
+\put(2208,-2368){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}1}}}}
+\put(2168,-2068){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}10}}}}
+\put(1973,-2368){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}3}}}}
+\put(2443,-2368){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\sfdefault}{\mddefault}{\updefault}2}}}}
+\put(2578,-2688){\makebox(0,0)[lb]{\smash{{\SetFigFont{9}{10.8}{\sfdefault}{\mddefault}{\updefault}(b)}}}}
+\put(1238,112){\makebox(0,0)[lb]{\smash{{\SetFigFont{10}{12.0}{\ttdefault}{\mddefault}{\updefault}curr}}}}
+\end{picture}%

@@ -1,0 +1,12 @@
+\documentclass{report}
+\usepackage{epsfig}
+\newcommand{\NP}{\mbox{${\cal NP}$}}
+\newcommand{\Poly}{\mbox{${\cal P}$}}
+
+\pagestyle{empty}
+\begin{document}
+
+\input{../figs/Buddy.pstex_t}
+
+\end{document}
+

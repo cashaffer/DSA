@@ -1,0 +1,33 @@
+To get these figures to work right with the LaTeX files when using
+Xfig Version 3.2:
+
+After saving the file, it must be exported. Use the entry
+"Combined PS/LaTeX (both parts)". This will create the files (for
+figure foo.fig) foo.pstex and foo.pstex_t. Unfortunately, there are
+two problems with this process.
+
+1) I used the epsfig package. Under Xfig 3.2, it outputs at the 2nd
+line something like
+\includegraphics{foo.pstex}
+
+What I need is
+\epsfig{foo.pstex}
+
+I'm not sure what the proper package is to use \includegraphics.
+
+The second problem is that the LaTeX code gets sucked into the LaTeX
+files, but they have to reference this current figure directory. So
+what the 2nd line actually has to say is:
+
+\epsfig{../figs/foo.pstex}
+
+There are two ways to do this. Either hand-edit the .pstex_t file (to
+solve both the \epsfig problem and the directory referencing problem)
+or, when you export the file, change the name of the file to be
+../figs/foo.pstex in the "output file" box. This puts it in exactly
+the same place as it would have gone, except now it will put into the
+.pstex_t file "../figs/foo.pstex" instead of just "foo.pstex".
+
+
+TODO: Document how to package the figure up as a .gif file for
+exporting to, say, Powerpoint.

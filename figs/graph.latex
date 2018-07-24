@@ -1,0 +1,84 @@
+%\begin{picture}(0,0)(28,284)
+\begin{picture}(324,432)(38,284)
+\sffamily
+\put( 60,310){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{0}$}}}
+\put( 49,351){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{100}$}}}
+\put( 49,393){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{200}$}}}
+\put( 49,434.5){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{300}$}}}
+\put( 49,476){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{400}$}}}
+
+\put(350,360){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{10n}$}}}
+\put(350,441){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{20n}$}}}
+\put(345,490){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{2 n^2}$}}}
+\put(330,400){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{5 n\:\log\:n}$}}}
+\put( 230,490){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{2^n}$}}}
+
+\put( 65,302){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{0}$}}}
+\put(165,302){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{5}$}}}
+\put(263,302){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{10}$}}}
+\put(364,302){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{15}$}}}
+\put( 65,527){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{0}$}}}
+\put(122,527){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{10}$}}}
+\put(182.5,527){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{20}$}}}
+\put(243,527){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{30}$}}}
+\put(304,527){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{40}$}}}
+\put(364,527){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{50}$}}}
+
+\put( 196,288){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf Input
+size}}}
+\put( 241,288){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\tensf
+$\mathsf{n}$}}}
+
+\put(68.2,538.2){\dashbox{3.000}(90.5, 56)}
+%\put(66.8,538.0){\dashbox{3.000}(90.2, 56)}
+%\put(68,538){\dashline{3.000}(91, 56)(0, 56)}
+%\put(68,538){\dashline{3.000}(91, 56)(91, 0)}
+
+\put(350,605){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{10n}$}}}
+\put(350,666){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{20n}$}}}
+\put(330,715){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{5 n\:\log\:n}$}}}
+\put(210,715){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{2 n^2}$}}}
+\put(115,715){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{2^n}$}}}
+
+\put( 60,535){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{0}$}}}
+\put( 49,560){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{200}$}}}
+\put( 49,585){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{400}$}}}
+\put( 49,609.5){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{600}$}}}
+\put( 49,634){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{800}$}}}
+\put( 43,659){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{1000}$}}}
+\put( 43,684){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{1200}$}}}
+\put( 43,709){\makebox(0,0)[lb]{\raisebox{0pt}[0pt][0pt]{\small
+$\mathsf{1400}$}}}
+\end{picture}
